@@ -49,6 +49,15 @@ jobs:
 
       # The image is only useful if it runs, so prove it before the release
       # is published rather than after someone pulls it.
+      - name: Smoke-test the image just built
+        run: |
+          set -eu
+          mkdir -p /tmp/smoke
+          printf '10 PRINT "hello from"; 8*10+8\n20 CIRCLE(320,100),60,5\n' > /tmp/smoke/t.bas
+          docker run --rm -v /tmp/smoke:/work "${IMAGE}:${GITHUB_REF_NAME#v}" t.bas
+          test -f /tmp/smoke/t.png || { echo "the program drew nothing"; exit 1; }
+          echo "image runs and draws"
+
       # The binary is lifted out of the image just built rather than compiled
       # a second time: one build, two artifacts, and the binary that ships is
       # provably the one that was smoke-tested below. It is linked against
@@ -60,6 +69,10 @@ jobs:
           docker cp "$cid:/usr/local/bin/n88" ./n88-linux-x86_64
           docker rm "$cid" >/dev/null
           chmod +x ./n88-linux-x86_64
+          # The runner is glibc and the image is musl, so this only succeeds
+          # if the binary is genuinely static. A dynamically linked musl
+          # binary fails here with "required file not found".
+          file ./n88-linux-x86_64
           ./n88-linux-x86_64 --version
 
       - uses: softprops/action-gh-release@v2
@@ -68,14 +81,6 @@ jobs:
           files: n88-linux-x86_64
           generate_release_notes: true
 
-      - name: Smoke-test the image just built
-        run: |
-          set -eu
-          mkdir -p /tmp/smoke
-          printf '10 PRINT "hello from"; 8*10+8\n20 CIRCLE(320,100),60,5\n' > /tmp/smoke/t.bas
-          docker run --rm -v /tmp/smoke:/work "${IMAGE}:${GITHUB_REF_NAME#v}" t.bas
-          test -f /tmp/smoke/t.png || { echo "the program drew nothing"; exit 1; }
-          echo "image runs and draws"
 
   extension:
     runs-on: ubuntu-latest
