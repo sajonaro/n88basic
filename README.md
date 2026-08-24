@@ -45,6 +45,7 @@ To put it on your PATH as `n88`:
 ```sh
 scripts/install.sh               # to ~/.local, or pass a prefix
 n88 rings.bas
+n88 --version                    # prints just the version, for pinning
 ```
 
 `test/programs/` holds twelve worked example programs — graphics, strings,

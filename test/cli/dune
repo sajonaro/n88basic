@@ -158,3 +158,15 @@
  (alias runtest)
  (action
   (diff no_picture.out no_picture.actual)))
+
+; --version must print exactly the version and nothing else: a consumer
+; pinning byte-exact fixtures parses this, so extra words would break them.
+(rule
+ (with-stdout-to
+  version.actual
+  (run %{exe:../../bin/main.exe} --version)))
+
+(rule
+ (alias runtest)
+ (action
+  (diff version.out version.actual)))

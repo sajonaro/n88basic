@@ -52,8 +52,26 @@ let write_png (path : string) (ops : N88basic.Display.op list) : unit =
       prerr_endline message;
       exit 2
 
+(* Kept in step with the release tag. A consumer pinning byte-exact output
+   needs something to pin against, and asking the binary is more reliable
+   than inferring a version from the output itself. *)
+let version = "0.1.0"
+
+let usage =
+  "usage: n88 FILE.bas\n\n\
+  \  Runs an N88-BASIC(86) program. Output goes to stdout; a program that\n\
+  \  draws also writes a PNG beside its source.\n\n\
+  \  --version   print the version and exit\n\
+  \  --help      print this message and exit\n"
+
 let () =
   match Sys.argv with
+  | [| _; ("--version" | "-version" | "-v") |] ->
+      print_endline version;
+      exit 0
+  | [| _; ("--help" | "-help" | "-h") |] ->
+      print_string usage;
+      exit 0
   | [| _; path |] -> (
       match read_file path with
       | exception Sys_error message ->
@@ -117,5 +135,5 @@ let () =
                   prerr_endline (N88basic.Error.to_string e);
                   exit 1)))
   | _ ->
-      prerr_endline "usage: n88basic FILE.bas";
+      prerr_string usage;
       exit 2
