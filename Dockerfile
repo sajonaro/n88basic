@@ -27,7 +27,7 @@ COPY --chown=opam:opam basic/  ./basic/
 COPY --chown=opam:opam raster/ ./raster/
 COPY --chown=opam:opam bin/    ./bin/
 
-RUN opam exec -- dune build --profile release bin/main.exe
+RUN opam exec -- dune build --profile static bin/main.exe
 
 # --- runtime ----------------------------------------------------------------
 FROM alpine:3.20

@@ -90,7 +90,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       # The extension ships the checker bundle and the spec data it reads at
       # run time, so both are produced before packaging.

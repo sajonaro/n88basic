@@ -1,0 +1,9 @@
+; A build profile that links the interpreter statically.
+;
+; Used by the Dockerfile so the binary lifted out of the image depends on no
+; loader at all, and therefore runs on any Linux rather than only where the
+; image's own libc is present. A dynamically linked musl binary fails with
+; "required file not found" on a glibc host, which is what this avoids.
+(env
+ (static
+  (link_flags (-ccopt -static))))
