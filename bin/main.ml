@@ -55,7 +55,7 @@ let write_png (path : string) (ops : N88basic.Display.op list) : unit =
 (* Kept in step with the release tag. A consumer pinning byte-exact output
    needs something to pin against, and asking the binary is more reliable
    than inferring a version from the output itself. *)
-let version = "0.1.0"
+let version = "0.1.1"
 
 let usage =
   "usage: n88 FILE.bas\n\n\

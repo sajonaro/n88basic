@@ -87,6 +87,18 @@ jobs:
           file ./n88-linux-x86_64
           ./n88-linux-x86_64 --version
 
+      # A version string that drifts from the tag is worse than none: it is
+      # what a consumer pins byte-exact fixtures against. v0.1.1 shipped a
+      # binary reporting 0.1.0, so this now refuses to release on a mismatch.
+      - name: The binary's version must match the tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -eu
+          reported=$(./n88-linux-x86_64 --version)
+          expected="${GITHUB_REF_NAME#v}"
+          echo "tag $expected, binary reports $reported"
+          test "$reported" = "$expected"
+
       - name: Check it runs a program
         run: |
           set -eu
