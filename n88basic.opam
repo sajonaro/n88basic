@@ -1,0 +1,30 @@
+opam-version: "2.0"
+synopsis: "Interpreter and cited specification for N88-BASIC(86)"
+description: """
+An interpreter for N88-BASIC(86), the BASIC that shipped in ROM on NEC's
+PC-9801, together with a specification written from NEC's reference manual.
+
+Installs the `n88` command, which runs a BASIC program and writes a PNG
+beside the source when the program draws.
+"""
+maintainer: ["sajonaro <alex.kunich@gmail.com>"]
+authors: ["Alex Kunich"]
+license: "MIT"
+homepage: "https://github.com/sajonaro/n88basic"
+bug-reports: "https://github.com/sajonaro/n88basic/issues"
+dev-repo: "git+https://github.com/sajonaro/n88basic.git"
+
+depends: [
+  "ocaml" {>= "5.0"}
+  "dune" {>= "3.17"}
+  "alcotest" {with-test}
+  "js_of_ocaml" {with-test}
+  "js_of_ocaml-compiler" {with-test}
+  "menhir" {with-test}
+]
+
+build: [
+  ["dune" "subst"] {dev}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]

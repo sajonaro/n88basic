@@ -1,2 +1,3 @@
 (library
- (name n88basic))
+ (name n88basic)
+ (public_name n88basic))

@@ -56,6 +56,27 @@ bar-chart program. They double as the end-to-end test:
 python3 tools/run_programs.py
 ```
 
+## Installing
+
+Three ways, in rough order of convenience.
+
+**A prebuilt binary.** Every release attaches `n88-linux-x86_64`, built inside
+the release container and therefore the same binary that image ships:
+
+```sh
+curl -LO https://github.com/sajonaro/n88basic/releases/latest/download/n88-linux-x86_64
+chmod +x n88-linux-x86_64 && ./n88-linux-x86_64 --version
+```
+
+**The container**, if you would rather install nothing — see below.
+
+**From source**, with OCaml and dune: `scripts/install.sh` puts `n88` on your
+PATH. The project is also a valid opam package, so it can be pinned directly:
+
+```sh
+opam pin add n88basic https://github.com/sajonaro/n88basic.git
+```
+
 ## Using it as a container
 
 The interpreter is published as an image, so it can be run with nothing

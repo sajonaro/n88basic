@@ -15,7 +15,7 @@ jobs:
   image:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       - uses: actions/checkout@v4
@@ -49,6 +49,25 @@ jobs:
 
       # The image is only useful if it runs, so prove it before the release
       # is published rather than after someone pulls it.
+      # The binary is lifted out of the image just built rather than compiled
+      # a second time: one build, two artifacts, and the binary that ships is
+      # provably the one that was smoke-tested below. It is linked against
+      # musl, which makes it portable across Linux distributions.
+      - name: Extract the interpreter binary
+        run: |
+          set -eu
+          cid=$(docker create "${IMAGE}:${GITHUB_REF_NAME#v}")
+          docker cp "$cid:/usr/local/bin/n88" ./n88-linux-x86_64
+          docker rm "$cid" >/dev/null
+          chmod +x ./n88-linux-x86_64
+          ./n88-linux-x86_64 --version
+
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: n88-linux-x86_64
+          generate_release_notes: true
+
       - name: Smoke-test the image just built
         run: |
           set -eu

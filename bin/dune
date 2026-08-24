@@ -1,9 +1,13 @@
 ; The module is (name main), not (name n88basic): the library n88basic
 ; generates a wrapper module N88basic, and an executable module of the same
 ; name would shadow it, so N88basic.Interp would not resolve from here. No
-; public_name either — that requires a package definition this project does
-; not have yet. The binary is _build/default/bin/main.exe; it acquires the
-; name n88basic once packaged for opam.
+; public_name is set below, so opam and dune install it as `n88`. In a plain
+; dune build the binary is still _build/default/bin/main.exe.
 (executable
  (name main)
+ ; Installed as `n88` -- the module stays `main` because the library
+ ; n88basic generates a wrapper module of that name, which an executable
+ ; module called n88basic would shadow.
+ (public_name n88)
+ (package n88basic)
  (libraries n88basic raster))

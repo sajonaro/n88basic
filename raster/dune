@@ -4,4 +4,6 @@
 ; disk.
 (library
  (name raster)
+ ; Namespaced under the package: opam installs it as n88basic.raster.
+ (public_name n88basic.raster)
  (libraries n88basic))
