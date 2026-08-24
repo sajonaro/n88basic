@@ -60,8 +60,8 @@ python3 tools/run_programs.py
 
 Three ways, in rough order of convenience.
 
-**A prebuilt binary.** Every release attaches `n88-linux-x86_64`, built inside
-the release container and therefore the same binary that image ships:
+**A prebuilt binary.** Every release attaches `n88-linux-x86_64`, a native
+Linux build (glibc):
 
 ```sh
 curl -LO https://github.com/sajonaro/n88basic/releases/latest/download/n88-linux-x86_64

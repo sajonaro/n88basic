@@ -58,29 +58,46 @@ jobs:
           test -f /tmp/smoke/t.png || { echo "the program drew nothing"; exit 1; }
           echo "image runs and draws"
 
-      # The binary is lifted out of the image just built rather than compiled
-      # a second time: one build, two artifacts, and the binary that ships is
-      # provably the one that was smoke-tested below. It is linked against
-      # musl, which makes it portable across Linux distributions.
-      - name: Extract the interpreter binary
+  binary:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.2"
+
+      - name: Install build dependencies
+        run: opam install -y dune
+
+      # Built natively rather than lifted out of the container image. The
+      # image is Alpine, so a binary taken from it is linked against musl and
+      # will not run on a glibc host; linking it statically instead crashes
+      # the OCaml 5 runtime under musl. A native build is dynamically linked
+      # against glibc, which is what nearly every Linux desktop and server
+      # provides, and the container covers everyone else.
+      - name: Build the interpreter
         run: |
           set -eu
-          cid=$(docker create "${IMAGE}:${GITHUB_REF_NAME#v}")
-          docker cp "$cid:/usr/local/bin/n88" ./n88-linux-x86_64
-          docker rm "$cid" >/dev/null
+          opam exec -- dune build --profile release bin/main.exe
+          cp _build/default/bin/main.exe ./n88-linux-x86_64
           chmod +x ./n88-linux-x86_64
-          # The runner is glibc and the image is musl, so this only succeeds
-          # if the binary is genuinely static. A dynamically linked musl
-          # binary fails here with "required file not found".
           file ./n88-linux-x86_64
           ./n88-linux-x86_64 --version
+
+      - name: Check it runs a program
+        run: |
+          set -eu
+          printf '10 PRINT "ok"; 8*10+8\n' > /tmp/t.bas
+          ./n88-linux-x86_64 /tmp/t.bas
 
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           files: n88-linux-x86_64
           generate_release_notes: true
-
 
   extension:
     runs-on: ubuntu-latest

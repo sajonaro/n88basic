@@ -22,12 +22,12 @@ RUN opam install -y dune
 
 # Only what the interpreter binary needs. The editor bundle, the tests and
 # the specification tooling are deliberately left out of the image.
-COPY --chown=opam:opam dune-project dune ./
+COPY --chown=opam:opam dune-project ./
 COPY --chown=opam:opam basic/  ./basic/
 COPY --chown=opam:opam raster/ ./raster/
 COPY --chown=opam:opam bin/    ./bin/
 
-RUN opam exec -- dune build --profile static bin/main.exe
+RUN opam exec -- dune build --profile release bin/main.exe
 
 # --- runtime ----------------------------------------------------------------
 FROM alpine:3.20
