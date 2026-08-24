@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.2"
+
+      - name: Build
+        run: opam exec -- dune build
+
+      - name: Unit tests and conformance cases
+        run: opam exec -- dune test
+
+      # The specification is checked as well as the code: every clause must
+      # cite a manual page, every implemented clause must carry a conformance
+      # case, and the project invariants must hold.
+      - name: Project invariants
+        run: sh scripts/check-invariants.sh
+
+      - name: Specification gates
+        run: |
+          python3 tools/check_spec.py
+          python3 tools/coverage.py
+          python3 tools/citation_coverage.py
+
+      - name: Example programs
+        run: python3 tools/run_programs.py

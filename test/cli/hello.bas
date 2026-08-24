@@ -1,0 +1,6 @@
+10 REM A first program
+20 FOR I=1 TO 3
+30 PRINT "LINE";I
+40 NEXT I
+50 PRINT 1,2
+60 END

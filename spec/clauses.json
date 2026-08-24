@@ -1,0 +1,795 @@
+{
+  "clauses": [
+    {
+      "id": "NUM.TYPES",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.12-14 / PDF p.25-27",
+      "text": "Every number is one of three types: integer (a whole number from -32768 to 32767), single precision (a real number carrying about 7 significant decimal digits, magnitude up to roughly 1.70141E+38), or double precision (a real number carrying about 16 significant decimal digits, magnitude up to roughly 1.701411834604692E+38). A number with no type declaration of its own -- no suffix character, and no letter-range DEFxxx declaration in effect -- is single precision by default."
+    },
+    {
+      "id": "NUM.SUFFIXES",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.14 / PDF p.27",
+      "text": "A variable name, array name, or numeric literal may end in one type-declaration character: % fixes integer, ! fixes single precision, # fixes double precision (a fourth, $, fixes the unrelated string type). The character distinguishes otherwise-identical names -- A, A%, A!, A# and A$ are five separate variables, except that a bare A and an explicit A! name the same one, since single precision is the unsuffixed default. Where no suffix is given, DEFINT/DEFSNG/DEFDBL/DEFSTR set what a name defaults to instead (see PROG.DEFINT and its siblings); an explicit suffix always overrides whatever DEFxxx would otherwise give that name."
+    },
+    {
+      "id": "NUM.COERCION",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.18 / PDF p.31",
+      "text": "Assigning a value to a variable of a different numeric type converts it to the variable's own type: a real assigned to an integer variable rounds to the nearest whole number (ties away from zero), and a value assigned to a lower-precision variable than it came from loses whatever digits that type cannot hold. When two operands of different precision meet in one arithmetic expression, the less precise one converts to match the more precise one before the operation runs, so the result carries the higher of the two types -- except division, which this interpreter also always widens to at least single precision even for two integer operands, since the manual's own operator table describes \"/\" itself as real-number division, distinct from the integer-division operator this interpreter does not implement. A logical operation (AND, OR, NOT) converts every operand to integer and produces an integer result."
+    },
+    {
+      "id": "NUM.OVERFLOW",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.18 / PDF p.31",
+      "text": "When an assignment or an arithmetic result cannot be represented in its target type's range, this interpreter raises Overflow (OV) and the statement does not complete. The manual's own worked example shows this for assigning an out-of-range real to an integer variable, and CINT and CSNG state the identical bound and outcome for their own conversions to integer and single precision respectively; this interpreter applies the same outcome to every numeric construction uniformly -- a literal, an assignment, or an ordinary arithmetic result exceeding its type's bound all raise Overflow the same way, extending the manual's assignment- and conversion-specific examples to arithmetic in general, which is this interpreter's own reading rather than a case the manual's examples cover directly."
+    },
+    {
+      "id": "NUM.DIV-BY-ZERO",
+      "status": "divergent",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.20 / PDF p.33",
+      "text": "Dividing by zero (or raising zero to a negative power) does not stop the program: the manual states that it prints a short \"/0\" (Division by zero) notice and continues, substituting the largest number the result's type can represent, with the sign the true result would have had, as the expression's value. DIVERGENT: this interpreter still raises Division by zero as an ordinary halting error instead -- caught by ON ERROR GOTO if one is installed, otherwise stopping the program, the same as every other runtime error here and the same as this interpreter did before this task. Implementing the manual's print-and-continue behaviour is a materially different feature (the evaluator would need to produce output mid-expression, independent of whichever statement is running, and interact with whatever ON ERROR machinery is active) and is left for a future task rather than folded into the type system this task is about."
+    },
+    {
+      "id": "NUM.DISPLAY",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.125 / PDF p.136",
+      "text": "PRINT always follows a printed number with one space, and reserves one column before it for a sign -- blank for zero or positive, \"-\" for negative. Single precision prints in ordinary fixed-point form when it fits within 6 significant digits without losing precision, and switches to exponent form (a mantissa, \"E\", a sign, and the exponent) otherwise; double precision follows the identical rule at 16 significant digits, with \"D\" in place of \"E\" as the exponent letter. No type-declaration character is ever appended to printed output. Integer values print as plain whole numbers and never switch to exponent form, since the entire integer range is far short of needing it. The manual does not state the exact magnitude below which a fixed-point value gives way to scientific notation for a very small number; this interpreter uses 0.01 for both single and double precision, carried over unchanged from this codebase's pre-existing behaviour -- a decision of ours, not a manual rule. The small-magnitude boundary is this interpreter's own. Printed p.125 states only that a value showable within the digit budget without losing precision appears in ordinary decimal form; it names no floor, so the floor below which even an in-budget fixed form gives way to exponent form is this interpreter's own. It used to be tested as \"the stored float is at least 0.01\", which misfired at its own edge: a listing writing .01 gets the single-precision value 0.00999999977, which is NOT at least 0.01, so PRINT .01 produced \"1E-02\" where \".01\" is required under any reading of the page -- one significant digit and two digit characters, well inside a budget of six. The boundary is now read off the RENDERED digits (how many zeros stand between the point and the first significant digit), which is the same boundary and cannot round below a literal written in decimal. A test now pins that specific input."
+    },
+    {
+      "id": "NUM.SUFFIX-SINGLE",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.13 / PDF p.26",
+      "text": "! fixes a variable name, array name, or numeric literal as single precision. Appended to a variable or array name it declares that name's type outright, overriding any DEFxxx declaration in effect for its first letter; appended to a numeric literal (e.g. 3.14!) it is one of three ways a literal can be written as single precision, alongside a plain real number of 7 digits or fewer and E exponent notation."
+    },
+    {
+      "id": "NUM.SUFFIX-DOUBLE",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.14 / PDF p.27",
+      "text": "# fixes a variable name, array name, or numeric literal as double precision, the same way ! fixes single precision (see NUM.SUFFIX-SINGLE). Appended to a numeric literal (e.g. 56789.0#) it is one of three ways a literal can be written as double precision, alongside a plain real number of 8 digits or more and D exponent notation."
+    },
+    {
+      "id": "NUM.SUFFIX-INTEGER",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.12 / PDF p.25",
+      "text": "% fixes a variable name, array name, or numeric literal as integer. Appended to a real numeric literal (e.g. 31100.5%) it rounds the literal to the nearest whole number (ties away from zero) where it is written, the same rounding an assignment to an integer variable performs."
+    },
+    {
+      "id": "NUM.RADIX-LITERALS",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.13 / PDF p.26",
+      "text": "An integer constant may be written in one of three notations. The decimal form is the ordinary one. The hexadecimal form is a run of the digits 0 to F introduced by &H, over the range &H0 to &HFFFF. The octal form is a run of the digits 0 to 7 introduced by &O -- or by a bare &, which the manual gives as an equal alternative, so &12345 is an octal constant and not a decimal number carrying a stray sigil -- over the range &0 to &177777. Both ranges are exactly sixteen bits wide. Those sixteen bits are read as a signed integer, so &HFFFF and &177777 are both -1: the manual does not say that outright, but it calls these integer constants, gives ranges reaching 65535, and defines the integer type as -32768 to 32767, and reading the bit pattern as signed is what makes those three statements consistent -- the deduction is ours, not a stated rule. A value written in either non-decimal form is an ordinary integer constant wherever one may appear, and PRINT and the other output statements show it in decimal; HEX$ and OCT$ are what put a value back into its own notation, as strings."
+    },
+    {
+      "id": "PROG.COMMENT-MARK",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.135 / PDF p.146",
+      "text": "An apostrophe (') may be used in place of REM to introduce a comment. It is the same construct under a shorter name and carries REM's rules with it, including that a colon after the comment text does not end it (see PROG.REM)."
+    },
+    {
+      "id": "GFX.LINE.B",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.94 / PDF p.105",
+      "text": "LINE's ,B option draws a box instead of a single segment: it treats the statement's two endpoints as opposite corners of a rectangle and draws just its four-sided outline, rather than one segment between them. It takes the same optional leading palette-number argument as plain LINE, defaulting to the current graphics foreground colour when left out, and -- unlike ,BF, which the manual states cannot take one at all -- the same optional trailing line-style code plain LINE accepts, dashing the outline. See GFX.LINE for the style's own rules and for the two readings of it that are ours."
+    },
+    {
+      "id": "GFX.LINE.BF",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.94 / PDF p.105",
+      "text": "LINE's ,BF option means Box Fill: it takes the statement's two endpoints as opposite corners of a rectangle, as ,B does, and fills the rectangle's interior rather than drawing only its outline. Two further arguments belong to BF alone and are meaningless without it: a second palette number giving the colour the interior is filled with, and a tile string giving the pattern it is filled with. When BF is written and both are left out, the interior is filled in the same colour the rectangle was drawn in. Unlike plain LINE and ,B, BF may not be given a line style, which is what lets the one trailing slot be read as a fill here and as a style there. A tile string names the pattern an area is filled with instead of a flat colour, and its meaning is defined once, under [2] PAINT (printed p.118-119 / PDF p.129-130) -- CIRCLE's and LINE's entries only refer to it. A tile is always 8 dots wide, and as many rows tall as the string describes: one character makes a row in monochrome mode, three in the 8-colour mode this interpreter targets, four in 16-colour mode. In colour mode the three characters of a row are bit planes rather than three rows -- for each of the eight dot columns the three bits are read downward as a binary number, and that number is the dot's palette, the first character being the 2^0 plane and bit 7 of each byte the leftmost dot. Characters left over at the end of the string, when its length is not a whole number of rows, are ignored; a string too short for even one row is Illegal function call. Where the pattern is anchored is not addressed by the manual: this interpreter repeats it from the screen origin rather than from where a fill starts, so two adjacent fills of one pattern line up, and that reading is ours."
+    },
+    {
+      "id": "NUM.ABS",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.38 / PDF p.49",
+      "text": "ABS(<numeric expression>) is the absolute value of the expression. Its result type does not follow its argument's: the manual states the same rule here that it states for SIN and SQR -- the result is double precision when the expression contains a double-precision real, and single precision in every other case, including when the argument is an integer. That rule is observable rather than bookkeeping, since the absolute value of the most negative integer does not fit the integer type: ABS of an integer variable holding -32768 is 32768, where a result that kept the argument's type would raise Overflow instead."
+    },
+    {
+      "id": "STR.ASC",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.38 / PDF p.49",
+      "text": "ASC(s) returns the character code of the first character of s, as a decimal integer. The manual does not say what ASC does when s is the null string; this interpreter raises Illegal function call there, the same domain error every other string function in this library raises for an argument outside what it can accept -- a decision of ours, not a rule the manual states."
+    },
+    {
+      "id": "NUM.ATN",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.39 / PDF p.50",
+      "text": "ATN(n) returns the arctangent of n in radians, in the open range -pi/2 to pi/2. The manual states the result is double precision only when n itself carries a double-precision value, and single precision otherwise, even when n is an integer -- implemented here by tagging the result Double when n's own type is Double, Single otherwise (spec/spec.md NUM.COERCION's typed-value model)."
+    },
+    {
+      "id": "NUM.CDBL",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.42 / PDF p.53",
+      "text": "CDBL(n) returns n converted to double precision. Conversion changes only the value's representation, not its precision: the result carries no more significant digits than n's own type already did -- an integer's result has no fractional part beyond n's own whole value, and a single-precision n's result is exactly n's already-narrowed 32-bit float value extended to a double, single precision's own rounding error included and now visible at double precision's wider display."
+    },
+    {
+      "id": "STR.CHR",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.44 / PDF p.55",
+      "text": "CHR$(<code>) returns the one-character string whose character code is <code>. <code> must be in 0..255; a value outside that range is \"Illegal function call\"."
+    },
+    {
+      "id": "NUM.CINT",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.44 / PDF p.55",
+      "text": "CINT(n) returns n rounded to the nearest integer, with ties rounded away from zero. If the rounded result falls outside -32768..32767 it raises Overflow."
+    },
+    {
+      "id": "GFX.CIRCLE",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.45 / PDF p.56",
+      "text": "Draws a circle, ellipse or arc centred on the given point, which may be absolute or relative to the last point referenced. The radius applies to whichever axis the aspect makes the larger, so an aspect above 1 narrows the horizontal axis rather than lengthening the vertical one. Start and end angles are in radians; a negative angle uses its absolute value and additionally draws a radius line from the centre to that endpoint. Whether a negative start and a negative end each draw their own radius line independently is this interpreter's reading rather than a rule the page states. A trailing F fills the interior: with the palette number written after it, with a tile string, or -- with neither -- in the colour the circle itself was drawn in. With angles present F fills a sector, so the radius lines close the shape even where their angles are positive. A tile string names the pattern an area is filled with instead of a flat colour, and its meaning is defined once, under [2] PAINT (printed p.118-119 / PDF p.129-130) -- CIRCLE's and LINE's entries only refer to it. A tile is always 8 dots wide, and as many rows tall as the string describes: one character makes a row in monochrome mode, three in the 8-colour mode this interpreter targets, four in 16-colour mode. In colour mode the three characters of a row are bit planes rather than three rows -- for each of the eight dot columns the three bits are read downward as a binary number, and that number is the dot's palette, the first character being the 2^0 plane and bit 7 of each byte the leftmost dot. Characters left over at the end of the string, when its length is not a whole number of rows, are ignored; a string too short for even one row is Illegal function call. Where the pattern is anchored is not addressed by the manual: this interpreter repeats it from the screen origin rather than from where a fill starts, so two adjacent fills of one pattern line up, and that reading is ours."
+    },
+    {
+      "id": "PROG.CLEAR",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.46 / PDF p.57",
+      "text": "CLEAR [<dummy>][,<memory upper limit>][,<stack size>][,<array data area size>] initializes variables and memory layout. The manual states directly that every numeric variable reverts to 0, every string variable to the null string, and every DEF (DEF FN among them) is invalidated; this interpreter implements exactly that for scalars, arrays (an array reverts to undimensioned, the same state ERASE leaves one in), and DEF FN. OPTION BASE's origin is also put back to unset, since the manual names CLEAR (or RUN) as the only way to change it once fixed. The three numeric slots after the dummy parameter describe memory segment addresses and byte counts this interpreter has no model of -- there is no fixed memory layout to relayout -- so each is parsed and evaluated (a malformed one still reports its own error) and then ignored, which is this interpreter's own reading of \"we do not model memory layout\" rather than a rule the manual states. The manual does not describe CLEAR interacting with an open FOR/WHILE loop or GOSUB call, or with the DATA cursor, so this interpreter leaves all three untouched -- our own decision, not a stated rule."
+    },
+    {
+      "id": "SCREEN.CLS",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.47-48 / PDF p.58-59",
+      "text": "CLS [<function>] clears the currently active screen. The function is 1, 2 or 3, and 1 is used when it is left out: 1 clears the text screen only, 2 clears the inside of the graphics viewport, and 3 clears both. Clearing the graphics screen with 2 or 3 paints the viewport in the background colour set by [1] COLOR when SCREEN has put the display in colour mode, and moves the last point referenced to the viewport's top-left corner, so a following LINE with no start point of its own begins there. Clearing the text screen clears within the scroll window CONSOLE has set. This interpreter has no text screen, so CLS 1 -- and therefore a bare CLS -- correctly leaves the graphics framebuffer alone; VIEW is out of scope (spec.md section 3.2), so the viewport CLS 2 and CLS 3 clear is the whole screen and its top-left corner is (0,0). This status is conditional on two facts about other parts of this project, named here so that a change to either trips over them rather than leaving this clause quietly wrong: that there is no text screen (build one and CLS 1 must clear it, so implemented would become partial the same minute), and that VIEW stays out of scope (bring it in and CLS 2 and CLS 3 must clear the viewport rather than the whole screen). Both hold today. The manual does not say what a function code outside 1 to 3 does; this interpreter raises Illegal function call rather than clearing something anyway, and that choice is ours. The text screen is deferred by decision (spec.md SS3.2) rather than merely absent: this interpreter's output is a stream and a text screen is a grid, and the two are different objects. What is unbuilt here is therefore a recorded scope boundary rather than an oversight, and the refusal-free recording of arguments above stays the right behaviour meanwhile."
+    },
+    {
+      "id": "SCREEN.COLOR",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.48-52 / PDF p.59-63",
+      "text": "[1] COLOR takes up to five optional comma-separated arguments: a text-character function code, a background colour, a border colour, a foreground colour, and (DISK mode only) a palette-mode switch; a slot left empty between commas keeps its previous value rather than resetting it. The background and foreground colours are the ones PSET, PRESET and LINE's own omitted-colour arguments fall back to. This interpreter implements the background and foreground slots for that reason; the function code and border are recorded (so a listing setting them still loads and nothing is silently dropped) but have no rasterised effect, since this engine draws no text and no border region at all. The palette-mode slot is refused at run time rather than implemented. The unrelated '=' form the manual calls [2] COLOR, which reassigns what colour a palette number displays, IS implemented now for the 8-of-8 mode -- see SCREEN.COLOR-PALETTE -- so this clause no longer speaks for it. The boundary was an assumption, not a decision, and spec.md SS3.3 now puts palette mode in scope explicitly. The palette-mode slot is therefore an unimplemented feature rather than an omission of this specification, and its refusal stays the right behaviour meanwhile. The mutable palette that [2] COLOR needed has since been built (raster/framebuffer.ml holds palette numbers, resolved at write time), so what remains here is the mode switch itself, not the machinery under it. COLOR@ (printed p.52), a different keyword that colours already-written text-screen characters, is unrelated to COLOR and is not implemented either. The default 8-colour palette's identity, order, and RGB values (raster/palette.ml) are grounded on this same page range: printed p.49 states the order black/blue/red/purple/green/light-blue/yellow/white, and printed p.50's 4096-colour-mode table gives each entry's exact colour code, from which its RGB triple is read. The text screen is deferred by decision (spec.md SS3.2) rather than merely absent: this interpreter's output is a stream and a text screen is a grid, and the two are different objects. What is unbuilt here is therefore a recorded scope boundary rather than an oversight, and the refusal-free recording of arguments above stays the right behaviour meanwhile."
+    },
+    {
+      "id": "SCREEN.COLOR-PALETTE",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.51 / PDF p.62",
+      "text": "[2] COLOR = (<palette number>, <colour code>) changes which colour a palette number displays. All colour given to the graphics screen is given as a palette number, and this statement is what decides the colour each of those numbers stands for. The palette number names one of the 8 palettes (0-7), or one of 16 (0-15) in the sixteen-colour mode; the colour code says which colour it is to stand for. Which codes are legal depends on the palette mode [1] COLOR selected: the 8-of-8 mode takes the 8 codes 0-7, and both 4096-colour modes take any of &H000 to &HFFF. Any palette number may be given any legal code, and the same code may be given to several palette numbers at once. Writing COLOR with the equals sign and both arguments left off initialises the mapping back to its startup state, which the manual states is valid in DISK mode only. The sixteen-colour mode is honoured only where an analog RGB display is attached; without one it is not an error, the colours simply do not come out as asked. IMPLEMENTED for the 8-of-8 palette mode, which is the only mode this interpreter has, and that includes the indirection itself: reassigning a palette recolours dots ALREADY on the screen. raster/framebuffer.ml stores a palette number per pixel rather than an RGB triple, and the colour each number shows is resolved when the PNG is written, so nothing rewrites a pixel and every pixel drawn through a reassigned palette changes colour at once. The reverse lookup Palette.index_of_rgb that GFX.POINT used to read a pixel back through is gone; POINT now reads the stored palette number directly, and so still reports the palette a dot was drawn THROUGH rather than the colour it currently shows. That retroactive recolouring follows from this page calling the palette the single route by which the graphics screen is given colour, but the page does not say it in as many words. It is stated outright at intro-8801 printed p.119, which walks the reader through it: give palette 0 the colour white, draw a dot specifying colour 0, then give palette 0 the colour blue, and the dot already drawn turns blue. PARTIAL nonetheless, in three respects, each recorded rather than guessed. First, only the 8-of-8 mode exists here, so a colour code is 0-7 and the 4096-colour and sixteen-colour modes are unreachable -- reaching them needs [1] COLOR's palette-mode slot, which is still refused (SCREEN.COLOR). Second, a palette number or colour code outside 0-7 is refused with Illegal function call. That refusal is OURS, not the manual's, which tabulates the legal values and never says what an out-of-range one does; it is refused rather than wrapped so that a listing written for a 4096-colour machine says so instead of silently folding &HF00 to a wrong colour that persists for the rest of the run. It matches this interpreter's existing refusals for an untabulated SCREEN mode, an out-of-range WIDTH and a KEY number outside 1-10. Third, the manual marks the bare initialising form valid in DISK mode only; this interpreter has no such modes, so it is accepted unconditionally, since refusing it would need a mode concept that does not exist here. One further reading is ours: writing the equals sign commits the statement to both arguments, so COLOR= alone and COLOR=(2,) are syntax errors. The page brackets the whole =(<palette>,<code>) group and neither argument within it, but it does not discuss a malformed one. Note also that a COLOR with no arguments at all is this initialising form, while COLOR ,,, is [1] COLOR setting nothing -- the two leave every slot empty and are told apart only by syntax."
+    },
+    {
+      "id": "SCREEN.CONSOLE",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.54 / PDF p.65",
+      "text": "CONSOLE [<scroll start line>][,<scroll line count>][,<function key display switch>][,<colour/monochrome switch>] sets the text screen's mode. The first two arguments mark out the scroll window: the region that scrolls runs for <scroll line count> lines from <scroll start line> downward, and it is this window that a text-screen clear -- CLS 1, or PRINT CHR$(12) -- acts on rather than the whole screen. The function key display switch shows the strings defined for the function keys on the bottom line of the screen when it is 1 and stops showing them when it is 0; they are shown immediately after startup. The colour/monochrome switch puts the text screen into colour mode when it is 1 and monochrome when it is 0, and it is monochrome immediately after startup. Every slot is optional and an empty one is written as a bare comma. None of the four has a constant default: an omitted slot leaves that setting as it stands. PARTIAL: this interpreter parses every form and records the four settings in the manual's order, but has no text screen for them to act on, so nothing observes them -- the scroll window in particular bounds a CLS 1 that currently has nothing to clear. The text screen is deferred by decision (spec.md SS3.2) rather than merely absent: this interpreter's output is a stream and a text screen is a grid, and the two are different objects. What is unbuilt here is therefore a recorded scope boundary rather than an oversight, and the refusal-free recording of arguments above stays the right behaviour meanwhile."
+    },
+    {
+      "id": "NUM.COS",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.56 / PDF p.67",
+      "text": "COS(n) returns the cosine of n, where n is in radians."
+    },
+    {
+      "id": "NUM.CSNG",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.57 / PDF p.68",
+      "text": "CSNG(n) returns n rounded to single-precision floating point (about 6 significant decimal digits), computed here by round-tripping n through an IEEE-754 32-bit float. If |n| exceeds the manual's stated single-precision bound (1.70141E+38) it raises Overflow."
+    },
+    {
+      "id": "PRINT.CSRLIN",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.57 / PDF p.68",
+      "text": "CSRLIN, always written bare with no parentheses, returns the current text cursor's row, 0 at the top. This interpreter counts newlines the PRINT writer has emitted; it does not reflect LOCATE, which is parsed (SCREEN.LOCATE) but not wired to any cursor state in this interpreter, so a program that repositions the cursor with LOCATE and then reads CSRLIN will not see the effect. That is a gap in this interpreter's screen-state tracking, not a rule the manual states differently, and wiring LOCATE to cursor state is outside what this task's 16 functions cover."
+    },
+    {
+      "id": "DATA.BASIC",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.58-59 / PDF p.69-70",
+      "text": "DATA <constant>[,<constant>...] embeds constants in the program for READ to consume. Each constant is either a numeric or a string constant, and expressions are not allowed -- only constants may be written. Constants are separated by commas, and a string constant must be enclosed in double quotes when it contains a comma or a period, when it has leading or embedded spaces that matter, or when it contains two-byte Japanese characters; otherwise the quotes may be left off. A DATA line holds as much data as fits in one line of 255 bytes. A program may contain any number of DATA lines, placed anywhere in it, and READ works through them in ascending line-number order. PARTIAL for one reason, and it is no longer the line limit. That limit -- one line, its number included, within 255 bytes (printed p.9 SS2) -- is enforced by PROG.LINE-LENGTH when the program loads, so it binds a DATA line like any other. Its pattern was widened when this was found. All three forms of an integer constant may be written. Printed p.12 SS5.3 classifies an integer constant into three forms -- octal, decimal and hexadecimal -- and printed p.13 gives them as &O or a bare & for octal and &H for hexadecimal, with its own examples &12345, &O7777, &H100 and &HCFFF. DATA takes constants, so all three belong in it. But DATA items are classified by their own raw-item scanner, separate from the one the rest of a line goes through, and that scanner required a digit after an optional sign. \"&HFF\" failed the test, was classified as the STRING \"&HFF\", and only announced itself when a READ tried to take it as a number -- reporting Syntax error on the READ line rather than on the DATA line that held the fault. Every other part of the language read these literals correctly throughout, which is why nothing else showed it. All three forms are accepted now, and a DATA item agrees with the same literal written in an expression. A sign is deliberately NOT part of them: printed p.13 states the sign rule for the decimal form alone, so \"-&HFF\" stays a string, as do \"&HGG\" and a bare \"&H\". What remains partial is the timing of one refusal. On expressions the manual is explicit -- 但し、定数式は使えません, constant expressions cannot be used -- but it fixes neither an error name nor a moment for the rejection, and this interpreter does reject them: 10 DATA 1+2 is accepted where it is written and fails when a READ tries to take it as a number. Deferring the refusal from the DATA line to the READ is therefore a choice of ours about timing, not a rule broken; it is recorded here because the difference is visible to a program that never reads that datum, which runs to completion where the machine would presumably have objected."
+    },
+    {
+      "id": "PROG.DEF-FN",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.59 / PDF p.70",
+      "text": "DEF FN<name>[(<parameter list>)] = <definition expression> defines a function the program can then call. The name must be a well-formed variable name, and the function may be numeric, string, or a mixture of the two. The parameters name the variables the definition expression uses; they are in effect only while that expression is being evaluated, so a program variable of the same name is untouched by a call and keeps its own value. The parameter list is bracketed in the manual's syntax and may be left off entirely, defining a function of no arguments -- DEF FNA=7 is then called as FNA, with no empty pair of parentheses to write. DEF FN may only be executed from within a program, not as a direct command, which this interpreter satisfies by having no direct mode at all."
+    },
+    {
+      "id": "PROG.DEFDBL",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.60 / PDF p.71",
+      "text": "DEFDBL <letter>['-'<letter>][,...] declares that every variable or array name starting with a letter in one of the given ranges defaults to double precision, the same way DEFINT declares integer (see PROG.DEFINT for the shared rules on ranges, suffix precedence, and when it takes effect)."
+    },
+    {
+      "id": "PROG.DEFINT",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.60 / PDF p.71",
+      "text": "DEFINT <letter>['-'<letter>][,...] declares that every variable or array name starting with a letter in one of the given ranges defaults to integer, from that statement onward, unless the name itself carries an explicit type-declaration suffix, which always overrides any DEFxxx declaration (NUM.SUFFIXES). Each range's two letters are inclusive; a single letter with no '-' declares just that one letter. DEFINT may appear anywhere in a program and takes effect for the rest of the run once executed; it is not undone by CLEAR, which the manual describes only as reinitializing values and memory layout, never as reverting a type declaration -- a decision of ours where the manual does not say either way."
+    },
+    {
+      "id": "PROG.DEFSNG",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.60 / PDF p.71",
+      "text": "DEFSNG <letter>['-'<letter>][,...] declares that every variable or array name starting with a letter in one of the given ranges defaults to single precision, the same way DEFINT declares integer (see PROG.DEFINT for the shared rules). Single precision is already every name's default before any DEFxxx statement runs, so DEFSNG matters only after some other DEFxxx has changed a letter's default and a program wants to set it back."
+    },
+    {
+      "id": "PROG.DEFSTR",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.60 / PDF p.71",
+      "text": "DEFSTR <letter>['-'<letter>][,...] declares that every variable or array name starting with a letter in one of the given ranges defaults to the string type, the same way DEFINT declares integer (see PROG.DEFINT for the shared rules) -- the one difference being that a name defaulted to string by DEFSTR needs no trailing $ to be treated as a string variable; the letter range alone is enough."
+    },
+    {
+      "id": "PROG.DIM",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.62-63 / PDF p.73-74; printed p.15-16 / PDF p.28-29 (SS7 配列変数)",
+      "text": "DIM <variable>(<maximum subscript>[,<maximum subscript>...])[,<variable>(...)...] fixes the largest subscript each dimension of an array may take and allocates the array. The variable must be a well-formed variable name, and one DIM may declare several arrays. Giving several maximum subscripts declares an array of that many dimensions; any number of dimensions is allowed so long as the statement fits in one 255-byte line. The smallest subscript is 0 unless OPTION BASE has set it to 1, so an array declared without OPTION BASE holds one more element per dimension than its maximum subscript. Every element of the array is set to 0 (the null string, for a string array) at the moment DIM executes. An array may be used without being declared at all, in which case its subscripts may run up to 10, whichever OPTION BASE is in force. A subscript larger than the declared maximum raises Subscript out of range, and an array too large for memory raises Out of memory. A numeric array's element count is capped by its own type: 32767 for integer, 16383 for single precision, 8191 for double. Those three are one limit seen three ways -- at two, four and eight bytes an element they all land just under 64K -- which is why passing one is Out of memory rather than an error of its own. The manual states the caps for numeric arrays only and says nothing about a string array's element count, so none is imposed on one here. The syntax chapter states the same rules independently at printed pp.15-16, which is where the implicit-array bound comes from: an array whose maximum subscript is 10 or less may be used with no DIM at all. That page also gives the worked element counts this interpreter reproduces -- DIM A(10) is 11 elements, DIM TA(2,3) is 3x4=12, DIM NAME$(2,5,3) is 3x6x4=72 -- and notes that the dimension count is bounded in practice by what fits in one 255-byte line (PROG.LINE-LENGTH)."
+    },
+    {
+      "id": "PROG.VARIABLE-NAMES",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.14-15 / PDF p.27-28 (SS6 変数); printed p.10 / PDF p.23 (SS4 文字); printed p.17 / PDF p.30 (SS8 予約語)",
+      "text": "A variable name is up to 40 characters of single-byte letters, digits, and periods, and must start with a letter; every one of the 40 characters is significant, and letter case is not distinguished. A name may not itself be a reserved word, but a name that merely contains one is fine -- TOTAL, LINEAR, FORM, ANDY, and IFS are all ordinary variables even though TO, LINE, FOR, AND, and IF are each reserved. A name may not begin with FN, which the same page states is reserved for DEF FN's own namespace. This interpreter implements the naming rule with a maximal-munch scanner: at a letter-starting position it reads the whole identifier run first and only then asks whether that whole run, not a prefix of it, is a reserved word. That the whole run is what counts, rather than any prefix, is also the manual's own separately-stated rule for recognising a reserved word at all: a delimiter -- space, double quote, \"#\", colon, or other punctuation -- must set the word off on both sides. The two pages read together settle FORI=1TO10: nothing delimits FOR from the I that follows it, so no FOR keyword is recognised there at all, and the whole run scans as the single identifier FORI (and likewise 1TO10 as the number 1 followed by the identifier TO10). Consequently, unspaced keyword runs -- FORI=1TO10 read as FOR I = 1 TO 10, the way classic Microsoft BASICs tokenise it -- are not supported here. That consequence is the manual's own delimiter rule, not an inference of ours. A TYPE-DECLARATION SUFFIX IS PART OF THE NAME, BUT A BARE NAME IS NOT A FIFTH ONE. Printed p.15 prints A!, A#, A% and A$ as four variables that are distinguished from one another, and says of them \"A!とAは同じ\": A! and A are the SAME variable. A name written without a suffix is the same name carrying whichever suffix its default kind implies -- \"!\" until a DEFINT/DEFSNG/DEFDBL/DEFSTR statement changes it for that letter (printed p.60), after which a bare name in that letter's range is the same variable as the same name with the declared type's suffix. Array names follow the same rule and had the same defect. Printed p.10 states the other half of how a name is read: outside a string constant, upper and lower case are the same, so a and A are one name."
+    },
+    {
+      "id": "PROG.LABELS",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.29-30 / PDF p.42-43 (SS13 ラベル名)",
+      "text": "A label name may be written in place of a line number wherever a program branches, and the manual gives editing as the other use -- its stated motivation is RENUM, since a label needs no re-checking after the line numbers move. A label is defined by \"*NAME\" opening a line and is referenced by the same \"*NAME\" after GOTO, GOSUB, RETURN, RESUME, ON ... GOTO/GOSUB, RESTORE, or as an IF branch. The rules below are the manual's, stated in section 13, which runs from printed p.29 onto p.30. (1) A label begins with an asterisk. (2) After the asterisk it must start with a single-byte letter. (3) The characters allowed are single-byte letters, digits and the period, matched without regard to case. (4) A reserved word may not BE a label, though a label may contain one -- *MYFOR is legal where *FOR is not. (5) Its length is bounded only by the 255-byte line (PROG.LINE-LENGTH). (6) A label that is referenced must stand at the start of its line. (7) Where a statement follows a label on one line, the two are separated by a colon OR BY A SPACE. Breaking (1)-(7) is Syntax error. Two of these were wrong here and are now fixed. The space form of (7) was refused, only the colon accepted. And a duplicate label was resolved by keeping the first definition, on the reasoning that refusing to load a program the real interpreter might have run was the worse reading -- but p.30 names \"Duplicate label\" as an error, detected when RUN begins and before any line executes, so such a listing does not run at all. That error names no line number, which the page also states, and which this interpreter spells as line 0. What remains ours, because the page really is silent on it: an undefined label is \"Undefined line number\" at the moment the jump runs, reusing the error a missing line number gets. Also ours: a definition is accepted only as the first statement of its line, which rule (6) supports for referenced labels without settling unreferenced ones. \"*\" remains multiplication everywhere an expression is read; a label is recognised only where a line reference or a statement may begin, so the two never compete."
+    },
+    {
+      "id": "PROG.LINE-NUMBERS",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.9 / PDF p.22 (SS3 行番号)",
+      "text": "A line number is an integer from 1 to 65529. The manual states the range in as many words, so refusing a number outside it enforces its rule rather than inventing one -- unlike the out-of-range refusals on SCREEN, WIDTH and KEY, which are this interpreter's own choices because their pages give legal values without saying what lies outside. Note the floor is 1: line 0 is not a line number. Line numbers also fix the order in which lines are stored and run, which is why a listing may be typed in any order. A number outside the range is reported when the program is loaded, and a listing with any broken line does not run at all. RENUM's own entry (printed p.135) states the same ceiling from the other direction: it cannot generate a line number above 65529 and raises Illegal function call rather than doing so."
+    },
+    {
+      "id": "PROG.LINE-LENGTH",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.9 / PDF p.22 (SS2 行)",
+      "text": "One line, its line number included, may hold statements within 255 BYTES. Bytes and not characters, which matters here: a line of Japanese text reaches the limit in far fewer characters than an ASCII one, and this interpreter measures the raw line rather than a decoded length. Within that limit a line may carry any number of statements separated by colons -- the manual puts no separate cap on the count, only on the bytes they occupy. The limit is checked before the line is tokenised, so an over-long line is reported as the one thing wrong with it rather than as whatever its tail happens to lex into."
+    },
+    {
+      "id": "CTRL.ELSE",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.80 / PDF p.91",
+      "text": "ELSE introduces IF's false branch, taken when <condition> is zero: either a bare line number, acting as a GOTO to that line, or one or more statements. Omitting ELSE entirely just falls through to the next line on a false condition. Chaining another IF right after ELSE nests conditions."
+    },
+    {
+      "id": "PROG.END",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.70 / PDF p.81",
+      "text": "END ends the program's execution and returns to command level, closing any files that were open. It may be placed wherever execution should stop, and a program may contain any number of ENDs. The END at the end of a program may be left out, in which case execution still stops there but the files are not closed. This interpreter opens no files, so only the halting behaviour is observable here."
+    },
+    {
+      "id": "PROG.ERASE",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.70 / PDF p.81",
+      "text": "ERASE <array name>[, <array name>...] discards each named array entirely -- bare names only, no subscripts or parentheses. The manual states the consequence directly: the memory the array held is freed, so the same name can be DIM'd again, or simply used again and auto-vivified at its default size, exactly as if it had never appeared in the program. Without an intervening ERASE, redeclaring an array that already has dimensions -- whether an earlier DIM or the array's own first use fixed them -- is the \"Duplicate Difinition\" error the manual's own ERASE note names (spec/errors.json #10); this interpreter's DIM enforces exactly that, so ERASE's consequence is the only way to redeclare an array that already exists. Erasing a name that was never dimensioned or referenced is not an error -- there is nothing to remove, which this interpreter treats as a silent no-op since the manual does not describe this corner case."
+    },
+    {
+      "id": "ERR.ERL",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.71 / PDF p.82",
+      "text": "ERL holds the BASIC line number on which the most recently trapped error occurred, for use inside an ON ERROR GOTO handler. The manual's own examples show it read only from inside a handler; this interpreter also gives it a value beforehand -- 0, since no error has occurred yet -- and keeps that value after the handler returns via RESUME, since the manual describes only what sets ERL and nothing that clears it. Neither the starting value nor the post-RESUME persistence is a rule the manual states outright, so both are this interpreter's own decision (PARTIAL)."
+    },
+    {
+      "id": "ERR.FN",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.71 / PDF p.82",
+      "text": "ERR holds the error code of the most recently trapped error, for use inside an ON ERROR GOTO handler. The same two decisions as ERR.ERL apply here and for the same reason: ERR is 0 before any error is ever trapped, and it keeps its value after RESUME rather than being cleared by it -- our own reading of a case the manual leaves silent (PARTIAL)."
+    },
+    {
+      "id": "ERR.ERROR",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.71 / PDF p.82",
+      "text": "ERROR <n>, <n> an integer expression 0-255, simulates error number <n> or raises a program's own. For an <n> already used as one of the language's own error codes, this shows that code's own message and stops the program (or, with a handler installed, sets ERR to <n> and ERL to the ERROR statement's own line and transfers to it, the same as any other trapped error); for an <n> the language does not assign a message to, it shows the shared \"Unprintable error\" placeholder instead and stops (or traps) the same way -- the manual's own appendix names this as intentional, not a gap, so a program can use an unassigned number as an error condition of its own. The manual gives 0-255 as <n>'s notation range but does not say what happens for a value outside it; this interpreter reads that the same as every other range-checked argument in this library and raises Illegal function call, which is our own decision, not a stated rule (PARTIAL)."
+    },
+    {
+      "id": "ERR.MESSAGE-FORM",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.30-31 / PDF p.43-44 (SS14 エラーメッセージ)",
+      "text": "On detecting an error that must stop execution, N88-BASIC(86) writes a message and returns to command level. The manual gives two shapes for it. In direct mode the message stands alone. In program mode it is \"<message> in <line>\", where the line is the one on which BASIC DETECTED the error -- the page warns in as many words that the real cause may lie on another line, so the number is where it was noticed and not necessarily where it is wrong. The catalogue of messages themselves lives in Appendix A, which is what spec/errors.json cites (printed pp.181-188); this clause is about the FORM the catalogue's entries are delivered in, which is stated only here. THIS INTERPRETER'S FORM DIFFERS DELIBERATELY, and the difference is recorded here rather than left implicit. It writes \"<message> in line <n> (line <file line>, column <c>)\": the word \"line\" before the number, and a file position after it. Both are additions for a file-based interpreter with an editor front end -- the source is a file rather than a session, so a file line and column exist and are what editor/ turns into a squiggle, while the manual's machine had only the BASIC line number to give. Where no BASIC line number is known the clause is omitted entirely and the message stands alone, which is both this codebase's line-0 convention and, not by coincidence, the manual's own direct-mode shape. That case covers a failure found while loading the listing rather than while running it, and the label errors printed p.30 says carry no line number."
+    },
+    {
+      "id": "NUM.EXP",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.72 / PDF p.83",
+      "text": "EXP(n) returns e (2.71828...) raised to the power n."
+    },
+    {
+      "id": "NUM.FIX",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.74 / PDF p.85",
+      "text": "FIX(n) returns n with its fractional part discarded -- truncation toward zero. That is FIX's whole difference from INT (NUM.INT, still absent here): for a negative n, INT returns the largest integer that does not exceed n (rounding toward negative infinity), one less than FIX's answer whenever n is not already a whole number. FIX(-2.7) is -2; INT(-2.7) is -3."
+    },
+    {
+      "id": "CTRL.FOR",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.74 / PDF p.85",
+      "text": "FOR <var> = <start> TO <limit> [STEP <increment>] begins a counted loop: <var> is set to <start>, and the loop body down to the matching NEXT runs repeatedly, adding <increment> to <var> after each pass, until <var> would pass <limit> (below it, counting down, when <increment> is negative). STEP defaults to 1 when left out. If the very first test already fails -- <increment> positive and <start> already past <limit>, or the reverse -- the body never runs at all, and execution resumes after the matching NEXT. The manual states in as many words that the loop variable must be of integer or single-precision type, and a Double control variable is refused here rather than quietly accepted. The manual names no error for that violation, so \"Type mismatch\" is this interpreter's choice and not the manual's. The test is made against the variable's type as the environment holds it rather than against its spelling, so a suffix-less name made Double by DEFDBL is refused as well as an explicit X#."
+    },
+    {
+      "id": "CTRL.GOSUB",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.78 / PDF p.89",
+      "text": "GOSUB <line number> calls the given line as a subroutine: execution jumps there, and the position right after the GOSUB is remembered so a later RETURN can come back to it. Subroutines may call each other (the manual calls this nesting), limited only by however much stack space is left; the manual states that exhausting it is \"Out of memory\", which this interpreter does not model. A label name may stand in for the line number, as in the manual's own \"GOSUB *SUB1\" (see PROG.LABELS)."
+    },
+    {
+      "id": "CTRL.GOTO",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.78 / PDF p.89",
+      "text": "GOTO <line number> jumps unconditionally to the given line, and execution continues from there. The manual documents a second spelling, the two words \"GO TO\", and is exact about the gap between them: one space means exactly the same statement, while two or more are explicitly not interpreted as GOTO at all. Both halves are honoured here, and the second word must be delimited as any reserved word is, so \"GO TOTAL\" is a GO followed by the variable TOTAL rather than a jump. A label name may stand in for the line number, as in the manual's own \"GOTO *EXIT\" (see PROG.LABELS). A target that turns out not to exist is not checked until the jump actually runs, where it is \"Undefined line number\" -- the same for a label as for a number, which is this interpreter's reuse of that error rather than a message the manual gives labels of their own."
+    },
+    {
+      "id": "STR.HEX",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.80 / PDF p.91",
+      "text": "HEX$(n) renders n as a hexadecimal string. n must fall in -32768..32767 or, equivalently, 0..65535 -- outside that combined range is Illegal function call. A negative n and the positive value 65536 above it that shares its bit pattern render identically: HEX$(-1) and HEX$(65535) both give \"FFFF\", because both are read as the same 16-bit word."
+    },
+    {
+      "id": "CTRL.IF",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.80 / PDF p.91",
+      "text": "IF <condition> THEN <branch> [ELSE <branch>] runs the THEN branch when <condition> is non-zero (true) and the ELSE branch, if given, when it is zero (false); with no ELSE, a false condition simply falls through to the next line. Each <branch> is either a bare line reference, acting as a GOTO to it, or one or more statements. A bare line reference may be a label as well as a number, as in the manual's own \"IF A<0 THEN *MINUS\" (see PROG.LABELS). Chaining another IF right after ELSE nests conditions, limited by the manual only to what fits on one physical program line (255 bytes). The manual's second, THEN-less form, IF <condition> GOTO <line number> [ELSE <branch>], is accepted here too; its syntax box gives GOTO's branch as a line number alone, unlike THEN's, which may be a statement or a line number, and that asymmetry is kept rather than smoothed over."
+    },
+    {
+      "id": "IN.INPUT",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.82 / PDF p.93; printed p.12-14 / PDF p.25-27 (SS5 定数)",
+      "text": "INPUT [<prompt>{;|,}] <var>[,<var>...] pauses for a line of keyboard input and stores it into the variables. A prompt must be followed by one of the two separators, and which one decides what reaches the screen: \";\" shows a question mark and one space after the prompt text, \",\" shows nothing further. One typed line answers the whole statement however many variables it names: the line is split on commas, one field per variable, and the counts must agree. A string field that needs to contain a comma, or to keep spaces at its ends, is written in double quotes, and those quotes are not part of the value; an unquoted field is trimmed. Pressing Return on an empty field counts as an empty answer -- 0 for a numeric variable, the null string for a string one -- but with several variables the separating commas must still be typed, so a line of nothing but commas is a valid answer of empty fields. A field whose type does not match its variable displays \"?Redo from start\" and asks for the whole line again rather than stopping the program. Two details are ours because the manual is silent on them: a statement written with no prompt at all shows \"? \", as though \";\" had been given; and a line whose field count does not match the variables is re-prompted the same way a type mismatch is, the page requiring the counts to agree without saying what happens when they do not. The re-prompt loop ends when the input source runs out, there being no terminal here to keep asking. Which notations a numeric field may use is not something this page states. INPUT converted a field with OCaml's own float parser rather than a BASIC one, so it accepted literals N88-BASIC never had: \"1_000\" read as 1000, \"0x10\" as 16, and \"nan\" and \"inf\" put a NaN or an Overflow into a numeric variable from a typed line. It also REJECTED \"1D3\", a double-precision constant printed p.14 SS5.6 defines, while accepting its single-precision sibling \"1E3\" from SS5.5 -- an asymmetry no reading of the manual supports. A numeric field now goes through the same whole-field reader a DATA item does (DATA.BASIC), so one definition of \"a typed number\" serves both rather than a second one drifting from the first. That is the third defect this project has had from keeping more than one text-to-number reader, after STR.VAL's missing octal and exponent forms and DATA's missing radix forms. Two consequences are OURS, the page being silent on both. Sharing the reader makes INPUT accept the radix forms (&H, &O and a bare &), which the manual neither permits nor forbids for a typed datum -- SS5 defines a constant as what is written in a PROGRAM, and this page speaks of データ typed at a prompt, so the two are not obviously the same thing and consistency was preferred to a second rule. And a field that is not a BASIC number at all is treated as a type mismatch, taking the page's own \"?Redo from start\" rather than an error of its own."
+    },
+    {
+      "id": "STR.INSTR",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.84 / PDF p.95",
+      "text": "INSTR([position,] haystack$, needle$) searches haystack$ for needle$ and returns the 1-based position of the first match, or 0 if it does not occur. The optional leading position argument gives the offset to start searching from and defaults to 1 when left out. When needle$ is the null string, INSTR's result is simply the given position, with no further condition. This interpreter also rejects a position below 1 with Illegal function call; the manual states no floor for position, so that boundary is this interpreter's own decision, not the manual's."
+    },
+    {
+      "id": "NUM.INT",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.85 / PDF p.96",
+      "text": "INT(<numeric expression>) is the largest integer not exceeding the expression's value -- it floors toward negative infinity rather than truncating toward zero. The manual draws the distinction explicitly against FIX: for a negative argument FIX merely removes the fractional part while INT returns the largest integer that does not exceed the value, so INT(-2.7) is -3 and FIX(-2.7) is -2. The manual does not say what type INT returns. This interpreter gives the result the argument's own type, which is our decision, not a stated rule -- and one worth noting, because the manual does state a contrary rule for the functions it does cover (ABS, SIN, SQR: single precision unless a double is involved), and INT is not among them."
+    },
+    {
+      "id": "SCREEN.KEY-OFF",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.87 / PDF p.98",
+      "text": "KEY[(<key number>)] {ON|OFF|STOP} controls whether the function keys raise interrupts. ON permits them, so that pressing the key branches to the routine ON KEY GOSUB has set; OFF forbids them; STOP suspends them, remembering that the key was pressed and branching later, once ON restores them. The key number is 1 to 10, and leaving it off -- parentheses and all -- means every function key. This statement does not hide the function-key labels along the bottom of the screen, which is a separate thing: CONSOLE's third argument (see SCREEN.CONSOLE). All three forms are accepted, with or without a key number, and the display list records which key and which of ON, OFF and STOP; a statement written without the number -- parentheses and all -- is recorded with the key left absent, since the manual makes that mean every function key rather than any particular one. PARTIAL: none of them does anything, there being no function-key interrupts in this interpreter for ON to permit, OFF to forbid or STOP to hold back and remember. They are recorded rather than discarded so that an event loop which grows them finds what the listing actually asked for, and so that a listing using them runs at all: until recently only the bare KEY OFF parsed. Refusing a key number outside 1 to 10 with Illegal function call is this interpreter's choice, the manual giving the range but not saying what lies outside it does. The clause id still reads KEY-OFF, after the single form this interpreter once had, but the clause covers all three."
+    },
+    {
+      "id": "STR.LEFT",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.92 / PDF p.103",
+      "text": "LEFT$(s,n) returns the leftmost n characters of s. n must lie in 0..255: 0 yields the null string, n at or past s's own character count yields s unchanged, and a value outside 0..255 is Illegal function call."
+    },
+    {
+      "id": "STR.LEN",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.93 / PDF p.104",
+      "text": "LEN(s) returns the total character count of s, counting every character s holds, including unprintable control codes and spaces."
+    },
+    {
+      "id": "PROG.LET",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.93 / PDF p.104",
+      "text": "[LET] <variable name> = <expression> assigns the expression's value to the variable. The keyword LET is optional and the bare assignment form is the usual one. The expression may be of any type, numeric or string, but the variable and the expression must agree in kind: a string expression may only be assigned to a string variable and a numeric expression only to a numeric variable. Between numeric types the assignment is not refused -- the value is converted to the precision of the variable on the left, so assigning 3.7 to an integer variable stores 4. An assignment must have a variable on its left-hand side."
+    },
+    {
+      "id": "GFX.LINE",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.94-95 / PDF p.105-106",
+      "text": "LINE [(x1,y1)|STEP(x1,y1)]-[(x2,y2)|STEP(x2,y2)][,<palette number>][,B|BF][,...] draws the straight segment joining two points in world coordinates. The first point may be left out, in which case the segment starts from the last point referenced; either point may instead be written as STEP(dx,dy), giving coordinates relative to the point just referenced -- so the first STEP is relative to the last point referenced and the second to the first, which the manual offers without saying outright and is our reading. The palette number is the colour to draw in, and defaults to the graphics foreground colour COLOR has set. After the statement runs, the last point referenced is the second point. The slot after B or BF holds a line style: a value from &H0 to &HFFFF whose sixteen bits map onto sixteen screen dots, a set bit drawing its dot and a clear bit leaving it, the pattern repeating every sixteen dots along the line. An omitted line style draws a solid line, and it may not be given with BF. The B/BF slot may itself be left empty to reach the style, which is how the manual's own worked example is written. Two details of the style are ours because the manual does not address them: the dot count starts at the first dot actually drawn, so a line clipped at the screen edge starts its pattern there; and on a ,B outline one count runs on across all four sides in the order they are drawn rather than restarting at each corner."
+    },
+    {
+      "id": "IN.LINE-INPUT",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.95 / PDF p.106",
+      "text": "LINE INPUT [<prompt>;] <string variable> reads whatever is typed at the keyboard (up to 255 bytes) and stores it in <string variable> as one unbroken piece, including any commas or quotation marks it contains -- unlike INPUT, which splits its answer on commas and strips quotes around a quoted field. <prompt>, if given, must be followed by \";\" (the manual's syntax box brackets the two together as one unit; unlike INPUT's box, there is no \",\" alternative here) and is displayed exactly as written, with no \"?\" or extra space appended -- INPUT's own page states plainly that INPUT adds \"? \" after its prompt, and LINE INPUT's page never repeats that statement for itself. The manual does not say what happens if input runs out (this interpreter has no interactive keyboard, only a caller-supplied answer source); this interpreter treats that the same as INPUT already does -- a runtime error, \"Out of input\" -- a decision of ours, not a stated rule. STOP/CTRL+C interrupting an in-progress read is not modelled, since this interpreter has no such keys to model."
+    },
+    {
+      "id": "SCREEN.LOCATE",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.99 / PDF p.110",
+      "text": "LOCATE [<X>][,<Y>][,<cursor switch>] moves the text cursor. X is the horizontal coordinate and comes first; Y is the vertical one. Both are character coordinates with the top-left corner of the screen as (0,0). Each slot is optional and an empty one is written as a bare comma: an omitted X is taken as 0, while an omitted Y leaves the cursor on the line it is already on -- the two defaults are not symmetric. The cursor switch hides the cursor when it is 0 and shows it when it is 1. This interpreter parses every one of those forms and records the arguments in the manual's order, but has no text screen to move a cursor on, so the operation reaches the display list and the rasterizer draws nothing for it. PARTIAL for that reason alone: what LOCATE means is implemented, what it acts on does not exist yet. The manual does not say what a coordinate outside the screen does, and with no screen to bound it this interpreter does not check. The text screen is deferred by decision (spec.md SS3.2) rather than merely absent: this interpreter's output is a stream and a text screen is a grid, and the two are different objects. What is unbuilt here is therefore a recorded scope boundary rather than an oversight, and the refusal-free recording of arguments above stays the right behaviour meanwhile."
+    },
+    {
+      "id": "NUM.LOG",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.100 / PDF p.111",
+      "text": "LOG(n) returns the natural logarithm of n (base e). The manual does not state LOG's behaviour at n <= 0; this interpreter raises Illegal function call there, the same domain-error convention every other function in this library uses for an argument outside what it can accept -- a decision of ours, not a rule the manual states."
+    },
+    {
+      "id": "PRINT.LPRINT",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.100 / PDF p.111",
+      "text": "LPRINT [<expr>] [(,|;) <expr>...] [(,|;)] takes the same item list, separators, and TAB/SPC forms as PRINT; the manual states outright that LPRINT's only difference from PRINT is that its output goes to the printer rather than the screen. This interpreter has no real printer (spec/spec.md §3.1): the caller of Interp.run/run_source may supply a separate ~printer sink, and if none is given the printer stream is merged into the same sink as PRINT's own output, rather than being silently discarded -- a deliberate deviation of this interpreter's, documented at Interp.run's own definition, not a rule the manual states."
+    },
+    {
+      "id": "PRINT.LPRINT-USING",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.101 / PDF p.112",
+      "text": "LPRINT USING <format>; <expr>[(,|;)<expr>...] takes the same format string and value list as PRINT USING; the manual states outright that LPRINT USING's only difference from PRINT USING is that its output goes to the printer rather than the screen. As with PRINT.LPRINT, this interpreter merges the printer stream into the same sink as the screen's by default when the caller supplies no separate ~printer sink -- a deliberate deviation of this interpreter's, not a rule the manual states."
+    },
+    {
+      "id": "STR.MID",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.103-104 / PDF p.114-115",
+      "text": "MID$ has two forms. As a function, MID$(s,start[,length]) returns length characters of s beginning at the 1-based start; when length is omitted, or would reach past the end of s, every character from start to the end of s is returned instead. A start beyond s's own character count yields the null string rather than an error, but start itself must lie in 1..255 and a given length in 0..255, or the call is Illegal function call. As a statement, MID$(v,start[,length]) = replacement$ overwrites characters of the string variable v in place, starting at the 1-based start: the count of characters copied from replacement$ is length, or, if length is omitted or exceeds replacement$'s own character count, however many characters replacement$ has -- capped, either way, by how many characters v still holds from start onward, since this statement can neither lengthen nor shorten v. start and length share the function form's 1..255 and 0..255 bounds. The manual does not say what happens when start lies beyond v's current length; this interpreter replaces nothing in that case, the only behaviour an in-place, fixed-length update can give, and that specific corner is this interpreter's own extension rather than a stated rule."
+    },
+    {
+      "id": "CTRL.NEXT",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.74 / PDF p.85",
+      "text": "NEXT [<var>][,<var>...] closes a FOR loop's current pass and either starts the next one or, once the bound is passed, falls through to the statement after it. Bare NEXT closes the innermost open loop; NEXT <var> closes the loop opened for <var> specifically. The comma form, which the manual gives in its syntax box and writes in its own example as \"NEXT K, J\", closes several nested loops in one statement and is accepted here. It is expanded into one NEXT per variable, which is exactly what \"NEXT K : NEXT J\" means. That distinction is not cosmetic: a loop whose bound fails on entry skips to just past the NEXT closing its own loop, so the NEXT closing the enclosing loop must remain a separate statement still to be run. Only a NEXT that named a variable may carry a comma list, since the manual's box brackets the first <var> together with the commas that follow it."
+    },
+    {
+      "id": "STR.OCT",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.107 / PDF p.118",
+      "text": "OCT$(n) renders n as an octal string, under the same domain as HEX$ (-32768..32767, equivalently 0..65535, both read as the same 16-bit word) and the same Illegal function call outside it."
+    },
+    {
+      "id": "ERR.ON-ERROR-GOTO",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.109 / PDF p.120",
+      "text": "ON ERROR GOTO <line number> installs <line number> as the entry point of an error-handling routine: from then on, an error that would otherwise stop the program instead sets ERR and ERL and transfers control there. A handler routine returns not with RETURN but with RESUME. ON ERROR GOTO 0 disables trapping again -- the manual's own advice is to run it once a program that installed a handler is finished, since otherwise every later error (even in direct mode, as long as the program remains in memory) keeps transferring to the routine. Run from inside the handler routine itself, ON ERROR GOTO 0 means something else: rather than quietly disabling the handler and continuing, it shows the message of the error that caused entry into this handler and stops the program there. The manual states plainly that no error interrupts a handler already running: an error raised while one is executing is never trapped a second time, it shows its own message and stops -- and a <line number> that turns out not to exist is \"Undefined line number\", raised when an error actually tries to use it. PARTIAL: whether the manual's own text validates <line number> the moment ON ERROR GOTO itself runs, or only later when an error first tries to jump there, is not stated outright; this interpreter reads it as the latter, since ON ERROR GOTO is only ever recorded for later use, the same way GOTO's own target is not checked until the jump."
+    },
+    {
+      "id": "CTRL.ON-GOSUB",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.109-110 / PDF p.120-121",
+      "text": "ON <expr> GOSUB <line>[,<line>...] chooses among its line numbers exactly as ON...GOTO does (see CTRL.ON-GOTO for the selection rule and its three manual-stated cases), except the chosen line is entered as a subroutine call: it must end in RETURN, which resumes execution at the statement following the ON...GOSUB, the same as an ordinary GOSUB. Rounding a fractional selector, rather than truncating it, is this interpreter's own decision, shared with ON...GOTO."
+    },
+    {
+      "id": "CTRL.ON-GOTO",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.109-110 / PDF p.120-121",
+      "text": "ON <expr> GOTO <line>[,<line>...] evaluates <expr> to a whole number n and transfers control to the nth line number in the list, counting from 1. The manual states three cases outright: a negative n is Illegal function call; n equal to 0, or greater than how many line numbers are listed, is not an error at all -- execution simply falls through to the statement following the ON...GOTO. The manual does not say how a fractional <expr> is reduced to a whole number; this interpreter rounds it, matching the convention every other whole-number argument in this interpreter already follows (rounded_ints), rather than truncating it -- a decision of ours, not a rule the manual states."
+    },
+    {
+      "id": "PROG.OPTION-BASE",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.116 / PDF p.127",
+      "text": "OPTION BASE 0|1 sets the minimum (origin) value every array subscript in the program is measured from; the manual's own syntax box offers only the literal digits 0 or 1, not a general expression. The manual states directly: the default origin is 0 if OPTION BASE is never used; the statement has effect only if it runs before any array in the program has been declared or referenced, and has no effect (not an error) if placed after one already exists; and once an origin has been fixed, attempting to specify it again raises \"Duplicate Difinition\" -- the manual gives no RUN/CLEAR to undo this except those two commands, both of which reset it. With OPTION BASE 1, using subscript 0 on any array is \"Subscript out of range\", stated directly. An explicitly DIM'd array's declared upper bound is unaffected by the origin; an undimensioned array's implicit upper bound is 10 counted from the origin (spec/errors.json #9), so it always holds 11 cells regardless of the origin chosen. This interpreter's reading of \"no effect once an array exists\" is that a later OPTION BASE in that state is silently ignored rather than raising Duplicate Difinition -- the manual describes the two outcomes (no effect vs. Duplicate Difinition) for two different situations without saying how they interact when both could apply, so treating \"an array already exists\" as taking priority over \"already specified\" is this interpreter's own decision."
+    },
+    {
+      "id": "GFX.PAINT",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.117 / PDF p.128",
+      "text": "Fills the region containing the given point, outward until the border colour is met, with the area colour or with a tile pattern. An omitted area colour uses the foreground colour COLOR set; an omitted border colour uses the same palette number as the area colour. When the starting point already carries the border colour, the statement performs no screen operation at all. A start point outside the window is Illegal function call. The fill is confined to the viewport. A tile string names the pattern an area is filled with instead of a flat colour, and its meaning is defined once, under [2] PAINT (printed p.118-119 / PDF p.129-130) -- CIRCLE's and LINE's entries only refer to it. A tile is always 8 dots wide, and as many rows tall as the string describes: one character makes a row in monochrome mode, three in the 8-colour mode this interpreter targets, four in 16-colour mode. In colour mode the three characters of a row are bit planes rather than three rows -- for each of the eight dot columns the three bits are read downward as a binary number, and that number is the dot's palette, the first character being the 2^0 plane and bit 7 of each byte the leftmost dot. Characters left over at the end of the string, when its length is not a whole number of rows, are ignored; a string too short for even one row is Illegal function call. Where the pattern is anchored is not addressed by the manual: this interpreter repeats it from the screen origin rather than from where a fill starts, so two adjacent fills of one pattern line up, and that reading is ours. One further silence is ours: with a tile as the area there is no single colour for an omitted border to name, so the current foreground colour is used, that being what an omitted area would itself have taken."
+    },
+    {
+      "id": "GFX.POINT",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.122-123 / PDF p.133-134",
+      "text": "The manual documents three distinct things under the name POINT, and all three are implemented. A STATEMENT, POINT (Wx,Wy) or POINT STEP(x,y), which sets the LP (last referenced point) and draws nothing at all -- printed p.122 says so in as many words, that it does not draw a figure or alter one. A one-argument FUNCTION, POINT(<function>), which reads the LP back: the code 0 gives the LP's X and 1 its Y in world coordinates, 2 and 3 the same pair in screen coordinates. And a two-argument FUNCTION, POINT(Sx,Sy), which gives the colour of the dot displayed at a *screen* coordinate as a palette number (printed p.123 states the palette-number part outright), or -1 when that coordinate falls outside the viewport. The two functions are told apart by arity; the statement is never a call, so it cannot be confused with either. The two-argument function reads back through Interp.state's on_point handler and the one-argument function through on_lp, so basic/ calls both without knowing what a pixel or a display list is; a caller with no rasteriser wired up reports every point as outside the viewport and the LP as (0,0), which is raster/'s own starting LP. TWO THINGS HERE REST ON FACTS ELSEWHERE and will need re-reading if either moves. First, codes 0/1 and 2/3 return the same numbers, because printed p.161 states that until WINDOW has been executed the window stays in its initial state and (world coordinate) = (screen coordinate). VIEW and WINDOW are deferred (spec.md SS3.2), so that condition holds for every program this interpreter can run, and the equality is the manual's own rule rather than a convenience. If WINDOW is ever built the two pairs must part company, and this clause is the place that says so. Second, the LP is tracked in raster/rasterize.ml rather than in the interpreter, because six operations move it and a second copy in basic/ would be free to drift from the first. One refusal is OURS, not the manual's: a function code outside 0-3 raises Illegal function call. Printed p.122 gives the four codes and does not say what a fifth would do, and this matches the refusals SCREEN, WIDTH and KEY already make. The page's own worked equivalence is what pins the statement: LINE(-200,30)-(100,120),3 and POINT(-200,30) followed by LINE -STEP(300,90),3 draw exactly the same figure, which the manual states and which is checked here over the whole framebuffer as well as through POINT readback in a conformance case."
+    },
+    {
+      "id": "PRINT.POS",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.124 / PDF p.135",
+      "text": "POS(x), where x is a required but unused (dummy) argument, returns the current text cursor's column, 0 at the left edge. This interpreter derives it from how many characters the PRINT writer has emitted since its last newline or comma-zone tab -- the same counter PRINT.TAB already reads -- so POS agrees with wherever TAB would pad to next."
+    },
+    {
+      "id": "GFX.PRESET",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.124 / PDF p.135",
+      "text": "PRESET takes the same coordinate forms as PSET (absolute or STEP-relative) and the same optional trailing colour argument, but its default differs: with no colour given, it paints the dot with the current *background* colour (erasing it, in effect), where PSET's default is the foreground. Given an explicit colour, PRESET behaves exactly like PSET and paints that colour instead. Executing PRESET moves the LP to the point it touched, the same as PSET."
+    },
+    {
+      "id": "PRINT.BASIC",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.125 / PDF p.136",
+      "text": "PRINT [<expression>][{,|;} <expression>...][{,|;}] writes values to the screen. An expression may be a constant or a variable of either kind, and its value is written out; PRINT with no expression at all just ends the line. A number is always written with a column ahead of it for its sign -- a space when positive, a minus sign when negative -- and always followed by a space. Items are separated by a comma, a semicolon, or a space. The line is divided into print zones every 14 characters: a comma moves to the start of the next zone, while a semicolon or a space writes immediately after what came before. Where a double-quoted string abuts another item, the separator between them may be omitted, and the effect is a semicolon's. A comma or semicolon at the very end of the list suppresses the newline, so the next PRINT continues on the same line. A single-precision value that fits in six digits or fewer without losing precision is written in fixed-point rather than exponential form, and a double-precision value that fits in sixteen; a number too long to fit to the right of the cursor is written on a fresh line instead of running over -- the manual states this of a 数値, a numeric value, and of nothing else. A question mark may be written in place of PRINT, and LIST expands it back to PRINT. The wrap depends on the current WIDTH, which the output writer now tracks (see SCREEN.WIDTH): it breaks the line at the right-hand column, and a number that will not fit in what is left of the line is moved down whole rather than split across the break. A string is deliberately not moved down, the rule being stated of numbers alone; it runs on and breaks wherever the column falls. That last is this interpreter's reading, not a rule the manual gives, and a string longer than the whole width would have to break somewhere in any case."
+    },
+    {
+      "id": "PRINT.USING",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.128-129 / PDF p.139-140",
+      "text": "PRINT USING <format>; <expr>[(,|;)<expr>...] writes each <expr> through a template string; a comma and a semicolon separate the expressions with no difference between them, which the manual states outright. In the template: a run of \"#\", optionally with a \".\" and further \"#\" marking the decimal point, is a right-justified numeric field of that many digit positions, rounded half-up; \"!\" takes a string's first character alone; \"&\" with n spaces before a closing \"&\" is a left-justified field of n+2 characters, padded when the string is shorter and truncated when it is longer; \"@\" takes the whole string. A \"+\" shows the sign in front or behind according to which end of the field it sits at, and a trailing \"-\" marks negatives only, leaving positives a blank column so a column of figures stays aligned; where two or more are written in a row, only the one against the field signs it and the rest are ordinary characters. A leading \"**\" reserves two digit positions and fills the blank left of the number with asterisks; \"¥¥\" reserves two of which one carries the yen sign itself, which the manual places immediately before the number and which therefore floats right against the first digit rather than sitting at the field's left edge; \"**¥\" reserves three and does both. A \",\" among the digits groups the integer part every three digits and carries a column of its own; placed to the right of the point it instead trails the number, with no grouping. \"^^^^\" after the digits switches the field to exponential form. \"_\" strips the control meaning from exactly one following character. Every other character passes through around the fields, and the manual bars Japanese characters both as template characters and inside the strings the string fields edit. A number whose digits do not fit its field is not truncated: it prints whole behind a \"%\", and the manual states that this covers the case where it is the rounding that pushes it over. The whole template is one pattern, applied again from its start to as many values as are given. Two readings here are this interpreter's rather than the manual's, and are recorded rather than adopted silently: the manual anchors \"**\", \"¥¥\" and \"+\" to the head of the format string, but its own worked example puts a yen pair mid-string, so they are read as belonging to the field rather than to the string; and the manual names exponential form without describing it, so the mantissa normalised to fill the \"#\" ahead of the point, and the four columns \"E+nn\" occupies, are ours. The manual's one statement about a field left with no value counts \"@\" against the expressions and says the surplus \"@\" are ignored; that is implemented, so output carries on past a starved \"@\". A \"#\", \"!\" or \"&\" field with no value left stops output instead, which the manual nowhere states -- that is this interpreter's decision, named here because the asymmetry is surprising enough to read as a bug otherwise. (The \"excess is ignored\" in the manual's \"&\" bullet is a different rule: it concerns a string longer than n+2 characters, not a missing value.) The prohibition on Japanese is enforced. Printed p.128 sets a 注意 directly under the string-format characters: 日本語を含む文字列を編集することはできません -- a string containing Japanese cannot be edited, 編集 being the same verb the entry's own 機能 line uses for what PRINT USING does. This interpreter edited it anyway. Its string fields count bytes, so \"!\" and \"&\" cut a multi-byte character in half and emitted the fragment: PRINT USING \"& &\" on a three-character Japanese string wrote one whole character and then a lone lead byte, and PRINT USING \"!\" wrote a lead byte alone -- not a shorter string but an invalid one, produced silently and with exit 0. A string field given an argument containing a multi-byte character now raises Illegal function call. Refusing is the page's rule; WHICH error is OURS, since the page says only that the edit cannot be done and names none. Illegal function call is the choice this interpreter already makes for an out-of-range SCREEN mode, WIDTH, KEY number and COLOR palette argument. A byte at or above 0x80 is the test: the manual means Shift-JIS and source files here are UTF-8, but the prohibition is about a character these byte-counting fields would cut, and such a character has a high byte in either encoding. TWO BOUNDARIES OF THE REFUSAL, both ours and both deliberate. It applies to every string field including \"@\", which alone could not corrupt anything because it copies the string whole -- the page draws no exception and calls all three 編集, so exempting it would have been our rule rather than its. And it does NOT apply to Japanese appearing as literal text in the format string, which is copied rather than edited and passes through untouched. The conformance case that used to freeze the corruption now pins the refusal; it was written to record what this interpreter did, never what the manual allowed."
+    },
+    {
+      "id": "GFX.PSET",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.130 / PDF p.141",
+      "text": "PSET lights a dot at a world coordinate: either an absolute (Wx,Wy) or, written as STEP(x,y), a point relative to the LP (the last coordinate any graphics operation touched). An optional trailing colour argument gives the dot's palette number; when it is left out, the dot takes the current foreground colour (the one COLOR's foreground slot sets). Executing PSET moves the LP to the point it just drew."
+    },
+    {
+      "id": "NUM.RANDOMIZE",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.133 / PDF p.144",
+      "text": "RANDOMIZE [<expr>] sets a new seed for the one sequence RND draws from, changing what RND returns from that point on. <expr> is a number or variable in -32768..32767; outside that range is Overflow. A bare RANDOMIZE, with <expr> left out entirely, is documented as displaying a message and prompting the user to type a seed at the keyboard -- this interpreter has no keyboard to prompt, so it reads one line through the same caller-supplied input source INPUT itself reads through instead, a decision of ours the manual does not make (this is the 'partial' this clause is marked for)."
+    },
+    {
+      "id": "DATA.READ",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.134 / PDF p.145",
+      "text": "READ <variable>[,<variable>...] takes the next constants from the program's DATA lines and assigns them to the variables one for one. A string constant may only be read into a string variable, but a numeric constant may be read into either a string variable or a numeric one; reading one into a string variable gives that variable the number's own digits, with no sign column and no trailing space -- the manual does not say which characters result, and taking PRINT's rendering of the number stripped of the padding PRINT adds is our reading. A single READ may run on across several DATA lines, and several READs may take their values from one DATA line; whatever a READ does not consume is where the next READ begins, and data left over when no READ remains is simply ignored. Asking for more values than the DATA lines hold raises Out of DATA. RESTORE resets where the next READ begins. Where the kinds do not match, READ raises Syntax error, and the manual is explicit that Type mismatch -- the error every other type confusion in this interpreter reports -- is not what happens here. An unquoted DATA item counts as a numeric constant only if it reads as a number, so a quoted \"42\" and an expression such as 1+2 are both string constants, and reading either into a numeric variable is that Syntax error."
+    },
+    {
+      "id": "PROG.REM",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.134-135 / PDF p.145-146",
+      "text": "REM [<comment text>] introduces a comment. Everything after REM is commentary and has no effect whatever on execution; LIST reproduces it exactly as it was entered. A colon does not end a comment: a statement written after REM's text and separated by one is part of the comment and is ignored, so 10 REM note : PRINT 99 prints nothing. An apostrophe may be written in place of REM (see PROG.COMMENT-MARK)."
+    },
+    {
+      "id": "DATA.RESTORE",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.135-136 / PDF p.146-147",
+      "text": "RESTORE [<line number>] sets the DATA line at which the next READ begins. Given a line number, reading resumes from the DATA line at that line; with the line number left off, reading resumes from the first DATA line in the program."
+    },
+    {
+      "id": "ERR.RESUME",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.136 / PDF p.147",
+      "text": "RESUME ends the error-handling routine ON ERROR GOTO transferred control to and resumes the main program, in one of three forms. Bare RESUME (RESUME 0 is the same, the 0 may be omitted) resumes at the very statement that raised the error being handled -- retrying it, rather than the line it sits on, so an earlier statement on the same line is not re-run. RESUME NEXT resumes at the statement after that one. RESUME <line number> resumes at the given line instead of either. RESUME executed while no error is being handled is itself an error, \"RESUME without error\" (spec/errors.json #20); reaching the end of a handler routine without any RESUME (or END, or ON ERROR GOTO 0) having run is a different error, \"No RESUME\" (spec/errors.json #19), since control then has nowhere left to go."
+    },
+    {
+      "id": "CTRL.RETURN",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.136 / PDF p.147",
+      "text": "RETURN ends the innermost still-running subroutine and resumes execution at the statement after the GOSUB that called it. A subroutine may contain more than one RETURN. The manual's second form, RETURN <line number>, ends the subroutine in the same way but resumes at the named line instead of the calling site; both forms pop exactly one level and differ only in where execution continues. The manual warns that when subroutines nest, or a GOSUB is made from inside a FOR loop, the target must be a line at the same stack level as the caller, and that ignoring this consumes stack abnormally and stops the program working -- it presents that as the programmer's responsibility and names no error, so no check is made here. Reading that silence as \"no check\" is ours; the manual neither requires nor forbids one."
+    },
+    {
+      "id": "STR.RIGHT",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.137 / PDF p.148",
+      "text": "RIGHT$(s,n) returns the rightmost n characters of s, under the same 0..255 domain, zero-yields-the-null-string, and over-long-n-yields-s rules as LEFT$."
+    },
+    {
+      "id": "NUM.RND",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.137 / PDF p.148",
+      "text": "RND draws from this interpreter's one pseudo-random sequence. RND(n) for n < 0 reseeds the sequence deterministically from n (the same negative n always starts the same sequence) and returns the first value drawn from it. RND(0) repeats the value most recently returned, without advancing the sequence. RND(n) for n > 0, and RND with the argument omitted entirely (parens and all), both draw and return the next value in the sequence, uniform in [0,1). Every run starts the sequence from a fixed seed -- an interpreter-chosen constant, not a value the manual states -- so a program's output is exactly reproducible from run to run, matching the manual's own rule that RND repeats the same series across RUN and CLEAR unless changed. RANDOMIZE (NUM.RANDOMIZE) reseeds this same sequence too, through the same mechanism as RND's own negative-argument form -- never a second source of randomness."
+    },
+    {
+      "id": "SCREEN.BASIC",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.140 / PDF p.151",
+      "text": "SCREEN [<screen mode>][,<screen switch>][,<active page>][,<display page>] sets the graphics screen's modes. The screen mode is the basic one -- colour or monochrome, and resolution: 0 is colour at 640x200 with 4 pages, 1 monochrome at 640x200 with 12 pages, 2 high-resolution monochrome at 640x400 with 6 pages, and 3 high-resolution colour at 640x400 with 2 pages; the page counts rise to 16 and 8 for modes 1 and 2 in sixteen-colour mode. The screen switch displays the graphics screen when it is 0 or 1 and temporarily blanks whatever is drawn on it when it is 2 or 3. The active page selects which page graphics statements write to and the display page which is shown; the values each accepts depend on the screen mode and on the palette mode. All four slots are read, each of them optional and an omitted one written as a bare comma, so \"SCREEN ,,0,1\" sets the two pages alone and a bare \"SCREEN\" sets nothing; an omitted slot is recorded as absent rather than taking a default, since it says nothing whatever about the value it leaves out. The screen mode and the screen switch are checked against the values tabulated above; the two page numbers are not, their legal range depending on the palette mode. PARTIAL: the three further arguments are recorded and none of them has an effect. This interpreter has one page, so neither page number can select anything; its framebuffer is 640x400 whatever mode is chosen, so the mode changes no resolution; and there is no display to blank, so the screen switch blanks nothing. Refusing a mode or switch outside the table with Illegal function call is this interpreter's choice -- the manual tabulates the legal values but does not say what an untabulated one does."
+    },
+    {
+      "id": "NUM.SGN",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.145 / PDF p.156",
+      "text": "SGN(<numeric expression>) reports the sign of the expression's value: 1 when it is positive, 0 when it is zero, and -1 when it is negative. The manual gives the three values and nothing else; it does not say what type the result carries. This interpreter returns an integer, on the grounds that -1, 0 and 1 are whole numbers exactly representable in it -- our decision, not a stated rule."
+    },
+    {
+      "id": "NUM.SIN",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.145 / PDF p.156",
+      "text": "SIN(n) returns the sine of n, where n is in radians."
+    },
+    {
+      "id": "STR.SPACE",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.146 / PDF p.157",
+      "text": "SPACE$(n) returns a string of n space characters (character code &H20), where 0 <= n <= 255; outside that range it raises Illegal function call, the same convention its sibling STRING$ (STR.STRING) already uses."
+    },
+    {
+      "id": "PRINT.SPC",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.146 / PDF p.157",
+      "text": "SPC(n), usable only inside a PRINT or LPRINT list, emits n literal space characters at that point in the output. The manual gives SPC's domain as -32768..32767 with any negative n treated as 0, and states SPC cannot be used as a general string expression; this interpreter enforces that by parsing SPC only inside a PRINT/LPRINT item list, as its own print_item, the same restriction PRINT.TAB already has. The manual's further rule -- that a value at or above the current WIDTH is replaced by its remainder modulo that width -- is applied, the output writer now tracking WIDTH (see SCREEN.WIDTH): SPC(42) at WIDTH 40 emits two spaces, and a negative n still emits none. PRINT.TAB states the same rule in the same words and shares one implementation of it with SPC."
+    },
+    {
+      "id": "NUM.SQR",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.146 / PDF p.157",
+      "text": "SQR(<numeric expression>) is the square root of the expression's value. Its result type is stated: double precision when the expression contains a double-precision real, and single precision in every other case. The manual does not say what a negative argument does. This interpreter raises Illegal function call for one, which is our decision, not a stated rule."
+    },
+    {
+      "id": "PROG.STOP",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.147 / PDF p.158",
+      "text": "STOP suspends execution and returns to command level, and may be placed anywhere in a program. It differs from END in two ways the manual states plainly: it prints the message \"Break in <line number>\", naming the line it stopped at, and it does not close the files that were open. Execution can be picked up again with the CONT command, except when the program stopped inside an input statement -- INPUT, LINE INPUT or the INPUT$ function -- which cannot be continued. This interpreter prints the message and halts. It has no CONT to resume with and opens no files, so the message is the whole of the difference from END that is observable here."
+    },
+    {
+      "id": "STR.STR-FN",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.148 / PDF p.159",
+      "text": "STR$(n) renders a numeric value as decimal text, using this dialect's own number-to-text rules (the significant-digit and exponent rules this spec's numeric-display clauses cover). Unlike PRINT, which brackets a value with both a leading and a trailing space, STR$'s result carries only the leading character: a space for a non-negative value, a minus sign for a negative one, and nothing after the digits."
+    },
+    {
+      "id": "STR.STRING",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.148 / PDF p.159",
+      "text": "STRING$(count,item) returns a string of count copies of one character. item names that character two ways: a string expression donates only its own first character, while a numeric expression is read as a character code, which must lie in 0..255 or the call is Illegal function call. This interpreter also requires count to lie in 0..255, matching the bound every sibling substring function in this library places on its own length argument; the manual states that bound only for item's character-code form, not for count, so holding count to it too is this interpreter's own decision."
+    },
+    {
+      "id": "PROG.SWAP",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.149 / PDF p.160",
+      "text": "SWAP <variable>, <variable> exchanges the two variables' current values. Either may be a plain scalar or an array element, of any type -- integer, single precision, double precision, or string -- as long as both sides agree; a type mismatch between them is the ordinary Type mismatch error."
+    },
+    {
+      "id": "PRINT.TAB",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.149 / PDF p.160",
+      "text": "TAB(<numeric expression>) moves the print position along the current output line, measured from the start of that line. It is only usable inside an output statement such as PRINT or LPRINT and is not a string expression, so it cannot be assigned or concatenated. The argument may be anything from -32768 to 32767, but every negative value is treated as 0, and a value at or above the current horizontal column count set by WIDTH is reduced modulo that column count. The output writer now tracks WIDTH (see SCREEN.WIDTH), so the modulo is applied: TAB(90) at WIDTH 80 means column 10. It is a remainder and not a clamp -- the manual's word is 余り -- and since the SPC entry states the identical rule in identical words, TAB and SPC share one implementation of it. The manual's wording (\"leave as many columns of blanks as specified, from the head of the line\") does not settle whether the argument counts from 0 or from 1; this interpreter treats it as counting from 1, so TAB(10) leaves the position at the tenth column, and that reading is ours. A TAB to a column the cursor has already passed emits nothing here rather than wrapping to the next line, which the manual does not address either."
+    },
+    {
+      "id": "NUM.TAN",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.149 / PDF p.160",
+      "text": "TAN(n) returns the tangent of n, where n is in radians."
+    },
+    {
+      "id": "CTRL.THEN",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.80 / PDF p.91",
+      "text": "THEN introduces IF's true branch: either a bare line number, acting as a GOTO to that line, or one or more statements to run when the condition is non-zero. See CTRL.IF for the one syntax form (IF...GOTO with no THEN at all) this interpreter does not accept; where THEN is written, it behaves exactly as documented."
+    },
+    {
+      "id": "STR.VAL",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.154 / PDF p.165",
+      "text": "VAL(<string>) reads a numeral at the start of <string> and returns its value. Every notation the manual lists is accepted: integer notation in octal, decimal or hexadecimal, and real notation with a decimal point or an exponent. If <string>'s first character is none of a digit, \"+\", \"-\" or \"&\", VAL is 0; otherwise scanning stops -- and only what was scanned counts -- at the first character that is not part of the numeral, and what counts as one differs by base, the manual being explicit that A-F are digits under &H while 8 and 9 are not digits under octal, so VAL(\"&19\") is 1. Spaces anywhere in <string> are ignored, not only at its ends, so VAL(\"1 2\") is 12. The manual does not state VAL's result type; this interpreter returns single precision, matching the default type of an unsuffixed value, which is our decision rather than a stated rule. A numeral is recognised here by the same two scanners that read one in program text, so \"what a numeral looks like\" has one definition rather than a second free to drift from it."
+    },
+    {
+      "id": "CTRL.WEND",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.158 / PDF p.169",
+      "text": "WEND closes the loop body opened by the nearest WHILE still open, and returns control there to re-test its condition. WEND cannot be omitted -- every WHILE must be paired with exactly one WEND. A WEND reached with no WHILE open is \"WEND without WHILE\" (spec/errors.json #30); a WHILE whose condition starts false and whose matching WEND cannot be found anywhere in the program is \"WHILE without WEND\" (spec/errors.json #29) -- the same shape FOR without NEXT takes when a FOR's bound fails on entry."
+    },
+    {
+      "id": "CTRL.WHILE",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.158 / PDF p.169",
+      "text": "WHILE <condition> opens a loop whose body -- every statement up to its matching WEND -- repeats for as long as <condition> is nonzero. The condition is tested before every iteration, including the first: the manual states outright that a condition false from the start means the body between WHILE and WEND never runs, not even once. WHILE loops nest: each WEND closes the nearest WHILE still open. The manual states that jumping into or out of a WHILE/WEND loop's body from outside it (with GOTO and the like) leaves behaviour unguaranteed; this interpreter does not special-case that beyond what the ordinary stack mechanics already do."
+    },
+    {
+      "id": "SCREEN.WIDTH",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.158-159 / PDF p.169-170",
+      "text": "WIDTH <columns>[,<rows>] sets how much text the screen shows. Columns is 40 or 80 characters per line, and rows is 20 or 25; leaving rows out keeps the row count as it stands. The statement has two further forms that address a device or an open file rather than the screen -- WIDTH <file descriptor>,<size> and WIDTH #<file number>,<size> -- which set a line length for a printer or an RS-232C line and are out of this specification's scope. The screen form is now validated and the column count has effect: anything but 40 or 80 columns, or 20 or 25 rows, is refused, and the accepted column count is handed to the output writer, which is what makes PRINT.BASIC's line wrap and PRINT.TAB's and PRINT.SPC's modulo work. Two things here are this interpreter's rather than the manual's: the manual does not say what an illegal value does, so it is refused with Illegal function call, on the same grounds as CLS's fourth function code; and the manual gives the two legal column counts without saying which the machine starts in, so this interpreter starts at 80. PARTIAL: the row count is validated and recorded but does nothing, there being no scrolling text screen here for it to size -- the same reason SCREEN.LOCATE remains partial. Columns are implemented; rows are accepted and inert. The text screen is deferred by decision (spec.md SS3.2) rather than merely absent: this interpreter's output is a stream and a text screen is a grid, and the two are different objects. What is unbuilt here is therefore a recorded scope boundary rather than an oversight, and the refusal-free recording of arguments above stays the right behaviour meanwhile."
+    },
+    {
+      "id": "PRINT.WRITE",
+      "status": "partial",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.161 / PDF p.172",
+      "text": "WRITE <expr>[(,|;)<expr>...] writes each expression's value to the screen. \",\" and \";\" both separate items with no functional difference between them (the manual states this outright, unlike PRINT where they differ); on output, every value is nonetheless separated from the next by a comma regardless of which separator the source used. A string is written wrapped in double quotes; a number is written with the unnecessary padding columns PRINT gives it (the leading sign column, the trailing space) squeezed out, so a positive number carries no leading space and no number carries a trailing one. WRITE ends its output with a newline. The manual's own syntax box does not bracket the first <expr> as optional, unlike PRINT's -- this interpreter reads that as WRITE requiring at least one expression, so a bare WRITE is a parse error rather than a blank output line; that reading of an unbracketed grammar slot is this interpreter's own, not a rule the manual states in prose."
+    },
+    {
+      "id": "OP.PRECEDENCE",
+      "text": "Arithmetic operators are applied in this order: exponentiation, then the sign of a negative term, then multiplication and real division, then addition and subtraction. Exponentiation therefore outranks the sign, so -2^2 is -(2^2) = -4 rather than (-2)^2 = 4. A bare run of exponentiations groups to the LEFT: 2^3^2 is (2^3)^2 = 64, and the manual's own worked examples make the point from both sides, writing the algebraic X^(Y squared) with parentheses as X^(Y^2) while writing (X^Y) squared bare as X^Y^2. An exponent may carry its own sign, as in 0^-1. Parentheses override the order, and inside them the same order applies. First clause of the OP family, which covers the manual's operator chapter (section 10, printed pp.19-25) rather than any one keyword -- the keyword-shaped families could not hold a rule about operators, which is why this chapter went unmodelled and its rules unread. This clause covers the arithmetic rows. The fuller fifteen-level order of section 10.6 -- integer division, MOD, the relational operators, and the logical operators including NOT's level below relational -- is not covered here; see the clauses for those operators, which do cover it. Those rows no longer contradict the interpreter. Integer division at level 6 is covered by OP.INTDIV. With it the whole of section 10.6's table is both implemented and covered by some clause, so this one is no longer partial -- what remains is a division of labour between clauses, not a gap in the language. Exponentiation never yields an Integer, for the same reason division does not: an integer base and an integer exponent routinely give a fractional result. The type-conversion rules do not state this, but the manual's own worked example does -- printed p.20 prints 0^-1 as 1.70141E+38, a single-precision value, from two integer operands, which an integer result could not display.",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.19-20 / PDF p.32-33",
+      "status": "implemented"
+    },
+    {
+      "id": "OP.LOGICAL",
+      "text": "AND, OR and NOT are bitwise, not boolean. Each operand is first converted to a two's-complement integer in the range -32768 to 32767 -- a value outside it raises Overflow -- and the operation is then applied to each of the 16 bits independently. So 12 AND 10 is 8, 12 OR 10 is 14, and NOT 5 is -6. The manual gives per-bit truth tables for NOT, AND, OR, XOR, IMP and EQV and closes by using AND to mask all but the wanted bits of a device port's status byte, a use only possible per bit. Relational operators yield -1 for true and 0 for false, so the boolean reading agrees with the bitwise one wherever operands are comparison results -- which is why an interpreter treating them as boolean passes every ordinary condition and fails only where a program masks bits. NOT sits at level 10 of the precedence table, BELOW the relational operators at 9 and above AND at 11, so NOT A = B is NOT (A = B). The conversion's range check is enforced: 40000 AND 1 raises Overflow, while 32767 and -32768 pass. The manual works six expansions on printed p.23 -- 48 AND 24 = 16, 15 XOR 60 = 51, 17 EQV 12 = -30, 28 IMP 9 = -21, NOT 23 = -24, -1 OR 0 = -1 -- and all six agree here, checked against a build rather than read off the code. The PARTIAL this clause carried until now said XOR, IMP and EQV were not implemented; they were implemented after it was written, and nothing re-derived the status, so it went on claiming a gap that had closed.",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.21-23 / PDF p.34-36",
+      "status": "implemented"
+    },
+    {
+      "id": "OP.INTDIV",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.20 / PDF p.33 (SS10.1); printed p.25 / PDF p.38 (SS10.6)",
+      "text": "The backslash is integer division. Printed p.20 states both halves of its semantics outright, which is unusual for this chapter: real operands are ROUNDED (四捨五入) before the operation is performed, and the quotient is then TRUNCATED (切り捨て) to an integer. Its own worked examples are 10\\\\3 -> 3 and 23.75\\\\5 -> 4, the second being 24/5 = 4.8 truncated -- one example that pins both halves at once, since rounding the quotient instead would give 5. It sits at level 6 of section 10.6's table (printed p.25): tighter than MOD at 7, looser than * and / at 5. The manual prints the operator as a yen sign. That is not a different character: on a PC-9801 the byte 0x5C is drawn as ¥, and it is the same byte an ASCII backslash occupies in a file today, so this interpreter lexes \\\\. A file containing U+00A5, a genuinely different codepoint, is not accepted. In scope by the same reasoning as MOD, XOR, IMP and EQV: excluding a table-mate of operators already included was hard to justify, and this one is described in the very same paragraph as MOD. It was omitted from that ruling by oversight rather than decision, and until now did not lex at all -- so a listing using it failed loudly, which is why nothing was ever silently wrong. One thing here is ours, not the manual's: a zero divisor raises Division by zero. The page states that no more for this operator than it does for MOD. Truncation toward zero for a negative quotient is also ours by extension; the page shows no negative example."
+    },
+    {
+      "id": "OP.MOD",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.21-25 / PDF p.34-38",
+      "text": "MOD is the integer remainder, at level 7 of the operator precedence table -- binding more tightly than + and - at 8 and less tightly than * and / at 5, so 2+3 MOD 2 is 2+(3 MOD 2). It is not one of the logical operators: the conversion rule that governs those speaks of them by name, and MOD sits among the arithmetic rows. The manual names MOD and fixes its precedence but states nothing else about it, so three things here are ours: its operands are rounded to whole numbers the way every other whole-number argument in this interpreter is rounded, a negative remainder takes its sign from the dividend, and a zero divisor raises Division by zero as / does."
+    },
+    {
+      "id": "OP.XOR",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.21-25 / PDF p.34-38",
+      "text": "XOR is exclusive or, at level 13 of the precedence table -- looser than OR at 12 and tighter than IMP at 14. A bit of the result is set when exactly one of the corresponding operand bits is set. It is one of the logical operators, so it converts its operands to two's-complement integers in -32768..+32767 before touching a bit, and a value outside that range on conversion is Overflow. The operation is then performed bit by bit across the sixteen bits, which the manual states outright and illustrates in binary. Its use in a condition is a consequence of that rather than its definition: with only 0 and -1 in play every bit carries the same answer, so the result is 0 or -1 again. The manual's worked example is 15 XOR 60, which is 51."
+    },
+    {
+      "id": "OP.IMP",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.21-25 / PDF p.34-38",
+      "text": "IMP is implication, at level 14 of the precedence table -- looser than XOR at 13 and tighter than EQV at 15. A bit of the result is clear only where the left operand's bit is set and the right operand's is clear; it is set in every other case, which is to say X IMP Y is (NOT X) OR Y. It is one of the logical operators, so it converts its operands to two's-complement integers in -32768..+32767 before touching a bit, and a value outside that range on conversion is Overflow. The operation is then performed bit by bit across the sixteen bits, which the manual states outright and illustrates in binary. Its use in a condition is a consequence of that rather than its definition: with only 0 and -1 in play every bit carries the same answer, so the result is 0 or -1 again. The manual's worked example is 28 IMP 9, which is -21."
+    },
+    {
+      "id": "OP.EQV",
+      "status": "implemented",
+      "evidence": "manual",
+      "source": "ref-9801 printed p.21-25 / PDF p.34-38",
+      "text": "EQV is equivalence, at level 15 of the precedence table and the loosest operator in it. A bit of the result is set where the corresponding operand bits agree and clear where they differ, which is to say X EQV Y is NOT (X XOR Y). It is one of the logical operators, so it converts its operands to two's-complement integers in -32768..+32767 before touching a bit, and a value outside that range on conversion is Overflow. The operation is then performed bit by bit across the sixteen bits, which the manual states outright and illustrates in binary. Its use in a condition is a consequence of that rather than its definition: with only 0 and -1 in play every bit carries the same answer, so the result is 0 or -1 again. The manual's worked example is 17 EQV 12, which is -30 -- a value only explicable bit by bit."
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+POINT after PSET through palette 3: 3 
+POINT after COLOR=(3,5): 3 
+POINT after bare COLOR: 3 
+two palettes sharing one code: accepted
+COLOR ,,, : accepted as [1] COLOR

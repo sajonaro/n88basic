@@ -1,0 +1,5 @@
+rule 7: a space separates a label from its statement
+rule 7: so does a colon
+a label may sit alone on its line
+rule 3: digits and periods, matched without regard to case
+rule 4: a label may contain a reserved word

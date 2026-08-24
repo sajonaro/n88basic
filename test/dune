@@ -1,0 +1,39 @@
+(tests
+ (names test_smoke test_print_format test_lexer test_parser test_program test_env
+   test_interp test_tile)
+ (libraries n88basic alcotest))
+
+; raster/ is a separate library (a display list is pure input, a framebuffer
+; and PNG bytes are pure output), so its tests are a separate test group
+; rather than folded into the interpreter suite above. test_point_roundtrip
+; belongs here too, not with test_interp: it exercises the composition of
+; Interp.state's on_point with raster/, which basic/'s own suite has no
+; business depending on.
+(tests
+ (names test_raster_geometry test_raster_png test_point_roundtrip
+   test_raster_circle_paint test_palette_indirection)
+ (libraries n88basic raster alcotest))
+
+; test_checker exercises editor/lsp/checker.ml, a separate library from
+; n88basic for the same reason raster/ is: it is a consumer of basic/, not
+; part of it, so its tests get their own group rather than folding into the
+; interpreter suite above.
+(tests
+ (names test_checker)
+ (libraries n88basic n88lsp alcotest))
+
+; The conformance layer (design doc §9, "does the interpreter do what the
+; spec says"), distinct from the unit-test suites above ("does this module
+; work"): test_conformance.ml discovers every conformance/*.bas case at
+; test time, runs it through N88basic.Interp, and diffs its output against
+; the case's own .expected text or, for a drawing program, a digest of the
+; raster/ framebuffer it produced -- hence the dependency on raster here,
+; the same reason the group above needs it. conformance/ itself is listed
+; as a dep so dune's sandboxed runtest modes see the whole directory, not
+; just the two file extensions the other rules in this file name
+; explicitly.
+(tests
+ (names test_conformance)
+ (deps
+  (source_tree conformance))
+ (libraries n88basic raster alcotest))

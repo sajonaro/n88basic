@@ -1,0 +1,9 @@
+; The module is (name main), not (name n88basic): the library n88basic
+; generates a wrapper module N88basic, and an executable module of the same
+; name would shadow it, so N88basic.Interp would not resolve from here. No
+; public_name either — that requires a package definition this project does
+; not have yet. The binary is _build/default/bin/main.exe; it acquires the
+; name n88basic once packaged for opam.
+(executable
+ (name main)
+ (libraries n88basic raster))

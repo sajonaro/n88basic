@@ -1,0 +1,7 @@
+; Depends on n88basic only for the Display.op type the interpreter's display
+; list is made of (basic/display.ml) — no third-party library, no I/O. It
+; produces PNG bytes as an OCaml string; bin/ is the one that writes them to
+; disk.
+(library
+ (name raster)
+ (libraries n88basic))

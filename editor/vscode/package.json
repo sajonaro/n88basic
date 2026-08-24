@@ -1,0 +1,138 @@
+{
+  "name": "n88basic",
+  "publisher": "n88basic",
+  "displayName": "N88-BASIC(86)",
+  "description": "N88-BASIC(86) for VS Code: syntax highlighting, live diagnostics from the interpreter's own parser, hover documentation drawn from a cited specification, completion, quick fixes, automatic line numbering and renumbering, and Run.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Snippets"
+  ],
+  "keywords": [
+    "basic",
+    "n88-basic",
+    "pc-9801",
+    "nec",
+    "retro",
+    "interpreter"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:n88basic"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "n88basic.run",
+        "title": "N88-BASIC: Run",
+        "icon": "$(play)"
+      },
+      {
+        "command": "n88basic.renumber",
+        "title": "N88-BASIC: Renumber Lines"
+      },
+      {
+        "command": "n88basic.insertNextLine",
+        "title": "N88-BASIC: Insert Next Numbered Line"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "n88basic.run",
+          "when": "resourceLangId == n88basic",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "n88basic.run",
+          "when": "resourceLangId == n88basic"
+        },
+        {
+          "command": "n88basic.renumber",
+          "when": "resourceLangId == n88basic"
+        },
+        {
+          "command": "n88basic.insertNextLine",
+          "when": "resourceLangId == n88basic"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "n88basic.insertNextLine",
+        "key": "ctrl+k ctrl+n",
+        "mac": "cmd+k cmd+n",
+        "when": "editorTextFocus && resourceLangId == n88basic"
+      }
+    ],
+    "languages": [
+      {
+        "id": "n88basic",
+        "aliases": [
+          "N88-BASIC",
+          "n88basic"
+        ],
+        "extensions": [
+          ".bas",
+          ".n88"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/n88basic-light.svg",
+          "dark": "./icons/n88basic-dark.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "n88basic",
+        "scopeName": "source.n88basic",
+        "path": "./syntaxes/n88basic.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "n88basic",
+        "path": "./snippets/n88basic.code-snippets"
+      }
+    ],
+    "configuration": {
+      "title": "N88-BASIC(86)",
+      "properties": {
+        "n88basic.languageServer": {
+          "type": "boolean",
+          "default": false,
+          "description": "Run diagnostics through the N88-BASIC language server instead of in-process. Off by default: every editor feature works without it, so the server is opt-in until it has been proven on a real editor. Requires a window reload."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "generate": "node tools/generate-grammar.js",
+    "check": "node tools/check-grammar.js"
+  },
+  "extensionKind": [
+    "ui",
+    "workspace"
+  ],
+  "dependencies": {
+    "vscode-languageclient": "8.1.0",
+    "vscode-languageserver": "8.1.0",
+    "vscode-languageserver-textdocument": "^1.0.13"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sajonaro/n88basic.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sajonaro/n88basic/issues"
+  },
+  "homepage": "https://github.com/sajonaro/n88basic#readme"
+}

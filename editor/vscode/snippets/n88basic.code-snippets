@@ -1,0 +1,72 @@
+{
+  "FOR loop": {
+    "scope": "n88basic",
+    "prefix": "for",
+    "body": ["${1:100} FOR ${2:I} = ${3:1} TO ${4:10}", "${5:110}   $0", "${6:120} NEXT ${2:I}"],
+    "description": "FOR / NEXT counted loop"
+  },
+  "WHILE loop": {
+    "scope": "n88basic",
+    "prefix": "while",
+    "body": ["${1:100} WHILE ${2:condition}", "${3:110}   $0", "${4:120} WEND"],
+    "description": "WHILE / WEND loop — the condition is tested before the first iteration"
+  },
+  "IF THEN ELSE": {
+    "scope": "n88basic",
+    "prefix": "if",
+    "body": ["${1:100} IF ${2:condition} THEN ${3:statement} ELSE ${4:statement}$0"],
+    "description": "IF with both branches on one line"
+  },
+  "ON GOSUB": {
+    "scope": "n88basic",
+    "prefix": "ongosub",
+    "body": ["${1:100} ON ${2:N} GOSUB ${3:1000},${4:2000},${5:3000}$0"],
+    "description": "Branch by index. An index of 0, or past the end of the list, falls through to the next statement; a negative index raises Illegal function call"
+  },
+  "DEF FN": {
+    "scope": "n88basic",
+    "prefix": "deffn",
+    "body": ["${1:100} DEF FN${2:A}(${3:X}) = ${4:X * 2}$0"],
+    "description": "Single-line user-defined function"
+  },
+  "ON ERROR GOTO": {
+    "scope": "n88basic",
+    "prefix": "onerror",
+    "body": [
+      "${1:100} ON ERROR GOTO ${2:9000}",
+      "$0",
+      "${3:9000} PRINT \"ERROR\";ERR;\"IN LINE\";ERL",
+      "${4:9010} RESUME NEXT"
+    ],
+    "description": "Error trap with ERR/ERL and RESUME (not yet executed by this interpreter)"
+  },
+  "PRINT USING": {
+    "scope": "n88basic",
+    "prefix": "printusing",
+    "body": ["${1:100} PRINT USING \"${2:#####.##}\"; ${3:X}$0"],
+    "description": "Formatted output. # is a digit position; a value too wide for the field is prefixed with %"
+  },
+  "Graphics skeleton": {
+    "scope": "n88basic",
+    "prefix": "graphics",
+    "body": [
+      "${1:100} SCREEN 3",
+      "${2:110} CLS",
+      "${3:120} LINE (${4:0},${5:0})-(${6:100},${7:100}),${8:7}",
+      "$0"
+    ],
+    "description": "Set up the 640x400 screen and draw"
+  },
+  "CIRCLE": {
+    "scope": "n88basic",
+    "prefix": "circle",
+    "body": ["${1:100} CIRCLE (${2:320},${3:200}),${4:100},${5:7}$0"],
+    "description": "Circle, ellipse or arc. Optional arguments: colour, start angle, end angle, aspect"
+  },
+  "PAINT": {
+    "scope": "n88basic",
+    "prefix": "paint",
+    "body": ["${1:100} PAINT (${2:320},${3:200}),${4:2},${5:4}$0"],
+    "description": "Flood fill outward from a point until the border colour. An omitted border colour defaults to the area colour"
+  }
+}

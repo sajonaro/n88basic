@@ -1,0 +1,160 @@
+(rule
+ (with-stdout-to
+  hello.actual
+  (run %{exe:../../bin/main.exe} %{dep:hello.bas})))
+
+(rule
+ (alias runtest)
+ (action
+  (diff hello.out hello.actual)))
+
+; errors.bas has two malformed lines; the CLI must report both, one per
+; line, on stderr, and exit 1 without running anything.
+(rule
+ (with-stderr-to
+  errors.actual
+  (with-accepted-exit-codes
+   1
+   (run %{exe:../../bin/main.exe} %{dep:errors.bas}))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff errors.out errors.actual)))
+
+; runtime_error.bas prints "before" with a trailing ; (no newline) and then
+; hits a division by zero. stdout and stderr are merged into one stream here,
+; in real write order, specifically to pin that stdout is flushed before the
+; error reaches stderr — "before" must precede the error text with nothing
+; between them, not the other way around.
+(rule
+ (target runtime_error.actual)
+ (action
+  (with-accepted-exit-codes
+   1
+   (system
+    "%{exe:../../bin/main.exe} %{dep:runtime_error.bas} > runtime_error.actual 2>&1"))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff runtime_error.out runtime_error.actual)))
+
+; No file argument at all: a usage error, exit 2.
+(rule
+ (with-stderr-to
+  usage_error.actual
+  (with-accepted-exit-codes
+   2
+   (run %{exe:../../bin/main.exe}))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff usage_error.out usage_error.actual)))
+
+; A file argument that does not exist: also exit 2, distinct from a parse or
+; runtime error. The path is a literal, not a %{dep:...}, so the message
+; naming it is stable rather than reflecting a sandbox path.
+(rule
+ (with-stderr-to
+  file_error.actual
+  (with-accepted-exit-codes
+   2
+   (run %{exe:../../bin/main.exe} no-such-file.bas))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff file_error.out file_error.actual)))
+
+; A directory where a source file was expected. It opens and reports a length
+; like any file, so only the read fails — with an errno that varies by
+; filesystem ("Invalid argument", "Value too large for defined data type")
+; and never names the path. main.ml refuses it up front instead, so the
+; message is stable and matches the shape of the missing-file one above.
+(rule
+ (target dir_error.actual)
+ (action
+  (with-accepted-exit-codes
+   2
+   (system
+    "mkdir -p dir_error.dir && %{exe:../../bin/main.exe} dir_error.dir 2> dir_error.actual"))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff dir_error.out dir_error.actual)))
+
+; Writing the PNG is the last thing the runner does and was the one file
+; operation it did not guard: a Sys_error here escaped as "Fatal error:
+; exception Sys_error(...)" rather than a diagnostic. Taking the target path
+; with a directory is the reproducible way to make the write fail. The
+; program's own output is already correct by this point; what this pins is
+; that the failure is reported like every other file error, exit 2, with no
+; OCaml exception text.
+(rule
+ (target png_error.actual)
+ (deps png_error.bas)
+ (action
+  (with-accepted-exit-codes
+   2
+   (system
+    "mkdir -p png_error.png && %{exe:../../bin/main.exe} png_error.bas 2> png_error.actual"))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff png_error.out png_error.actual)))
+
+; graphics.bas draws (SCREEN/CLS/PSET/PRESET/LINE): the full pipeline, source
+; to PNG, through the CLI rather than through Interp/Rasterize directly. The
+; PNG's own bytes are covered at the unit level (test_raster_png.ml); what
+; this pins is that the CLI writes one at all, beside the source file, only
+; when a program actually draws — the exact message main.ml prints once it
+; has.
+(rule
+ (target graphics.png)
+ (deps graphics.bas)
+ (action
+  (with-stderr-to graphics.actual (run %{exe:../../bin/main.exe} graphics.bas))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff graphics.out graphics.actual)))
+
+; INPUT reads from stdin: two answers on separate lines feed two INPUT
+; statements.
+(rule
+ (with-stdout-to
+  input.actual
+  (with-stdin-from
+   input.stdin
+   (run %{exe:../../bin/main.exe} %{dep:input.bas}))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff input.out input.actual)))
+
+; no_picture.bas records display ops (CONSOLE, WIDTH, COLOR, LOCATE) but
+; paints nothing. main.ml promises that "a program that drew nothing must
+; behave exactly as it did before graphics existed: no stray file", and it
+; used to break that promise -- the check asked whether any op had been
+; RECORDED, not whether anything had been DRAWN, so a text-only listing that
+; merely set WIDTH got a blank PNG dropped beside it. Found by running the
+; book's chapter 5, which is full of such listings.
+;
+; stderr is the whole assertion: main.ml prints "wrote <path>" if and only if
+; it writes the file, so an empty stderr is exactly "no stray PNG". Verified
+; to fail by restoring the old ops <> [] check.
+(rule
+ (with-stderr-to
+  no_picture.actual
+  (run %{exe:../../bin/main.exe} %{dep:no_picture.bas})))
+
+(rule
+ (alias runtest)
+ (action
+  (diff no_picture.out no_picture.actual)))

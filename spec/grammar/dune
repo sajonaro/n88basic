@@ -1,0 +1,19 @@
+; Validate the grammar spec artifact. This does NOT build a parser: nothing
+; consumes one, and --no-code-generation means none is produced. What the rule
+; buys is the check -- menhir builds the LR automaton, and --strict turns every
+; shift/reduce and reduce/reduce conflict into an error, so an ambiguity in the
+; grammar fails the test suite instead of sitting unnoticed in a document.
+;
+; menhir is invoked as an ordinary program rather than through dune's (menhir)
+; stanza. That keeps dune-project free of a (using menhir ...) line and means
+; nothing else in this build acquires a menhir dependency: it is a build-time
+; dependency of this one artifact, never a runtime dependency of the
+; interpreter, the CLI or the VSCode extension.
+;
+; To see WHY a conflict happened, add --explain and read n88basic.conflicts:
+;   menhir --explain --strict --unused-tokens --no-code-generation \
+;     spec/grammar/n88basic.mly
+(rule
+ (alias runtest)
+ (action
+  (run menhir --strict --unused-tokens --no-code-generation %{dep:n88basic.mly})))

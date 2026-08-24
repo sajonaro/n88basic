@@ -1,0 +1,1823 @@
+{
+  "naming": "A \"name\" is the keyword as written in a program, except where one keyword covers two unrelated features that fall in different scopes. Those carry a parenthetical qualifier — \"GET (graphics)\" and \"GET (file)\", \"PUT (graphics)\" and \"PUT (file)\" — so each scope decision has its own entry. The qualifier is an editorial disambiguator, not part of the keyword: a lookup by keyword name must match on the text before the space and parenthesis, and will find more than one entry for GET and PUT. PAINT carried such a split until 2026-08-17, when spec.md §3.3 widened to bring tile patterns into scope; with both halves in scope the split had nothing left to record, and PAINT is one entry again.",
+  "kinds": {
+    "statement": "a complete, self-contained BASIC statement or command",
+    "function": "an expression-valued built-in, called by name in an expression",
+    "function-statement": "usable both as a function in an expression and as a statement (an assignment target, or read/write like a pseudo-variable)",
+    "clause": "a keyword that only ever appears inside another statement (e.g. THEN/ELSE inside IF), never on its own",
+    "type-suffix": "a character suffixed to an identifier or literal to fix its numeric/string type",
+    "comment": "the marker introducing a line comment",
+    "option": "a suffix modifying another statement's form, not a keyword usable on its own (LINE's ,B and ,BF)",
+    "device": "a device name referenced from I/O statements, not itself a statement or function"
+  },
+  "keywords": [
+    {
+      "name": "!",
+      "kind": "type-suffix",
+      "syntax": "<name>! -- single precision variable/array; <number>! -- a single-precision numeric literal",
+      "summary": "single precision type suffix",
+      "scope": "in",
+      "clauses": [
+        "NUM.SUFFIX-SINGLE"
+      ],
+      "source": "ref-9801 printed p.13-14 / PDF p.26-27"
+    },
+    {
+      "name": "#",
+      "kind": "type-suffix",
+      "syntax": "<name># -- double precision variable/array; <number># -- a double-precision numeric literal",
+      "summary": "double precision type suffix",
+      "scope": "in",
+      "clauses": [
+        "NUM.SUFFIX-DOUBLE"
+      ],
+      "source": "ref-9801 printed p.14 / PDF p.27"
+    },
+    {
+      "name": "%",
+      "kind": "type-suffix",
+      "syntax": "<name>% -- integer variable/array; <number>% -- rounds a real literal to the nearest integer, ties away from zero",
+      "summary": "integer type suffix",
+      "scope": "in",
+      "clauses": [
+        "NUM.SUFFIX-INTEGER"
+      ],
+      "source": "ref-9801 printed p.12,14 / PDF p.25,27"
+    },
+    {
+      "name": "'",
+      "kind": "comment",
+      "syntax": "' [<comment text>]",
+      "summary": "line comment marker",
+      "scope": "in",
+      "clauses": [
+        "PROG.COMMENT-MARK"
+      ],
+      "source": "ref-9801 printed p.135 / PDF p.146"
+    },
+    {
+      "name": ",B",
+      "kind": "option",
+      "syntax": "LINE ...,B -- draws the box outline instead of a single segment, using LINE's own two endpoints as opposite corners; takes the same optional trailing line-style code plain LINE does",
+      "summary": "LINE option: draw a box outline",
+      "scope": "in",
+      "clauses": [
+        "GFX.LINE.B"
+      ],
+      "source": "ref-9801 printed p.94 / PDF p.105"
+    },
+    {
+      "name": ",BF",
+      "kind": "option",
+      "syntax": "LINE ...,BF[,<palette number 2>|<tile string>] -- this interpreter parses neither trailing argument",
+      "summary": "LINE option: draw a filled box",
+      "scope": "in",
+      "clauses": [
+        "GFX.LINE.BF"
+      ],
+      "source": "ref-9801 printed p.94 / PDF p.105"
+    },
+    {
+      "name": "ABS",
+      "kind": "function",
+      "syntax": "ABS(<numeric expression>)",
+      "summary": "absolute value",
+      "scope": "in",
+      "clauses": [
+        "NUM.ABS"
+      ],
+      "source": "ref-9801 printed p.38 / PDF p.49"
+    },
+    {
+      "name": "ASC",
+      "kind": "function",
+      "syntax": "ASC(string$) -- the character code of string$'s first character, as a decimal integer",
+      "summary": "code of a string's first character",
+      "scope": "in",
+      "clauses": [
+        "STR.ASC"
+      ],
+      "source": "ref-9801 printed p.38 / PDF p.49"
+    },
+    {
+      "name": "ATN",
+      "kind": "function",
+      "syntax": "ATN(n) -- the arctangent of n, in radians, in (-pi/2, pi/2)",
+      "summary": "arctangent",
+      "scope": "in",
+      "clauses": [
+        "NUM.ATN"
+      ],
+      "source": "ref-9801 printed p.39 / PDF p.50"
+    },
+    {
+      "name": "CDBL",
+      "kind": "function",
+      "syntax": "CDBL(n) -- n converted to double precision",
+      "summary": "converts to double precision",
+      "scope": "in",
+      "clauses": [
+        "NUM.CDBL"
+      ],
+      "source": "ref-9801 printed p.42 / PDF p.53"
+    },
+    {
+      "name": "CHR$",
+      "kind": "function",
+      "syntax": "CHR$(<code>) -- code in 0..255",
+      "summary": "character for a given code",
+      "scope": "in",
+      "clauses": [
+        "STR.CHR"
+      ],
+      "source": "ref-9801 printed p.44 / PDF p.55"
+    },
+    {
+      "name": "CINT",
+      "kind": "function",
+      "syntax": "CINT(n) -- n rounded to the nearest integer (ties away from zero); Overflow if outside -32768..32767",
+      "summary": "converts to integer",
+      "scope": "in",
+      "clauses": [
+        "NUM.CINT"
+      ],
+      "source": "ref-9801 printed p.44 / PDF p.55"
+    },
+    {
+      "name": "CIRCLE",
+      "kind": "statement",
+      "syntax": "CIRCLE (Wx,Wy)|STEP(x,y),<radius>[,<colour>][,<start angle>][,<end angle>][,<aspect>][,F[,<colour>]]",
+      "summary": "draws a circle or arc",
+      "scope": "in",
+      "clauses": [
+        "GFX.CIRCLE"
+      ],
+      "source": "ref-9801 printed p.45 / PDF p.56"
+    },
+    {
+      "name": "CLEAR",
+      "kind": "statement",
+      "syntax": "CLEAR [<dummy>][,<memory upper limit>][,<stack size>][,<array data area size>] -- resets every scalar to its default, every array to undimensioned, every DEF FN, and OPTION BASE's origin; the three numeric slots are memory-layout parameters this interpreter does not model",
+      "summary": "clears variables and resets memory areas",
+      "scope": "in",
+      "clauses": [
+        "PROG.CLEAR"
+      ],
+      "source": "ref-9801 printed p.46 / PDF p.57"
+    },
+    {
+      "name": "CLS",
+      "kind": "statement",
+      "syntax": "CLS [<function>] -- 1 text, 2 graphics viewport, 3 both; this interpreter takes no argument",
+      "summary": "clears the screen",
+      "scope": "in",
+      "clauses": [
+        "SCREEN.CLS"
+      ],
+      "source": "ref-9801 printed p.47-48 / PDF p.58-59"
+    },
+    {
+      "name": "COLOR",
+      "kind": "statement",
+      "syntax": "COLOR [functionCode][,background][,border][,foreground][,paletteMode] -- an empty slot between commas keeps its previous value; COLOR[=(<palette number>,<colour code>)] -- the [2] COLOR form, which sets which colour a palette number displays",
+      "summary": "sets display colors",
+      "scope": "in",
+      "clauses": [
+        "SCREEN.COLOR",
+        "SCREEN.COLOR-PALETTE"
+      ],
+      "source": "ref-9801 printed p.48-50 / PDF p.59-61; printed p.51 / PDF p.62"
+    },
+    {
+      "name": "CONSOLE",
+      "kind": "statement",
+      "syntax": "CONSOLE [<scroll start line>][,<scroll line count>][,<function key display switch>][,<colour/monochrome switch>] -- every slot optional, empty ones written as bare commas",
+      "summary": "sets the text screen's scroll window and modes",
+      "scope": "in",
+      "clauses": [
+        "SCREEN.CONSOLE"
+      ],
+      "source": "ref-9801 printed p.54 / PDF p.65"
+    },
+    {
+      "name": "COS",
+      "kind": "function",
+      "syntax": "COS(n) -- the cosine of n, in radians",
+      "summary": "cosine",
+      "scope": "in",
+      "clauses": [
+        "NUM.COS"
+      ],
+      "source": "ref-9801 printed p.56 / PDF p.67"
+    },
+    {
+      "name": "CSNG",
+      "kind": "function",
+      "syntax": "CSNG(n) -- n rounded to single precision (about 6 significant digits); Overflow if |n| > 1.70141E+38",
+      "summary": "converts to single precision",
+      "scope": "in",
+      "clauses": [
+        "NUM.CSNG"
+      ],
+      "source": "ref-9801 printed p.57 / PDF p.68"
+    },
+    {
+      "name": "CSRLIN",
+      "kind": "function",
+      "syntax": "CSRLIN -- the cursor's current row, 0 at the top",
+      "summary": "current cursor row",
+      "scope": "in",
+      "clauses": [
+        "PRINT.CSRLIN"
+      ],
+      "source": "ref-9801 printed p.57 / PDF p.68"
+    },
+    {
+      "name": "DATA",
+      "kind": "statement",
+      "syntax": "DATA <constant>[,<constant>...]",
+      "summary": "embeds constants for READ",
+      "scope": "in",
+      "clauses": [
+        "DATA.BASIC"
+      ],
+      "source": "ref-9801 printed p.58-59 / PDF p.69-70"
+    },
+    {
+      "name": "DEF FN",
+      "kind": "statement",
+      "syntax": "DEF FN<name>[(<parameter list>)] = <definition expression> -- this interpreter requires the parameter list",
+      "summary": "defines a user function",
+      "scope": "in",
+      "clauses": [
+        "PROG.DEF-FN"
+      ],
+      "source": "ref-9801 printed p.59 / PDF p.70"
+    },
+    {
+      "name": "DEFDBL",
+      "kind": "statement",
+      "syntax": "DEFDBL <letter>['-'<letter>][,<letter>['-'<letter>]...] -- suffix-less names starting with a letter in range default to double precision",
+      "summary": "declares default type as double precision",
+      "scope": "in",
+      "clauses": [
+        "PROG.DEFDBL"
+      ],
+      "source": "ref-9801 printed p.60 / PDF p.71"
+    },
+    {
+      "name": "DEFINT",
+      "kind": "statement",
+      "syntax": "DEFINT <letter>['-'<letter>][,<letter>['-'<letter>]...] -- suffix-less names starting with a letter in range default to integer",
+      "summary": "declares default type as integer",
+      "scope": "in",
+      "clauses": [
+        "PROG.DEFINT"
+      ],
+      "source": "ref-9801 printed p.60 / PDF p.71"
+    },
+    {
+      "name": "DEFSNG",
+      "kind": "statement",
+      "syntax": "DEFSNG <letter>['-'<letter>][,<letter>['-'<letter>]...] -- suffix-less names starting with a letter in range default to single precision",
+      "summary": "declares default type as single precision",
+      "scope": "in",
+      "clauses": [
+        "PROG.DEFSNG"
+      ],
+      "source": "ref-9801 printed p.60 / PDF p.71"
+    },
+    {
+      "name": "DEFSTR",
+      "kind": "statement",
+      "syntax": "DEFSTR <letter>['-'<letter>][,<letter>['-'<letter>]...] -- suffix-less names starting with a letter in range default to the string type",
+      "summary": "declares default type as string",
+      "scope": "in",
+      "clauses": [
+        "PROG.DEFSTR"
+      ],
+      "source": "ref-9801 printed p.60 / PDF p.71"
+    },
+    {
+      "name": "DIM",
+      "kind": "statement",
+      "syntax": "DIM <variable>(<max subscript>[,<max subscript>...])[,<variable>(...)...]",
+      "summary": "declares array dimensions",
+      "scope": "in",
+      "clauses": [
+        "PROG.DIM"
+      ],
+      "source": "ref-9801 printed p.62-63 / PDF p.73-74"
+    },
+    {
+      "name": "ELSE",
+      "kind": "clause",
+      "syntax": "ELSE <stmt>|<line number> -- IF's false branch",
+      "summary": "introduces IF's false branch",
+      "scope": "in",
+      "clauses": [
+        "CTRL.ELSE"
+      ],
+      "source": "ref-9801 printed p.80 / PDF p.91"
+    },
+    {
+      "name": "END",
+      "kind": "statement",
+      "syntax": "END",
+      "summary": "stops program execution",
+      "scope": "in",
+      "clauses": [
+        "PROG.END"
+      ],
+      "source": "ref-9801 printed p.70 / PDF p.81"
+    },
+    {
+      "name": "ERASE",
+      "kind": "statement",
+      "syntax": "ERASE <array name>[, <array name>...] -- discards each named array (bare name, no subscripts); the name may be DIM'd or auto-vivified again afterwards",
+      "summary": "deletes an array",
+      "scope": "in",
+      "clauses": [
+        "PROG.ERASE"
+      ],
+      "source": "ref-9801 printed p.70 / PDF p.81"
+    },
+    {
+      "name": "ERL",
+      "kind": "function",
+      "syntax": "ERL -- the line number of the last error",
+      "summary": "line number of the last error",
+      "scope": "in",
+      "clauses": [
+        "ERR.ERL"
+      ],
+      "source": "ref-9801 printed p.71 / PDF p.82"
+    },
+    {
+      "name": "ERR",
+      "kind": "function",
+      "syntax": "ERR -- the error code of the last error",
+      "summary": "number of the last error",
+      "scope": "in",
+      "clauses": [
+        "ERR.FN"
+      ],
+      "source": "ref-9801 printed p.71 / PDF p.82"
+    },
+    {
+      "name": "ERROR",
+      "kind": "statement",
+      "syntax": "ERROR <integer expression 0-255>",
+      "summary": "raises or simulates an error",
+      "scope": "in",
+      "clauses": [
+        "ERR.ERROR"
+      ],
+      "source": "ref-9801 printed p.71 / PDF p.82"
+    },
+    {
+      "name": "EXP",
+      "kind": "function",
+      "syntax": "EXP(n) -- e (2.71828...) raised to the power n",
+      "summary": "e raised to a power",
+      "scope": "in",
+      "clauses": [
+        "NUM.EXP"
+      ],
+      "source": "ref-9801 printed p.72 / PDF p.83"
+    },
+    {
+      "name": "FIX",
+      "kind": "function",
+      "syntax": "FIX(n) -- n with its fractional part discarded, truncating toward zero",
+      "summary": "truncates toward zero",
+      "scope": "in",
+      "clauses": [
+        "NUM.FIX"
+      ],
+      "source": "ref-9801 printed p.74 / PDF p.85"
+    },
+    {
+      "name": "FOR",
+      "kind": "statement",
+      "syntax": "FOR <var> = <start> TO <limit> [STEP <increment>] -- STEP defaults to 1",
+      "summary": "begins a counted loop",
+      "scope": "in",
+      "clauses": [
+        "CTRL.FOR"
+      ],
+      "source": "ref-9801 printed p.74 / PDF p.85"
+    },
+    {
+      "name": "GOSUB",
+      "kind": "statement",
+      "syntax": "GOSUB <line number> -- a label name in place of the line number is not accepted here",
+      "summary": "calls a subroutine",
+      "scope": "in",
+      "clauses": [
+        "CTRL.GOSUB"
+      ],
+      "source": "ref-9801 printed p.78 / PDF p.89"
+    },
+    {
+      "name": "GOTO",
+      "kind": "statement",
+      "syntax": "GOTO <line number> -- the manual's own alternate spelling \"GO TO <line number>\" and a label name in place of the line number are not accepted here",
+      "summary": "unconditional jump",
+      "scope": "in",
+      "clauses": [
+        "CTRL.GOTO"
+      ],
+      "source": "ref-9801 printed p.78 / PDF p.89"
+    },
+    {
+      "name": "HEX$",
+      "kind": "function",
+      "syntax": "HEX$(n) -- n in -32768..32767 or 0..65535; the string is n's 16-bit word in hexadecimal",
+      "summary": "hexadecimal string of a number",
+      "scope": "in",
+      "clauses": [
+        "STR.HEX"
+      ],
+      "source": "ref-9801 printed p.80 / PDF p.91"
+    },
+    {
+      "name": "IF",
+      "kind": "statement",
+      "syntax": "IF <condition> THEN <stmt>|<line number> [ELSE <stmt>|<line number>] -- the manual's THEN-less \"IF <condition> GOTO <line number> [ELSE ...]\" form is not accepted here",
+      "summary": "conditional branch",
+      "scope": "in",
+      "clauses": [
+        "CTRL.IF"
+      ],
+      "source": "ref-9801 printed p.80 / PDF p.91"
+    },
+    {
+      "name": "INPUT",
+      "kind": "statement",
+      "syntax": "INPUT [<prompt>{;|,}] <var>[,<var>...] -- only the \";\"-form prompt is accepted here, and each <var> reads its own input line rather than one comma-split line",
+      "summary": "reads user input into variables",
+      "scope": "in",
+      "clauses": [
+        "IN.INPUT"
+      ],
+      "source": "ref-9801 printed p.82 / PDF p.93"
+    },
+    {
+      "name": "INSTR",
+      "kind": "function",
+      "syntax": "INSTR([position,] haystack$, needle$) -- 1-based position of needle$ in haystack$, searched from position (default 1); 0 if not found",
+      "summary": "finds a substring's position",
+      "scope": "in",
+      "clauses": [
+        "STR.INSTR"
+      ],
+      "source": "ref-9801 printed p.84 / PDF p.95"
+    },
+    {
+      "name": "INT",
+      "kind": "function",
+      "syntax": "INT(<numeric expression>)",
+      "summary": "rounds down toward negative infinity",
+      "scope": "in",
+      "clauses": [
+        "NUM.INT"
+      ],
+      "source": "ref-9801 printed p.85 / PDF p.96"
+    },
+    {
+      "name": "KEY OFF",
+      "kind": "statement",
+      "syntax": "KEY[(<key number>)] {ON|OFF|STOP} -- function-key interrupt control; this interpreter accepts the bare KEY OFF form only",
+      "summary": "forbids function-key interrupts (not the label line: that is CONSOLE's third argument)",
+      "scope": "in",
+      "clauses": [
+        "SCREEN.KEY-OFF"
+      ],
+      "source": "ref-9801 printed p.87 / PDF p.98"
+    },
+    {
+      "name": "LEFT$",
+      "kind": "function",
+      "syntax": "LEFT$(string$, n) -- the leftmost n characters of string$; n in 0..255",
+      "summary": "leftmost characters of a string",
+      "scope": "in",
+      "clauses": [
+        "STR.LEFT"
+      ],
+      "source": "ref-9801 printed p.92 / PDF p.103"
+    },
+    {
+      "name": "LEN",
+      "kind": "function",
+      "syntax": "LEN(string$) -- the character count of string$",
+      "summary": "length of a string",
+      "scope": "in",
+      "clauses": [
+        "STR.LEN"
+      ],
+      "source": "ref-9801 printed p.93 / PDF p.104"
+    },
+    {
+      "name": "LET",
+      "kind": "statement",
+      "syntax": "[LET] <variable name> = <expression>",
+      "summary": "assigns a value to a variable",
+      "scope": "in",
+      "clauses": [
+        "PROG.LET"
+      ],
+      "source": "ref-9801 printed p.93 / PDF p.104"
+    },
+    {
+      "name": "LINE",
+      "kind": "statement",
+      "syntax": "LINE [[(x1,y1)|STEP(x1,y1)]-[(x2,y2)|STEP(x2,y2)]] [,<palette1>] [,B|BF] [,<line style>|<palette2>|<tile string>] -- the trailing line-style/palette2/tile-string slot is not parsed by this interpreter",
+      "summary": "draws a line or box",
+      "scope": "in",
+      "clauses": [
+        "GFX.LINE"
+      ],
+      "source": "ref-9801 printed p.94 / PDF p.105"
+    },
+    {
+      "name": "LINE INPUT",
+      "kind": "statement",
+      "syntax": "LINE INPUT [<prompt string>;] <string variable>",
+      "summary": "reads an entire line of input",
+      "scope": "in",
+      "clauses": [
+        "IN.LINE-INPUT"
+      ],
+      "source": "ref-9801 printed p.95 / PDF p.106"
+    },
+    {
+      "name": "LOCATE",
+      "kind": "statement",
+      "syntax": "LOCATE [<X>][,<Y>][,<cursor switch>] -- X is horizontal and comes first; this interpreter requires exactly two arguments and reads them in the opposite order",
+      "summary": "positions the cursor",
+      "scope": "in",
+      "clauses": [
+        "SCREEN.LOCATE"
+      ],
+      "source": "ref-9801 printed p.99 / PDF p.110"
+    },
+    {
+      "name": "LOG",
+      "kind": "function",
+      "syntax": "LOG(n) -- the natural logarithm of n; Illegal function call if n <= 0",
+      "summary": "natural logarithm",
+      "scope": "in",
+      "clauses": [
+        "NUM.LOG"
+      ],
+      "source": "ref-9801 printed p.100 / PDF p.111"
+    },
+    {
+      "name": "LPRINT",
+      "kind": "statement",
+      "syntax": "LPRINT [<expr>] [(,|;) <expr>...] [(,|;)] -- same item list, separators and TAB/SPC as PRINT",
+      "summary": "like PRINT, directed to the printer stream",
+      "scope": "in",
+      "clauses": [
+        "PRINT.LPRINT"
+      ],
+      "source": "ref-9801 printed p.100 / PDF p.111"
+    },
+    {
+      "name": "LPRINT USING",
+      "kind": "statement",
+      "syntax": "LPRINT USING <format string>; <expr>[(,|;)<expr>...] -- same format string and value list as PRINT USING",
+      "summary": "like PRINT USING, to the printer stream",
+      "scope": "in",
+      "clauses": [
+        "PRINT.LPRINT-USING"
+      ],
+      "source": "ref-9801 printed p.101 / PDF p.112"
+    },
+    {
+      "name": "MID$",
+      "kind": "function-statement",
+      "syntax": "MID$(string$, start[, length]) -- function: length characters of string$ from the 1-based start (default: to the end of string$); MID$(var$, start[, length]) = replacement$ -- statement: overwrites var$ in place from start",
+      "summary": "substring of a string; also assigns into one",
+      "scope": "in",
+      "clauses": [
+        "STR.MID"
+      ],
+      "source": "ref-9801 printed p.103-104 / PDF p.114-115"
+    },
+    {
+      "name": "NEXT",
+      "kind": "statement",
+      "syntax": "NEXT [<var>][,<var>...] -- the manual's own example closes nested loops with one comma-separated NEXT; this interpreter accepts at most one <var>",
+      "summary": "ends a FOR loop iteration",
+      "scope": "in",
+      "clauses": [
+        "CTRL.NEXT"
+      ],
+      "source": "ref-9801 printed p.74 / PDF p.85"
+    },
+    {
+      "name": "OCT$",
+      "kind": "function",
+      "syntax": "OCT$(n) -- n in -32768..32767 or 0..65535; the string is n's 16-bit word in octal",
+      "summary": "octal string of a number",
+      "scope": "in",
+      "clauses": [
+        "STR.OCT"
+      ],
+      "source": "ref-9801 printed p.107 / PDF p.118"
+    },
+    {
+      "name": "ON ERROR GOTO",
+      "kind": "statement",
+      "syntax": "ON ERROR GOTO <line number>",
+      "summary": "installs an error handler",
+      "scope": "in",
+      "clauses": [
+        "ERR.ON-ERROR-GOTO"
+      ],
+      "source": "ref-9801 printed p.109 / PDF p.120"
+    },
+    {
+      "name": "ON…GOSUB",
+      "kind": "statement",
+      "syntax": "ON <expr> GOSUB <line>[,<line>...] -- calls the <expr>-th line number in the list as a subroutine (must end in RETURN); selection rule shared with ON...GOTO",
+      "summary": "calls one of several subroutines by index",
+      "scope": "in",
+      "clauses": [
+        "CTRL.ON-GOSUB"
+      ],
+      "source": "ref-9801 printed p.109-110 / PDF p.120-121"
+    },
+    {
+      "name": "ON…GOTO",
+      "kind": "statement",
+      "syntax": "ON <expr> GOTO <line>[,<line>...] -- branches to the <expr>-th line number in the list (1-based); 0 or past the end falls through with no error, negative is Illegal function call",
+      "summary": "branches to one of several lines by index",
+      "scope": "in",
+      "clauses": [
+        "CTRL.ON-GOTO"
+      ],
+      "source": "ref-9801 printed p.109-110 / PDF p.120-121"
+    },
+    {
+      "name": "OPTION BASE",
+      "kind": "statement",
+      "syntax": "OPTION BASE 0|1 -- sets the origin (minimum subscript) every array in the program is measured from; must run before any array is declared or referenced, and can be set only once per run (CLEAR resets it)",
+      "summary": "sets the default array lower bound",
+      "scope": "in",
+      "clauses": [
+        "PROG.OPTION-BASE"
+      ],
+      "source": "ref-9801 printed p.116 / PDF p.127"
+    },
+    {
+      "name": "PAINT",
+      "kind": "statement",
+      "syntax": "PAINT (Wx,Wy)|STEP(x,y)[,<area colour>[,<border colour>]]",
+      "summary": "flood-fills an area",
+      "scope": "in",
+      "clauses": [
+        "GFX.PAINT"
+      ],
+      "source": "ref-9801 printed p.117 / PDF p.128"
+    },
+    {
+      "name": "POINT",
+      "kind": "function",
+      "syntax": "POINT (Wx,Wy)|STEP(x,y) -- statement: sets the LP, draws nothing; POINT(<function>) -- the LP, 0/1 its X/Y in world coordinates and 2/3 in screen; POINT(Sx,Sy) -- the palette number at that dot, or -1 outside the viewport",
+      "summary": "reads a pixel's color",
+      "scope": "in",
+      "clauses": [
+        "GFX.POINT"
+      ],
+      "source": "ref-9801 printed p.123 / PDF p.134"
+    },
+    {
+      "name": "POS",
+      "kind": "function",
+      "syntax": "POS(dummy) -- the cursor's current column, 0 at the left; the argument is required but unused",
+      "summary": "current print column",
+      "scope": "in",
+      "clauses": [
+        "PRINT.POS"
+      ],
+      "source": "ref-9801 printed p.124 / PDF p.135"
+    },
+    {
+      "name": "PRESET",
+      "kind": "statement",
+      "syntax": "PRESET (x,y)[,colour] -- or PRESET STEP(x,y)[,colour]; omitted colour paints the background, not the foreground",
+      "summary": "plots a point in the background color",
+      "scope": "in",
+      "clauses": [
+        "GFX.PRESET"
+      ],
+      "source": "ref-9801 printed p.124 / PDF p.135"
+    },
+    {
+      "name": "PRINT",
+      "kind": "statement",
+      "syntax": "PRINT|? [<expression>][{,|;} <expression>...][{,|;}] -- this interpreter does not lex the ? form",
+      "summary": "writes to the screen",
+      "scope": "in",
+      "clauses": [
+        "PRINT.BASIC"
+      ],
+      "source": "ref-9801 printed p.125 / PDF p.136"
+    },
+    {
+      "name": "PRINT USING",
+      "kind": "statement",
+      "syntax": "PRINT USING <format string>; <expr>[(,|;)<expr>...] -- this interpreter implements only the \"#\"/\".\" numeric field",
+      "summary": "writes with a formatted template",
+      "scope": "in",
+      "clauses": [
+        "PRINT.USING"
+      ],
+      "source": "ref-9801 printed p.128 / PDF p.139"
+    },
+    {
+      "name": "PSET",
+      "kind": "statement",
+      "syntax": "PSET (x,y)[,colour] -- or PSET STEP(x,y)[,colour] for a point relative to the LP",
+      "summary": "plots a point",
+      "scope": "in",
+      "clauses": [
+        "GFX.PSET"
+      ],
+      "source": "ref-9801 printed p.130 / PDF p.141"
+    },
+    {
+      "name": "RANDOMIZE",
+      "kind": "statement",
+      "syntax": "RANDOMIZE [n] -- n in -32768..32767; omitted, reads a seed from the input source",
+      "summary": "seeds the random number generator",
+      "scope": "in",
+      "clauses": [
+        "NUM.RANDOMIZE"
+      ],
+      "source": "ref-9801 printed p.133 / PDF p.144"
+    },
+    {
+      "name": "READ",
+      "kind": "statement",
+      "syntax": "READ <variable>[,<variable>...]",
+      "summary": "reads values from DATA",
+      "scope": "in",
+      "clauses": [
+        "DATA.READ"
+      ],
+      "source": "ref-9801 printed p.134 / PDF p.145"
+    },
+    {
+      "name": "REM",
+      "kind": "statement",
+      "syntax": "REM [<comment text>]",
+      "summary": "line comment",
+      "scope": "in",
+      "clauses": [
+        "PROG.REM"
+      ],
+      "source": "ref-9801 printed p.134-135 / PDF p.145-146"
+    },
+    {
+      "name": "RESTORE",
+      "kind": "statement",
+      "syntax": "RESTORE [<line number>]",
+      "summary": "resets the DATA pointer",
+      "scope": "in",
+      "clauses": [
+        "DATA.RESTORE"
+      ],
+      "source": "ref-9801 printed p.135-136 / PDF p.146-147"
+    },
+    {
+      "name": "RESUME",
+      "kind": "statement",
+      "syntax": "RESUME [0] | RESUME NEXT | RESUME <line number>",
+      "summary": "continues after an error handler",
+      "scope": "in",
+      "clauses": [
+        "ERR.RESUME"
+      ],
+      "source": "ref-9801 printed p.136 / PDF p.147"
+    },
+    {
+      "name": "RETURN",
+      "kind": "statement",
+      "syntax": "RETURN -- the manual's RETURN [<line number>] form is not accepted here; RETURN takes no argument",
+      "summary": "returns from a subroutine",
+      "scope": "in",
+      "clauses": [
+        "CTRL.RETURN"
+      ],
+      "source": "ref-9801 printed p.136 / PDF p.147"
+    },
+    {
+      "name": "RIGHT$",
+      "kind": "function",
+      "syntax": "RIGHT$(string$, n) -- the rightmost n characters of string$; n in 0..255",
+      "summary": "rightmost characters of a string",
+      "scope": "in",
+      "clauses": [
+        "STR.RIGHT"
+      ],
+      "source": "ref-9801 printed p.137 / PDF p.148"
+    },
+    {
+      "name": "RND",
+      "kind": "function",
+      "syntax": "RND[(n)] -- n<0 reseeds the sequence from n and returns its first value; n=0 repeats the last value; n>0 or omitted returns the next value in [0,1)",
+      "summary": "a random number",
+      "scope": "in",
+      "clauses": [
+        "NUM.RND"
+      ],
+      "source": "ref-9801 printed p.137 / PDF p.148"
+    },
+    {
+      "name": "SCREEN",
+      "kind": "statement",
+      "syntax": "SCREEN [<screen mode>][,<screen switch>][,<active page>][,<display page>] -- this interpreter takes the screen mode alone",
+      "summary": "selects the display mode",
+      "scope": "in",
+      "clauses": [
+        "SCREEN.BASIC"
+      ],
+      "source": "ref-9801 printed p.140 / PDF p.151"
+    },
+    {
+      "name": "SGN",
+      "kind": "function",
+      "syntax": "SGN(<numeric expression>)",
+      "summary": "sign of a number",
+      "scope": "in",
+      "clauses": [
+        "NUM.SGN"
+      ],
+      "source": "ref-9801 printed p.145 / PDF p.156"
+    },
+    {
+      "name": "SIN",
+      "kind": "function",
+      "syntax": "SIN(n) -- the sine of n, in radians",
+      "summary": "sine",
+      "scope": "in",
+      "clauses": [
+        "NUM.SIN"
+      ],
+      "source": "ref-9801 printed p.145 / PDF p.156"
+    },
+    {
+      "name": "SPACE$",
+      "kind": "function",
+      "syntax": "SPACE$(n) -- a string of n spaces, 0 <= n <= 255",
+      "summary": "a string of spaces",
+      "scope": "in",
+      "clauses": [
+        "STR.SPACE"
+      ],
+      "source": "ref-9801 printed p.146 / PDF p.157"
+    },
+    {
+      "name": "SPC",
+      "kind": "function",
+      "syntax": "SPC(n) -- within a PRINT/LPRINT list only, n literal spaces (n<0 treated as 0)",
+      "summary": "prints n spaces, for use in PRINT",
+      "scope": "in",
+      "clauses": [
+        "PRINT.SPC"
+      ],
+      "source": "ref-9801 printed p.146 / PDF p.157"
+    },
+    {
+      "name": "SQR",
+      "kind": "function",
+      "syntax": "SQR(<numeric expression>)",
+      "summary": "square root",
+      "scope": "in",
+      "clauses": [
+        "NUM.SQR"
+      ],
+      "source": "ref-9801 printed p.146 / PDF p.157"
+    },
+    {
+      "name": "STOP",
+      "kind": "statement",
+      "syntax": "STOP",
+      "summary": "halts execution",
+      "scope": "in",
+      "clauses": [
+        "PROG.STOP"
+      ],
+      "source": "ref-9801 printed p.147 / PDF p.158"
+    },
+    {
+      "name": "STR$",
+      "kind": "function",
+      "syntax": "STR$(n) -- n as decimal text, with a leading space (non-negative) or \"-\" (negative)",
+      "summary": "string form of a number",
+      "scope": "in",
+      "clauses": [
+        "STR.STR-FN"
+      ],
+      "source": "ref-9801 printed p.148 / PDF p.159"
+    },
+    {
+      "name": "STRING$",
+      "kind": "function",
+      "syntax": "STRING$(count, string$-or-code) -- count copies of string$'s first character, or of the character with that code (0..255); count in 0..255",
+      "summary": "repeats a character",
+      "scope": "in",
+      "clauses": [
+        "STR.STRING"
+      ],
+      "source": "ref-9801 printed p.148 / PDF p.159"
+    },
+    {
+      "name": "SWAP",
+      "kind": "statement",
+      "syntax": "SWAP <variable>, <variable> -- exchanges the two variables' current values; both must be the same type (a mismatch is Type mismatch)",
+      "summary": "exchanges the values of two variables",
+      "scope": "in",
+      "clauses": [
+        "PROG.SWAP"
+      ],
+      "source": "ref-9801 printed p.149 / PDF p.160"
+    },
+    {
+      "name": "TAB",
+      "kind": "function",
+      "syntax": "TAB(<numeric expression>) -- only inside PRINT or LPRINT, never as a string expression",
+      "summary": "moves the print column, for use in PRINT",
+      "scope": "in",
+      "clauses": [
+        "PRINT.TAB"
+      ],
+      "source": "ref-9801 printed p.149 / PDF p.160"
+    },
+    {
+      "name": "TAN",
+      "kind": "function",
+      "syntax": "TAN(n) -- the tangent of n, in radians",
+      "summary": "tangent",
+      "scope": "in",
+      "clauses": [
+        "NUM.TAN"
+      ],
+      "source": "ref-9801 printed p.149 / PDF p.160"
+    },
+    {
+      "name": "THEN",
+      "kind": "clause",
+      "syntax": "THEN <stmt>|<line number> -- IF's true branch",
+      "summary": "introduces IF's true branch",
+      "scope": "in",
+      "clauses": [
+        "CTRL.THEN"
+      ],
+      "source": "ref-9801 printed p.80 / PDF p.91"
+    },
+    {
+      "name": "VAL",
+      "kind": "function",
+      "syntax": "VAL(<string>) -- this interpreter reads decimal and &H hexadecimal notation only, not &O octal or exponent notation",
+      "summary": "numeric value of a string",
+      "scope": "in",
+      "clauses": [
+        "STR.VAL"
+      ],
+      "source": "ref-9801 printed p.154 / PDF p.165"
+    },
+    {
+      "name": "WEND",
+      "kind": "statement",
+      "syntax": "WEND -- closes the loop body opened by the nearest WHILE still open, and returns control there to re-test its condition",
+      "summary": "ends a WHILE loop",
+      "scope": "in",
+      "clauses": [
+        "CTRL.WEND"
+      ],
+      "source": "ref-9801 printed p.158 / PDF p.169"
+    },
+    {
+      "name": "WHILE",
+      "kind": "statement",
+      "syntax": "WHILE <condition> ... WEND -- repeats the statements between them while <condition> is nonzero, tested before every iteration including the first",
+      "summary": "begins a conditional loop",
+      "scope": "in",
+      "clauses": [
+        "CTRL.WHILE"
+      ],
+      "source": "ref-9801 printed p.158 / PDF p.169"
+    },
+    {
+      "name": "WIDTH",
+      "kind": "statement",
+      "syntax": "WIDTH <columns>[,<rows>] -- columns 40 or 80, rows 20 or 25; the device and file forms are out of scope",
+      "summary": "sets the screen width",
+      "scope": "in",
+      "clauses": [
+        "SCREEN.WIDTH"
+      ],
+      "source": "ref-9801 printed p.158-159 / PDF p.169-170"
+    },
+    {
+      "name": "WRITE",
+      "kind": "statement",
+      "syntax": "WRITE <expr>[(,|;)<expr>...] -- strings quoted, numbers unpadded, always comma-separated on output",
+      "summary": "writes values separated by commas",
+      "scope": "in",
+      "clauses": [
+        "PRINT.WRITE"
+      ],
+      "source": "ref-9801 printed p.161 / PDF p.172"
+    },
+    {
+      "name": "VIEW",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "defines a graphics viewport",
+      "scope": "deferred",
+      "clauses": []
+    },
+    {
+      "name": "WINDOW",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "defines logical coordinates for graphics",
+      "scope": "deferred",
+      "clauses": []
+    },
+    {
+      "name": "GET (graphics)",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "captures a screen area into an array",
+      "scope": "deferred",
+      "clauses": []
+    },
+    {
+      "name": "PUT (graphics)",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "draws a captured screen area",
+      "scope": "deferred",
+      "clauses": []
+    },
+    {
+      "name": "DRAW",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "draws using a graphics macro string",
+      "scope": "deferred",
+      "clauses": []
+    },
+    {
+      "name": "INKEY$",
+      "kind": "function",
+      "syntax": null,
+      "summary": "reads a pending keypress without waiting",
+      "scope": "deferred",
+      "clauses": []
+    },
+    {
+      "name": "DATE$",
+      "kind": "function-statement",
+      "syntax": null,
+      "summary": "the current date; also settable",
+      "scope": "deferred",
+      "clauses": []
+    },
+    {
+      "name": "TIME$",
+      "kind": "function-statement",
+      "syntax": null,
+      "summary": "the current time; also settable",
+      "scope": "deferred",
+      "clauses": []
+    },
+    {
+      "name": "AKCONV$",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "ATTR$",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "AUTO",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "auto-generates line numbers",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "BEEP",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "sounds a beep",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "BLOAD",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "loads a binary memory image",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "BSAVE",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "saves a binary memory image",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "CALL",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "calls a machine-language routine",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "CHAIN",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "runs another program",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "CLOSE",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "closes a file",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "COM:",
+      "kind": "device",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "COMMON",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "declares variables preserved across CHAIN",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "CONT",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "continues after STOP or a break",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "COPY",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "CVD",
+      "kind": "function",
+      "syntax": null,
+      "summary": "string to double precision, for random files",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "CVI",
+      "kind": "function",
+      "syntax": null,
+      "summary": "string to integer, for random files",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "CVS",
+      "kind": "function",
+      "syntax": null,
+      "summary": "string to single precision, for random files",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "DEF SEG",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "sets the memory segment for PEEK/POKE",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "DEF USR",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "sets a USR routine's address",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "DELETE",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "deletes program lines",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "DSKF",
+      "kind": "function",
+      "syntax": null,
+      "summary": "free space on a disk",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "DSKI$",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "DSKO$",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "EDIT",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "edits a program line",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "EOF",
+      "kind": "function",
+      "syntax": null,
+      "summary": "true at end of file",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "FIELD",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "defines a random-file record layout",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "FILES",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "lists files on disk",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "FPOS",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "FRE",
+      "kind": "function",
+      "syntax": null,
+      "summary": "free memory available",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "GET (file)",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "reads a random-access file record",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "GETPICT",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "HELP",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "INP",
+      "kind": "function",
+      "syntax": null,
+      "summary": "reads a byte from an I/O port",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "INPUT#",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "reads from a file into variables",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "INPUT$",
+      "kind": "function",
+      "syntax": null,
+      "summary": "reads n characters from input or a file",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "JIS$",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "KACNV$",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "KEXT$",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "KEY",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "sets or displays function-key labels",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "KILL",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "deletes a file",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "KINPUT",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "KINSTR",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "KLEN",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "KMID$",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "KNJ$",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "KPLOAD",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "KTYPE",
+      "kind": "function",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "LCOPY",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "LFILES",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "LINE INPUT#",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "reads a line from a file",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "LINETO",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "draws to a point from the current position",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "LIST",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "lists program lines",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "LLIST",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "lists program lines to the printer",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "LOAD",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "loads a program",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "LOC",
+      "kind": "function",
+      "syntax": null,
+      "summary": "current file position",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "LOF",
+      "kind": "function",
+      "syntax": null,
+      "summary": "length of a file",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "LPOS",
+      "kind": "function",
+      "syntax": null,
+      "summary": "the printer's current column",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "LSET",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "left-justifies a string into a field",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "MAP",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "MERGE",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "merges a program into memory",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "MKD$",
+      "kind": "function",
+      "syntax": null,
+      "summary": "double precision to string, for random files",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "MKI$",
+      "kind": "function",
+      "syntax": null,
+      "summary": "integer to string, for random files",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "MKS$",
+      "kind": "function",
+      "syntax": null,
+      "summary": "single precision to string, for random files",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "MON",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "enters the machine-language monitor",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "MOTOR",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "controls the cassette tape motor",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "MOVETO",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "moves the current graphics position",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "NAME",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "renames a file",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "NEW",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "clears the program from memory",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "OPEN",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "opens a file",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "OUT",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "writes a byte to an I/O port",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "PEEK",
+      "kind": "function",
+      "syntax": null,
+      "summary": "reads a byte from memory",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "PEN",
+      "kind": "function",
+      "syntax": null,
+      "summary": "light pen status and position",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "PICTURE",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "POKE",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "writes a byte to memory",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "PRINT#",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "writes to a file",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "PRINT# USING",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "writes formatted output to a file",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "PUT (file)",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "writes a random-access file record",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "RENUM",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "renumbers program lines",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "ROLL",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "RSET",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "right-justifies a string into a field",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "RUN",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "runs the program",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "SAVE",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "saves a program",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "SEARCH",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "SET",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "TERM",
+      "kind": "statement",
+      "syntax": null,
+      "summary": null,
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "TROFF",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "disables line-number tracing",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "TRON",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "enables line-number tracing",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "USR",
+      "kind": "function",
+      "syntax": null,
+      "summary": "calls a user machine-language routine",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "VARPTR",
+      "kind": "function",
+      "syntax": null,
+      "summary": "the memory address of a variable",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "WAIT",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "polls an I/O port until a condition",
+      "scope": "out",
+      "clauses": []
+    },
+    {
+      "name": "WRITE#",
+      "kind": "statement",
+      "syntax": null,
+      "summary": "writes delimited values to a file",
+      "scope": "out",
+      "clauses": []
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+10 GOTO
+20 PRINT 1 +
+30 PRINT "ok"

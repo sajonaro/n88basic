@@ -1,0 +1,28 @@
+; checker.ml is plain OCaml (no js_of_ocaml dependency) so it can be
+; exercised directly from test/, the same way the rest of the suite tests
+; basic/. js_main.ml is the only module that needs js_of_ocaml, and is built
+; separately as the thing actually compiled to JavaScript.
+(library
+ (name n88lsp)
+ (modules checker)
+ (libraries n88basic))
+
+; The committed bundle must be small and identical regardless of which dune
+; profile builds it -- (mode promote) below will otherwise happily commit
+; dev's much larger, source-mapped output the next time someone runs a plain
+; `dune build`. Pinning compilation_mode and sourcemap here, rather than
+; relying on --profile release, keeps `dune build` alone reproducing the
+; same artifact every time.
+(executable
+ (name js_main)
+ (modules js_main)
+ (libraries n88lsp js_of_ocaml)
+ (modes js)
+ (js_of_ocaml
+  (compilation_mode whole_program)
+  (sourcemap no)
+  ; Deliberately not (:standard ...): dune's dev-profile standard flags add
+  ; --pretty, which alone accounts for most of the size difference between
+  ; a `dune build` and a `dune build --profile release` of this bundle. A
+  ; fixed, minimal flag list keeps the committed output identical either way.
+  (flags (--opt 3))))

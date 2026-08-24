@@ -1,0 +1,969 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "N88-BASIC(86)",
+  "scopeName": "source.n88basic",
+  "fileTypes": [
+    "bas"
+  ],
+  "generatedFrom": "spec/keywords.json",
+  "generatedBy": "editor/vscode/tools/generate-grammar.js -- do not hand-edit this file; edit spec/keywords.json (or the hand-written parts of build-grammar.js noted in its comments) and re-run the generator",
+  "scopeLegend": {
+    "keyword.control.n88basic / support.function.n88basic": "in-scope statement / function -- the interpreter runs this",
+    "invalid.deprecated.deferred.*.n88basic": "part of the language, not implemented yet (spec/spec.md §3.2)",
+    "invalid.deprecated.out.*.n88basic": "parses but the interpreter will not run it (spec/spec.md §3.3)"
+  },
+  "scopeConflicts": [
+    {
+      "text": "GET",
+      "candidates": [
+        {
+          "kind": "statement",
+          "scope": "deferred",
+          "source": "GET (graphics)"
+        },
+        {
+          "kind": "statement",
+          "scope": "out",
+          "source": "GET (file)"
+        }
+      ],
+      "resolvedScope": "deferred",
+      "rule": "ambiguous keyword text (same literal source, different scope); resolved by priority in > deferred > out -- see editor/vscode/README.md"
+    },
+    {
+      "text": "PUT",
+      "candidates": [
+        {
+          "kind": "statement",
+          "scope": "deferred",
+          "source": "PUT (graphics)"
+        },
+        {
+          "kind": "statement",
+          "scope": "out",
+          "source": "PUT (file)"
+        }
+      ],
+      "resolvedScope": "deferred",
+      "rule": "ambiguous keyword text (same literal source, different scope); resolved by priority in > deferred > out -- see editor/vscode/README.md"
+    }
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#line-numbers"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#punctuation"
+    },
+    {
+      "include": "#identifiers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "match": "'.*$",
+          "name": "comment.line.apostrophe.n88basic"
+        },
+        {
+          "match": "\\b[Rr][Ee][Mm].*$",
+          "name": "comment.line.rem.n88basic"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.n88basic",
+      "begin": "\"",
+      "end": "\"|$",
+      "patterns": []
+    },
+    "line-numbers": {
+      "match": "^\\s*(\\d+)\\b",
+      "captures": {
+        "1": {
+          "name": "constant.numeric.line-number.n88basic"
+        }
+      }
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "match": "(?<![A-Za-z0-9])[Oo][Nn](?![A-Za-z0-9])\\s+(?<![A-Za-z0-9])[Ee][Rr][Rr][Oo][Rr](?![A-Za-z0-9])\\s+(?<![A-Za-z0-9])[Gg][Oo][Tt][Oo](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Pp][Rr][Ii][Nn][Tt](?![A-Za-z0-9])\\s+(?<![A-Za-z0-9])[Uu][Ss][Ii][Nn][Gg](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Rr][Ii][Nn][Tt]#\\s+(?<![A-Za-z0-9])[Uu][Ss][Ii][Nn][Gg](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Ii][Nn][Ee](?![A-Za-z0-9])\\s+(?<![A-Za-z0-9])[Ii][Nn][Pp][Uu][Tt]#",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Oo][Pp][Tt][Ii][Oo][Nn](?![A-Za-z0-9])\\s+(?<![A-Za-z0-9])[Bb][Aa][Ss][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Rr][Ii][Nn][Tt](?![A-Za-z0-9])\\s+(?<![A-Za-z0-9])[Uu][Ss][Ii][Nn][Gg](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Ii][Nn][Ee](?![A-Za-z0-9])\\s+(?<![A-Za-z0-9])[Ii][Nn][Pp][Uu][Tt](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ee][Ff](?![A-Za-z0-9])\\s+(?<![A-Za-z0-9])[Ss][Ee][Gg](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ee][Ff](?![A-Za-z0-9])\\s+(?<![A-Za-z0-9])[Uu][Ss][Rr](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Ee][Yy](?![A-Za-z0-9])\\s+(?<![A-Za-z0-9])[Oo][Ff][Ff](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ee][Ff](?![A-Za-z0-9])\\s+(?<![A-Za-z0-9])[Ff][Nn](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Rr][Aa][Nn][Dd][Oo][Mm][Ii][Zz][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Aa][Kk][Cc][Oo][Nn][Vv]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Oo][Nn][Ss][Oo][Ll][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Gg][Ee][Tt][Pp][Ii][Cc][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Ii][Cc][Tt][Uu][Rr][Ee](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Rr][Ee][Ss][Tt][Oo][Rr][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Tt][Rr][Ii][Nn][Gg]\\$",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Ii][Rr][Cc][Ll][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Oo][Mm][Mm][Oo][Nn](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Ss][Rr][Ll][Ii][Nn](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ee][Ff][Dd][Bb][Ll](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ee][Ff][Ii][Nn][Tt](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ee][Ff][Ss][Nn][Gg](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ee][Ff][Ss][Tt][Rr](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ee][Ll][Ee][Tt][Ee](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ii][Nn][Kk][Ee][Yy]\\$",
+          "name": "invalid.deprecated.deferred.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ii][Nn][Pp][Uu][Tt]#",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ii][Nn][Pp][Uu][Tt]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Aa][Cc][Nn][Vv]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Ii][Nn][Pp][Uu][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Ii][Nn][Ss][Tt][Rr](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Pp][Ll][Oo][Aa][Dd](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Ff][Ii][Ll][Ee][Ss](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Ii][Nn][Ee][Tt][Oo](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Oo][Cc][Aa][Tt][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Pp][Rr][Ii][Nn][Tt](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Mm][Oo][Vv][Ee][Tt][Oo](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Rr][Ee][Ss][Ee][Tt](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Rr][Ii][Nn][Tt]#",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Rr][Ee][Ss][Uu][Mm][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Rr][Ee][Tt][Uu][Rr][Nn](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Rr][Ii][Gg][Hh][Tt]\\$",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Cc][Rr][Ee][Ee][Nn](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Ee][Aa][Rr][Cc][Hh](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Pp][Aa][Cc][Ee]\\$",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Vv][Aa][Rr][Pp][Tt][Rr](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ww][Ii][Nn][Dd][Oo][Ww](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.deferred.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ww][Rr][Ii][Tt][Ee]#",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Aa][Tt][Tt][Rr]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Bb][Ll][Oo][Aa][Dd](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Bb][Ss][Aa][Vv][Ee](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Hh][Aa][Ii][Nn](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Ll][Ee][Aa][Rr](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Ll][Oo][Ss][Ee](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Oo][Ll][Oo][Rr](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Aa][Tt][Ee]\\$",
+          "name": "invalid.deprecated.deferred.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ss][Kk][Ii]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ss][Kk][Oo]\\$",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ee][Rr][Aa][Ss][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ee][Rr][Rr][Oo][Rr](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ff][Ii][Ee][Ll][Dd](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ff][Ii][Ll][Ee][Ss](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Gg][Oo][Ss][Uu][Bb](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ii][Nn][Pp][Uu][Tt](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ii][Nn][Ss][Tt][Rr](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Ee][Xx][Tt]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Mm][Ii][Dd]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Tt][Yy][Pp][Ee](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Cc][Oo][Pp][Yy](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Ee][Ff][Tt]\\$",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Ll][Ii][Ss][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Mm][Ee][Rr][Gg][Ee](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Mm][Oo][Tt][Oo][Rr](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Aa][Ii][Nn][Tt](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Oo][Ii][Nn][Tt](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Rr][Ii][Nn][Tt](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Rr][Ee][Nn][Uu][Mm](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Tt][Ii][Mm][Ee]\\$",
+          "name": "invalid.deprecated.deferred.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Tt][Rr][Oo][Ff][Ff](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ww][Hh][Ii][Ll][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ww][Ii][Dd][Tt][Hh](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ww][Rr][Ii][Tt][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Aa][Uu][Tt][Oo](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Bb][Ee][Ee][Pp](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Aa][Ll][Ll](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Dd][Bb][Ll](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Hh][Rr]\\$",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Ii][Nn][Tt](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Oo][Mm]:",
+          "name": "invalid.deprecated.out.support-type-device.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Oo][Nn][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Oo][Pp][Yy](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Ss][Nn][Gg](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Aa][Tt][Aa](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Rr][Aa][Ww](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.deferred.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ss][Kk][Ff](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ee][Dd][Ii][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ee][Ll][Ss][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.conditional.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ff][Pp][Oo][Ss](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Gg][Oo][Tt][Oo](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Hh][Ee][Ll][Pp](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Hh][Ee][Xx]\\$",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Jj][Ii][Ss]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Ii][Ll][Ll](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Ll][Ee][Nn](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Nn][Jj]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Ii][Nn][Ee](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Ii][Ss][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Oo][Aa][Dd](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Pp][Oo][Ss](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Ss][Ee][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Mm][Ii][Dd]\\$",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Mm][Kk][Dd]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Mm][Kk][Ii]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Mm][Kk][Ss]\\$",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Nn][Aa][Mm][Ee](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Nn][Ee][Xx][Tt](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Oo][Cc][Tt]\\$",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Oo][Pp][Ee][Nn](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Ee][Ee][Kk](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Oo][Kk][Ee](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Ss][Ee][Tt](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Rr][Ee][Aa][Dd](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Rr][Oo][Ll][Ll](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Rr][Ss][Ee][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Aa][Vv][Ee](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Tt][Oo][Pp](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Tt][Rr]\\$",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Ww][Aa][Pp](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Tt][Ee][Rr][Mm](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Tt][Hh][Ee][Nn](?![A-Za-z0-9])",
+          "name": "keyword.control.conditional.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Tt][Rr][Oo][Nn](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Vv][Ii][Ee][Ww](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.deferred.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ww][Aa][Ii][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ww][Ee][Nn][Dd](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": ",[Bb][Ff](?![A-Za-z0-9])",
+          "name": "keyword.other.option.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Aa][Bb][Ss](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Aa][Ss][Cc](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Aa][Tt][Nn](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Ll][Ss](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Oo][Ss](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Vv][Dd](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Vv][Ii](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Cc][Vv][Ss](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Dd][Ii][Mm](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ee][Nn][Dd](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ee][Oo][Ff](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ee][Rr][Ll](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ee][Rr][Rr](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ee][Xx][Pp](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ff][Ii][Xx](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ff][Oo][Rr](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ff][Rr][Ee](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Gg][Ee][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.deferred.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ii][Nn][Pp](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ii][Nn][Tt](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Kk][Ee][Yy](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Ee][Nn](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Ee][Tt](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Oo][Cc](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Oo][Ff](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ll][Oo][Gg](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Mm][Aa][Pp](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Mm][Oo][Nn](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Nn][Ee][Ww](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Oo][Uu][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Ee][Nn](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Oo][Ss](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Pp][Uu][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.deferred.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Rr][Nn][Dd](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Rr][Uu][Nn](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Ee][Tt](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.keyword-control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Gg][Nn](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Ii][Nn](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Pp][Cc](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Qq][Rr](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Tt][Aa][Bb](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Tt][Aa][Nn](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Uu][Ss][Rr](?![A-Za-z0-9])",
+          "name": "invalid.deprecated.out.support-function.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Vv][Aa][Ll](?![A-Za-z0-9])",
+          "name": "support.function.n88basic"
+        },
+        {
+          "match": ",[Bb](?![A-Za-z0-9])",
+          "name": "keyword.other.option.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ii][Ff](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Oo][Nn](?![A-Za-z0-9])",
+          "name": "keyword.control.n88basic"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "match": "(?<![A-Za-z0-9])\\d+(?:\\.\\d+)?(?:[DdEe][+-]?\\d+)?[!#%]?(?![A-Za-z0-9])",
+          "name": "constant.numeric.n88basic"
+        },
+        {
+          "match": "\\.\\d+(?:[DdEe][+-]?\\d+)?[!#%]?(?![A-Za-z0-9])",
+          "name": "constant.numeric.n88basic"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "match": "(?<![A-Za-z0-9])[Aa][Nn][Dd](?![A-Za-z0-9])",
+          "name": "keyword.operator.word.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Oo][Rr](?![A-Za-z0-9])",
+          "name": "keyword.operator.word.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Nn][Oo][Tt](?![A-Za-z0-9])",
+          "name": "keyword.operator.word.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Mm][Oo][Dd](?![A-Za-z0-9])",
+          "name": "keyword.operator.word.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Xx][Oo][Rr](?![A-Za-z0-9])",
+          "name": "keyword.operator.word.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ee][Qq][Vv](?![A-Za-z0-9])",
+          "name": "keyword.operator.word.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ii][Mm][Pp](?![A-Za-z0-9])",
+          "name": "keyword.operator.word.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Ss][Tt][Ee][Pp](?![A-Za-z0-9])",
+          "name": "keyword.operator.word.n88basic"
+        },
+        {
+          "match": "(?<![A-Za-z0-9])[Tt][Oo](?![A-Za-z0-9])",
+          "name": "keyword.operator.word.n88basic"
+        },
+        {
+          "match": "<=",
+          "name": "keyword.operator.n88basic"
+        },
+        {
+          "match": ">=",
+          "name": "keyword.operator.n88basic"
+        },
+        {
+          "match": "<>",
+          "name": "keyword.operator.n88basic"
+        },
+        {
+          "match": "=",
+          "name": "keyword.operator.n88basic"
+        },
+        {
+          "match": "<",
+          "name": "keyword.operator.n88basic"
+        },
+        {
+          "match": ">",
+          "name": "keyword.operator.n88basic"
+        },
+        {
+          "match": "\\+",
+          "name": "keyword.operator.n88basic"
+        },
+        {
+          "match": "-",
+          "name": "keyword.operator.n88basic"
+        },
+        {
+          "match": "\\*",
+          "name": "keyword.operator.n88basic"
+        },
+        {
+          "match": "/",
+          "name": "keyword.operator.n88basic"
+        },
+        {
+          "match": "\\\\",
+          "name": "keyword.operator.n88basic"
+        },
+        {
+          "match": "\\^",
+          "name": "keyword.operator.n88basic"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "match": "\\(",
+          "name": "punctuation.section.round.begin.n88basic"
+        },
+        {
+          "match": "\\)",
+          "name": "punctuation.section.round.end.n88basic"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.comma.n88basic"
+        },
+        {
+          "match": ";",
+          "name": "punctuation.separator.semicolon.n88basic"
+        },
+        {
+          "match": ":",
+          "name": "punctuation.separator.statement.n88basic"
+        }
+      ]
+    },
+    "identifiers": {
+      "match": "(?<![A-Za-z0-9])[A-Za-z][A-Za-z0-9]*[!#%]?(?![A-Za-z0-9])",
+      "name": "variable.other.n88basic"
+    }
+  }
+}

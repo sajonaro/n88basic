@@ -1,0 +1,11 @@
+; n88basic-check.js is committed so the extension needs no build step at
+; install time (see editor/vscode/README.md). `dune build` still regenerates
+; it from editor/lsp/ and, via (mode promote), copies the result back over
+; this file whenever the compiled checker changes -- so it is generated, not
+; hand-maintained, without asking the editor's users to run a JS build tool.
+(rule
+ (mode promote)
+ (target n88basic-check.js)
+ (deps ../../lsp/js_main.bc.js)
+ (action
+  (copy ../../lsp/js_main.bc.js n88basic-check.js)))

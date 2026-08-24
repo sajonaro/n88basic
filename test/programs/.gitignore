@@ -1,0 +1,3 @@
+# The corpus runner writes a PNG beside each listing, on purpose: the
+# acceptance test is looking at them. They are output, not source.
+*.png

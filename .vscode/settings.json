@@ -1,0 +1,22 @@
+{
+  // VSCode ships a built-in Visual Basic extension that claims *.bas, so a
+  // .bas file in this repo opens as Visual Basic unless told otherwise.
+  // N88-BASIC is not Visual Basic; this pins the association for this
+  // workspace only.
+  "files.associations": {
+    "*.bas": "n88basic",
+    "*.n88": "n88basic"
+  },
+
+  // Run diagnostics through the N88-BASIC language server rather than
+  // in-process. Off by default in the extension; enabled here, for this
+  // workspace only, so the server gets exercised on a real editor rather than
+  // only in tools/test-language-server.js.
+  //
+  // Requires the installed extension copy to include server/ and
+  // node_modules/ -- the server is spawned from the installed directory, so
+  // an older copy without them yields a server that fails to start quietly.
+  // Set this back to false to return to the in-process checker; the two
+  // produce the same diagnostics from the same parser.
+  "n88basic.languageServer": true
+}

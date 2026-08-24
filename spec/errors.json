@@ -1,0 +1,376 @@
+{
+  "errors": [
+    {
+      "number": 1,
+      "message": "NEXT without FOR",
+      "meaning": "Execution reached a NEXT while no FOR loop it could close was open.",
+      "clause": null,
+      "source": "ref-9801 printed p.185 / PDF p.194"
+    },
+    {
+      "number": 2,
+      "message": "Syntax error",
+      "meaning": "A line could not be read as a statement: it names nothing the interpreter recognises as a command, or the text around a command does not fit the form that command takes. A READ whose DATA item cannot be held by the variable it is read into raises this too.",
+      "clause": null,
+      "source": "ref-9801 printed p.187 / PDF p.196"
+    },
+    {
+      "number": 3,
+      "message": "RETURN without GOSUB",
+      "meaning": "Execution reached a RETURN with no GOSUB call outstanding to return from.",
+      "clause": null,
+      "source": "ref-9801 printed p.186 / PDF p.195"
+    },
+    {
+      "number": 4,
+      "message": "Out of DATA",
+      "meaning": "A READ was executed with every DATA item in the program already consumed.",
+      "clause": null,
+      "source": "ref-9801 printed p.185 / PDF p.194"
+    },
+    {
+      "number": 5,
+      "message": "Illegal function call",
+      "meaning": "A statement or built-in function was given an argument outside the domain it accepts, or was asked for a result outside the range it can produce.",
+      "clause": null,
+      "source": "ref-9801 printed p.184 / PDF p.193"
+    },
+    {
+      "number": 6,
+      "message": "Overflow (OV)",
+      "meaning": "A value went past what its numeric type can hold, whether it was computed by an operation or supplied to the program as input.",
+      "clause": "NUM.OVERFLOW",
+      "source": "ref-9801 printed p.186 / PDF p.195"
+    },
+    {
+      "number": 7,
+      "message": "Out of memory",
+      "meaning": "BASIC's workspace ran out: program text, variable and array storage, and the stack that open loops and subroutine calls occupy all draw on it.",
+      "clause": null,
+      "source": "ref-9801 printed p.185 / PDF p.194"
+    },
+    {
+      "number": 8,
+      "message": "Undefined line number",
+      "meaning": "A transfer of control named a line number the program does not contain.",
+      "clause": null,
+      "source": "ref-9801 printed p.187 / PDF p.196"
+    },
+    {
+      "number": 9,
+      "message": "Subscript out of range",
+      "meaning": "An array subscript fell outside the array's bounds — those fixed by DIM, or, for an array used without a DIM, the implicit upper bound of 10, counted from the origin OPTION BASE sets.",
+      "clause": null,
+      "source": "ref-9801 printed p.186 / PDF p.195"
+    },
+    {
+      "number": 10,
+      "message": "Duplicate Difinition",
+      "meaning": "DIM was applied to an array that already has dimensions, whether an earlier DIM or the array's first use fixed them.",
+      "clause": null,
+      "source": "ref-9801 printed p.183 / PDF p.192"
+    },
+    {
+      "number": 11,
+      "message": "Division by Zero (/0)",
+      "meaning": "An expression asked for a quantity that is not finite — a divisor of zero, or zero raised to a negative power — so no representable value can be produced.",
+      "clause": "NUM.DIV-BY-ZERO",
+      "source": "ref-9801 printed p.182 / PDF p.191"
+    },
+    {
+      "number": 12,
+      "message": "Illegal direct",
+      "meaning": "A statement valid only inside a stored program was entered in direct mode.",
+      "clause": null,
+      "source": "ref-9801 printed p.184 / PDF p.193"
+    },
+    {
+      "number": 13,
+      "message": "Type mismatch",
+      "meaning": "A value's type does not agree with the position it is used in: a string where a number is expected, or a number where a string is.",
+      "clause": null,
+      "source": "ref-9801 printed p.187 / PDF p.196"
+    },
+    {
+      "number": 14,
+      "message": "Out of string space",
+      "meaning": "The strings a program holds at once outgrew the memory set aside for string storage.",
+      "clause": null,
+      "source": "ref-9801 printed p.185 / PDF p.194"
+    },
+    {
+      "number": 15,
+      "message": "String too long",
+      "meaning": "A single string value was made longer than 255 bytes.",
+      "clause": null,
+      "source": "ref-9801 printed p.186 / PDF p.195"
+    },
+    {
+      "number": 16,
+      "message": "String formula too complex",
+      "meaning": "A string expression is beyond the complexity the interpreter will evaluate.",
+      "clause": null,
+      "source": "ref-9801 printed p.186 / PDF p.195"
+    },
+    {
+      "number": 17,
+      "message": "Can't continue",
+      "meaning": "CONT could not resume a halted program, because the program text was altered while it was stopped.",
+      "clause": null,
+      "source": "ref-9801 printed p.182 / PDF p.191"
+    },
+    {
+      "number": 18,
+      "message": "Undefined user function",
+      "meaning": "A call named a user-defined function no DEF FN has defined, or a machine-code entry point no DEF USR has defined.",
+      "clause": null,
+      "source": "ref-9801 printed p.187 / PDF p.196"
+    },
+    {
+      "number": 19,
+      "message": "No RESUME",
+      "meaning": "Control ran off the end of an error-handling routine without a statement that ends error handling, leaving execution nowhere to continue.",
+      "clause": "ERR.RESUME",
+      "source": "ref-9801 printed p.185 / PDF p.194"
+    },
+    {
+      "number": 20,
+      "message": "RESUME without error",
+      "meaning": "RESUME was executed while no error was being handled.",
+      "clause": "ERR.RESUME",
+      "source": "ref-9801 printed p.186 / PDF p.195"
+    },
+    {
+      "number": 21,
+      "message": "Unprintable error",
+      "meaning": "An error code the interpreter prints under a shared placeholder rather than a message of its own. ERROR can raise such a code, which leaves it free for a program's own error conditions.",
+      "clause": null,
+      "source": "ref-9801 printed p.187 / PDF p.196",
+      "partial": true,
+      "note": "The manual heads this entry with the codes 21, 24, 25, and 28 followed by 他 — \"and others\". Further codes share this message and are not listed, so the set of unprintable codes, and with it the set of error codes as a whole, is larger than what is recorded here."
+    },
+    {
+      "number": 22,
+      "message": "Missing operand",
+      "meaning": "A statement was written without an operand its form requires.",
+      "clause": null,
+      "source": "ref-9801 printed p.185 / PDF p.194"
+    },
+    {
+      "number": 23,
+      "message": "Line buffer overflow",
+      "meaning": "An input line was longer than the 255 bytes a line may occupy.",
+      "clause": null,
+      "source": "ref-9801 printed p.185 / PDF p.194"
+    },
+    {
+      "number": 24,
+      "message": "Unprintable error",
+      "meaning": "An error code the interpreter prints under a shared placeholder rather than a message of its own. ERROR can raise such a code, which leaves it free for a program's own error conditions.",
+      "clause": null,
+      "source": "ref-9801 printed p.187 / PDF p.196",
+      "partial": true,
+      "note": "The manual heads this entry with the codes 21, 24, 25, and 28 followed by 他 — \"and others\". Further codes share this message and are not listed, so the set of unprintable codes, and with it the set of error codes as a whole, is larger than what is recorded here."
+    },
+    {
+      "number": 25,
+      "message": "Unprintable error",
+      "meaning": "An error code the interpreter prints under a shared placeholder rather than a message of its own. ERROR can raise such a code, which leaves it free for a program's own error conditions.",
+      "clause": null,
+      "source": "ref-9801 printed p.187 / PDF p.196",
+      "partial": true,
+      "note": "The manual heads this entry with the codes 21, 24, 25, and 28 followed by 他 — \"and others\". Further codes share this message and are not listed, so the set of unprintable codes, and with it the set of error codes as a whole, is larger than what is recorded here."
+    },
+    {
+      "number": 26,
+      "message": "FOR without NEXT",
+      "meaning": "A FOR loop was left open, with no NEXT anywhere that closes it.",
+      "clause": null,
+      "source": "ref-9801 printed p.184 / PDF p.193"
+    },
+    {
+      "number": 27,
+      "message": "Tape read error",
+      "meaning": "A read from cassette tape failed.",
+      "clause": null,
+      "source": "ref-9801 printed p.187 / PDF p.196"
+    },
+    {
+      "number": 28,
+      "message": "Unprintable error",
+      "meaning": "An error code the interpreter prints under a shared placeholder rather than a message of its own. ERROR can raise such a code, which leaves it free for a program's own error conditions.",
+      "clause": null,
+      "source": "ref-9801 printed p.187 / PDF p.196",
+      "partial": true,
+      "note": "The manual heads this entry with the codes 21, 24, 25, and 28 followed by 他 — \"and others\". Further codes share this message and are not listed, so the set of unprintable codes, and with it the set of error codes as a whole, is larger than what is recorded here."
+    },
+    {
+      "number": 29,
+      "message": "WHILE without WEND",
+      "meaning": "A WHILE loop was left open, with no WEND anywhere that closes it.",
+      "clause": null,
+      "source": "ref-9801 printed p.188 / PDF p.197"
+    },
+    {
+      "number": 30,
+      "message": "WEND without WHILE",
+      "meaning": "Execution reached a WEND with no WHILE loop it could close open.",
+      "clause": null,
+      "source": "ref-9801 printed p.187 / PDF p.196"
+    },
+    {
+      "number": 31,
+      "message": "Duplicate label",
+      "meaning": "The same label name is attached to more than one line of the program.",
+      "clause": null,
+      "source": "ref-9801 printed p.183 / PDF p.192"
+    },
+    {
+      "number": 32,
+      "message": "Undefined label",
+      "meaning": "A statement branched to a label name the program never defines.",
+      "clause": null,
+      "source": "ref-9801 printed p.187 / PDF p.196"
+    },
+    {
+      "number": 33,
+      "message": "Feature not available",
+      "meaning": "A statement was executed that this machine, as currently equipped and configured, cannot carry out.",
+      "clause": null,
+      "source": "ref-9801 printed p.183 / PDF p.192"
+    },
+    {
+      "number": 50,
+      "message": "FIELD overflow",
+      "meaning": "The fields FIELD lays over a random-access record total more than 255 bytes.",
+      "clause": null,
+      "source": "ref-9801 printed p.183 / PDF p.192"
+    },
+    {
+      "number": 52,
+      "message": "Bad file number",
+      "meaning": "A file number was used that is above the count of files the system is configured to hold open at once.",
+      "clause": null,
+      "source": "ref-9801 printed p.181 / PDF p.190"
+    },
+    {
+      "number": 53,
+      "message": "File not found",
+      "meaning": "A file operation named a file that is not present on the disk.",
+      "clause": null,
+      "source": "ref-9801 printed p.183 / PDF p.192"
+    },
+    {
+      "number": 54,
+      "message": "File already open",
+      "meaning": "An operation needing sole use of a file was applied to one that is already open.",
+      "clause": null,
+      "source": "ref-9801 printed p.183 / PDF p.192"
+    },
+    {
+      "number": 55,
+      "message": "Input past end",
+      "meaning": "A read from a file was attempted with no data left beyond the point already reached.",
+      "clause": null,
+      "source": "ref-9801 printed p.184 / PDF p.193"
+    },
+    {
+      "number": 56,
+      "message": "Bad file name",
+      "meaning": "A file operation was given a name that is not a well-formed file name.",
+      "clause": null,
+      "source": "ref-9801 printed p.181 / PDF p.190"
+    },
+    {
+      "number": 57,
+      "message": "Direct statement in file",
+      "meaning": "Loading a program stored in ASCII form found a line carrying no line number.",
+      "clause": null,
+      "source": "ref-9801 printed p.182 / PDF p.191"
+    },
+    {
+      "number": 59,
+      "message": "Sequential I/O only",
+      "meaning": "A file opened for sequential access was given an operation only random access supports; MERGE reading a program saved in binary rather than ASCII form raises it too.",
+      "clause": null,
+      "source": "ref-9801 printed p.186 / PDF p.195"
+    },
+    {
+      "number": 60,
+      "message": "File not open",
+      "meaning": "A statement referred to a file number with no open file behind it.",
+      "clause": null,
+      "source": "ref-9801 printed p.183 / PDF p.192"
+    },
+    {
+      "number": 61,
+      "message": "File write protected",
+      "meaning": "A write was directed at a file, disk, or drive marked as not writable — by a protection attribute, or by the write-protect tab on the medium itself.",
+      "clause": null,
+      "source": "ref-9801 printed p.184 / PDF p.193"
+    },
+    {
+      "number": 62,
+      "message": "Disk offline",
+      "meaning": "A file operation addressed a drive with no disk loaded in it.",
+      "clause": null,
+      "source": "ref-9801 printed p.182 / PDF p.191"
+    },
+    {
+      "number": 64,
+      "message": "Disk I/O error",
+      "meaning": "A transfer to or from the disk did not complete.",
+      "clause": null,
+      "source": "ref-9801 printed p.182 / PDF p.191"
+    },
+    {
+      "number": 65,
+      "message": "File already exist",
+      "meaning": "NAME was asked to give a file a name another file on the disk already holds.",
+      "clause": null,
+      "source": "ref-9801 printed p.183 / PDF p.192"
+    },
+    {
+      "number": 68,
+      "message": "Disk full",
+      "meaning": "A write to disk found no free space left to write into.",
+      "clause": null,
+      "source": "ref-9801 printed p.182 / PDF p.191"
+    },
+    {
+      "number": 69,
+      "message": "Bad allocation table",
+      "meaning": "The allocation table on the disk is damaged, leaving the layout of its files unreadable.",
+      "clause": null,
+      "source": "ref-9801 printed p.181 / PDF p.190"
+    },
+    {
+      "number": 70,
+      "message": "Bad drive number",
+      "meaning": "A file operation's drive specification does not name a drive this system can use.",
+      "clause": null,
+      "source": "ref-9801 printed p.181 / PDF p.190"
+    },
+    {
+      "number": 71,
+      "message": "Bad track/sector",
+      "meaning": "A direct sector transfer was given a head, track, or sector number the disk does not have.",
+      "clause": null,
+      "source": "ref-9801 printed p.181 / PDF p.190"
+    },
+    {
+      "number": 73,
+      "message": "Rename across disks",
+      "meaning": "NAME was asked to rename a file across drives; the old and new names must land on the same disk.",
+      "clause": null,
+      "source": "ref-9801 printed p.186 / PDF p.195"
+    },
+    {
+      "number": 74,
+      "message": "Illegal operation",
+      "meaning": "Insert-mode key entry on the scroll window's first line had nowhere to push the text already in the window, the window being full.",
+      "clause": null,
+      "source": "ref-9801 printed p.184 / PDF p.193"
+    }
+  ]
+}

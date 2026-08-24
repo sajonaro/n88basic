@@ -1,0 +1,23 @@
+10 REM CTRL.WHILE / CTRL.WEND: a condition false from the start never
+20 REM runs the body, a true condition loops until it turns false, and
+30 REM WHILE/WEND nest.
+40 WHILE 0
+50 PRINT "NEVER"
+60 WEND
+70 I=0
+80 WHILE I<3
+90 I=I+1
+100 PRINT I;
+110 WEND
+120 PRINT
+130 I=0
+140 WHILE I<2
+150 I=I+1
+160 J=0
+170 WHILE J<2
+180 J=J+1
+190 PRINT I*10+J;
+200 WEND
+210 WEND
+220 PRINT
+230 END

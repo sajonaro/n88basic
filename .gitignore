@@ -1,0 +1,43 @@
+# Reference scans. Large, copyrighted, and not ours to redistribute.
+# spec/sources.md records what each one is and where it came from.
+docs/*.pdf
+
+# OCaml / dune
+_build/
+# No trailing slash: "_opam/" matches only a directory, and a worktree that
+# shares the one switch holds _opam as a *symlink* to it. That symlink was
+# committed once (26c68b5) and, checked out in the main repo where its target
+# is its own path, became a self-referential loop over the real switch.
+_opam
+*.install
+*.merlin
+
+# Node / VSCode extension
+node_modules/
+editor/vscode/out/
+editor/vscode/*.vsix
+
+# Working files
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Framebuffer PNGs: the CLI writes one beside any .bas that draws, so a
+# conformance case leaves one behind whenever it is run by hand. The suite
+# compares digests (.digest), never these; .actual.png is the frame the
+# harness dumps on a digest mismatch.
+test/conformance/*.png
+
+# The extension's runtime dependencies are vendored deliberately (Alex's
+# ruling, 2026-08-17): the extension installs by copying a directory and has
+# no build step, and today proved that is the property that matters -- it was
+# silently dead for weeks because the installed copy was stale, and an
+# "npm install" step is the same class of hazard, skippable and quietly
+# half-completable. 3.1MB in git is the cheaper failure.
+# node_modules/.bin is NOT vendored: it holds only CLI shims, which nothing
+# here launches, and they are symlinks. A tracked symlink is what destroyed
+# the opam switch this morning, so the tree carries none.
+!editor/vscode/node_modules/
+editor/vscode/node_modules/.bin/

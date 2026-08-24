@@ -1,0 +1,7 @@
+ 3  3  3  3 
+ 3  3  3  3 
+after POINT(50,50), dot there is 0 
+LP world  X,Y: 50  50 
+LP screen X,Y: 50  50 
+after POINT STEP(10,-20): 60  30 
+after PSET(200,150): 200  150 

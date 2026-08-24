@@ -1,0 +1,3 @@
+10 PRINT "before";
+20 PRINT 1/0
+30 END
