@@ -1,1 +1,7 @@
-usage: n88basic FILE.bas
+usage: n88 FILE.bas
+
+  Runs an N88-BASIC(86) program. Output goes to stdout; a program that
+  draws also writes a PNG beside its source.
+
+  --version   print the version and exit
+  --help      print this message and exit
