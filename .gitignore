@@ -16,6 +16,11 @@ _opam
 node_modules/
 editor/vscode/out/
 editor/vscode/*.vsix
+# scripts/package-extension.sh writes the package at the repository root, and
+# stages the spec data the extension reads at run time into the extension
+# directory. Both are build output.
+/*.vsix
+editor/vscode/spec/
 
 # Working files
 .DS_Store
