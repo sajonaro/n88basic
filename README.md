@@ -112,6 +112,29 @@ forms, `CIRCLE`, `PAINT` with tile patterns, and the colour palette,
 rendered to a 640×400 framebuffer and written out as PNG with no image
 library.
 
+## Faithful behaviour that looks like a bug
+
+`PRINT 1000000` gives `1E+06`, while the *larger* `PRINT 10000000` gives
+`10000000` in full. This has been reported as an inconsistency twice, and it
+is the manual's rule rather than a defect.
+
+A written constant takes its type from its notation. Printed p.13 §5.5 makes
+a real of **seven digits or fewer** single precision; printed p.14 §5.6 makes
+a real of **eight digits or more** double precision. Single precision has a
+six-digit display budget and so overflows to exponent form; double precision
+has sixteen and does not. The display rule is applied identically to both —
+what differs is the type the constant was written into.
+
+Spelling the type settles it either way:
+
+```basic
+PRINT 1000000#     ' 1000000   -- forced double, shown in full
+PRINT 10000000!    ' 1E+07     -- forced single, overflows
+```
+
+`test/conformance/num_literal_typing.bas` pins this, including both values
+above; `NUM.TYPES` and `NUM.DISPLAY` in `spec/clauses.json` carry the pages.
+
 ## What it deliberately does not do
 
 Being explicit about this is part of the design, not an apology for it.
