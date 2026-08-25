@@ -134,6 +134,19 @@ never supplies. Making the logical operators bitwise broke no test, because
 relational operators yield only 0 and -1, and on exactly those two values
 bitwise and boolean agree. Prefer an input the manual itself supplies.
 
+**Test the input a real program produces, not the convenient one.** The
+sharper form of the practice above, and the one that has actually recurred.
+A suite tends to be written from the value that is easiest to type, and the
+easiest value is often the one that does not exercise the rule. Every numeric
+display case here printed a *constant*, so the corpus was green and silent on
+what happens when a value arrives in a *variable* — which is single precision
+by default, prints in exponent form past six digits, and is the only path a
+real listing takes. The same shape appeared in `PRINT USING`: the rounding
+cases used values that were not ties, so the half-up rule went unpinned by
+anything that could tell it from half-to-even. Both were found by asking one
+question of an existing green suite: *what value does a real program actually
+hand this code, and does any case supply it?*
+
 **A conclusion outlives its grounds.** A status resting on a fact about some
 other part of the system does not re-derive itself when that fact moves.
 `tools/check_spec.py` scans clause prose for that shape and lists what to
