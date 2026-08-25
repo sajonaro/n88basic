@@ -1,0 +1,5 @@
+constant  : 10000000 
+variable  : 1E+07 
+aggregate : 1E+07 
+suffixed  : 10000000 
+DEFDBL    : 10000000 

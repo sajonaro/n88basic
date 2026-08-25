@@ -132,8 +132,25 @@ PRINT 1000000#     ' 1000000   -- forced double, shown in full
 PRINT 10000000!    ' 1E+07     -- forced single, overflows
 ```
 
-`test/conformance/num_literal_typing.bas` pins this, including both values
-above; `NUM.TYPES` and `NUM.DISPLAY` in `spec/clauses.json` carry the pages.
+**The half that will actually bite you.** Those rules type a *constant* by
+its notation. A **variable** with no suffix and no `DEFxxx` in effect is
+single precision (printed p.14 §6.2), so the same value prints differently
+depending on how it got there:
+
+```basic
+PRINT 10000000     ' 10000000  -- an 8-digit constant is double
+A = 10000000
+PRINT A            ' 1E+07     -- but A is single
+```
+
+So a program totalling a column into a plain variable gets exponent form
+once the total passes six digits, whatever the constants looked like. That
+is the machine's behaviour, not a limitation of this interpreter. Declare
+the type when you want the full form — `T#`, or `DEFDBL T` at the top.
+
+`test/conformance/num_literal_typing.bas` pins the constant path and
+`num_variable_default_type.bas` the variable one; `NUM.TYPES`,
+`NUM.DISPLAY` and `PROG.DEFDBL` in `spec/clauses.json` carry the pages.
 
 ## What it deliberately does not do
 
