@@ -33,6 +33,13 @@ jobs:
       # The specification is checked as well as the code: every clause must
       # cite a manual page, every implemented clause must carry a conformance
       # case, and the project invariants must hold.
+      # dune test links the library and runs the cases in process. This runs
+      # the same corpus through the built EXECUTABLE, which is the only way
+      # the CLI's own layer -- argument handling, the stdout/stderr split,
+      # buffering -- is ever vetted against the spec.
+      - name: Conformance through the built binary
+        run: opam exec -- ./scripts/conform.sh "$PWD/_build/default/bin/main.exe"
+
       - name: Project invariants
         run: sh scripts/check-invariants.sh
 

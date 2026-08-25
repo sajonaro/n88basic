@@ -58,6 +58,21 @@ jobs:
           test -f /tmp/smoke/t.png || { echo "the program drew nothing"; exit 1; }
           echo "image runs and draws"
 
+      # Running one program proves the image starts. It does not prove the
+      # image is THIS INTERPRETER: the container is an Alpine/musl build,
+      # while the suite that vets the language runs in process against a
+      # glibc dev build, and nothing had ever compared the two.
+      - name: The image must pass the conformance corpus
+        run: |
+          set -eu
+          cat > /tmp/n88-container <<EOF
+          #!/usr/bin/env bash
+          d="\$(cd "\$(dirname "\$1")" && pwd)"
+          exec docker run --rm -i -v "\$d":/work "${IMAGE}:${GITHUB_REF_NAME#v}" "\$(basename "\$1")"
+          EOF
+          chmod +x /tmp/n88-container
+          ./scripts/conform.sh /tmp/n88-container
+
   binary:
     runs-on: ubuntu-latest
     permissions:
@@ -104,6 +119,13 @@ jobs:
           set -eu
           printf '10 PRINT "ok"; 8*10+8\n' > /tmp/t.bas
           ./n88-linux-x86_64 /tmp/t.bas
+
+      # The asset people download is a release-profile build, and the suite
+      # that vets the language never executes it -- test_conformance.ml
+      # links the library in process. Run the corpus through the artifact
+      # itself, before it is uploaded.
+      - name: The binary must pass the conformance corpus
+        run: ./scripts/conform.sh "$PWD/n88-linux-x86_64"
 
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/v')
