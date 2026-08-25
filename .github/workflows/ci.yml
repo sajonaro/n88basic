@@ -16,11 +16,15 @@ jobs:
         with:
           ocaml-compiler: "5.2"
 
-      # setup-ocaml installs dependencies from *.opam files, and this project
-      # has none -- it is built with dune directly rather than published to
-      # opam -- so its build dependencies are named here. dune builds the
-      # interpreter; alcotest runs the tests; js_of_ocaml compiles the
-      # editor's checker; menhir checks the specification's grammar.
+      # n88basic.opam names the test dependencies under {with-test}, which
+      # setup-ocaml does not install by default, so they are named here too.
+      # dune builds the interpreter; alcotest runs the tests; js_of_ocaml
+      # compiles the editor's checker; menhir checks the grammar.
+      #
+      # This comment used to say the project had no *.opam file at all. That
+      # was true when written and stopped being true in c42666b, which is the
+      # failure this project keeps finding: a remark that was correct when
+      # made and outlived the fact it rested on.
       - name: Install build dependencies
         run: opam install -y dune alcotest js_of_ocaml js_of_ocaml-compiler menhir
 

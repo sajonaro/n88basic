@@ -150,9 +150,10 @@ jobs:
 
       # The extension ships the checker bundle and the spec data it reads at
       # run time, so both are produced before packaging.
-      # setup-ocaml installs dependencies from *.opam files, and this project
-      # has none -- it is built with dune directly rather than published to
-      # opam -- so its build dependencies are named here. dune builds the
+      # n88basic.opam names the test dependencies under {with-test}, which
+      # setup-ocaml does not install by default, so they are named here too.
+      # (This used to say the project had no *.opam file; that was true when
+      # written and stopped being true in c42666b.) dune builds the
       # interpreter; alcotest runs the tests; js_of_ocaml compiles the
       # editor's checker; menhir checks the specification's grammar.
       - name: Install build dependencies
