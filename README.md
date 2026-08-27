@@ -71,11 +71,19 @@ chmod +x n88-linux-x86_64 && ./n88-linux-x86_64 --version
 **The container**, if you would rather install nothing — see below.
 
 **From source**, with OCaml and dune: `scripts/install.sh` puts `n88` on your
-PATH. The project is also a valid opam package, so it can be pinned directly:
+PATH. The project is also a valid opam package, so it can be pinned directly —
+**pin a release tag, not the branch**, or you get whatever `main` happens to be
+that day:
 
 ```sh
-opam pin add n88basic https://github.com/sajonaro/n88basic.git
+opam pin add n88basic 'git+https://github.com/sajonaro/n88basic.git#v0.1.1'
 ```
+
+This is the only route that gives you the *library* as well as the `n88`
+command: `N88basic.Interp` and `Raster` become linkable modules. If all you
+want is to run programs, the binary or the container is less work. The package
+is pinnable from git and is not published to the opam repository, so
+`opam install n88basic` on its own will not find it.
 
 ## Using it as a container
 
