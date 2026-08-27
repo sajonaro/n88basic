@@ -134,6 +134,14 @@ never supplies. Making the logical operators bitwise broke no test, because
 relational operators yield only 0 and -1, and on exactly those two values
 bitwise and boolean agree. Prefer an input the manual itself supplies.
 
+Then **check that the distinguishing input actually distinguishes** — an
+input asserted to separate two readings, and never verified to, is the same
+failure one level up. `221.875` and `2.675` were both offered as separating
+half-up from half-to-even and neither does: the first is a tie whose
+preceding digit is odd, so both rules round it up, and the second is not a
+tie at all. The ties that separate them have an EVEN preceding digit
+(`0.125`, `0.625`, `2.5`).
+
 **Test the input a real program produces, not the convenient one.** The
 sharper form of the practice above, and the one that has actually recurred.
 A suite tends to be written from the value that is easiest to type, and the
