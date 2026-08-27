@@ -136,8 +136,8 @@ what differs is the type the constant was written into.
 Spelling the type settles it either way:
 
 ```basic
-PRINT 1000000#     ' 1000000   -- forced double, shown in full
-PRINT 10000000!    ' 1E+07     -- forced single, overflows
+10 PRINT 1000000#     : REM prints 1000000 -- forced double, full form
+20 PRINT 10000000!    : REM prints 1E+07   -- forced single, overflows
 ```
 
 **The half that will actually bite you.** Those rules type a *constant* by
@@ -146,9 +146,9 @@ single precision (printed p.14 §6.2), so the same value prints differently
 depending on how it got there:
 
 ```basic
-PRINT 10000000     ' 10000000  -- an 8-digit constant is double
-A = 10000000
-PRINT A            ' 1E+07     -- but A is single
+10 PRINT 10000000     : REM prints 10000000 -- an 8-digit constant is double
+20 A = 10000000
+30 PRINT A            : REM prints 1E+07    -- but A is single
 ```
 
 So a program totalling a column into a plain variable gets exponent form
