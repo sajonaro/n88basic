@@ -72,6 +72,13 @@ echo "$pass of $((pass + fail)) text cases match through $(basename "$N88")."
 # "unchanged", never "correct") and it is the one decidable from outside a
 # process, which is what makes a released binary and a container checkable at
 # all. See tools/png_hashes.py.
+#
+# NOTE that a .pnghash pins the ENCODER as well as the drawing, so an older
+# artifact can fail these while drawing exactly the same picture -- that is
+# what happened across the compression change, where every hash moved and no
+# display-list digest did. A drawing mismatch against a PREVIOUS release is a
+# question ("did the encoder change?"), not automatically a defect; against
+# the build you just made from this tree, it is a defect.
 dpass=0; dfail=0
 for dg in "$CASES"/*.digest; do
   [ -e "$dg" ] || continue

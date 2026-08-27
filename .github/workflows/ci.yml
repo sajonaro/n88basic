@@ -44,6 +44,13 @@ jobs:
       - name: Conformance through the built binary
         run: opam exec -- ./scripts/conform.sh "$PWD/_build/default/bin/main.exe"
 
+      # raster/Zlib writes zlib streams and has no decompressor, so its
+      # correctness is checked against Python's inflater rather than against
+      # itself. Bit order is the thing this guards: a stream with the extra
+      # bits reversed inflates for a while and then fails.
+      - name: Deflate round-trips through a real inflater
+        run: opam exec -- python3 tools/check_deflate.py
+
       - name: Project invariants
         run: sh scripts/check-invariants.sh
 

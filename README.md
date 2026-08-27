@@ -160,6 +160,17 @@ the type when you want the full form — `T#`, or `DEFDBL T` at the top.
 `num_variable_default_type.bas` the variable one; `NUM.TYPES`,
 `NUM.DISPLAY` and `PROG.DEFDBL` in `spec/clauses.json` carry the pages.
 
+## Scripting around it
+
+Program output goes to **stdout**; diagnostics and the `wrote <file>.png`
+notice go to **stderr**. Keep them separate. Merging them with `2>&1` is
+order-unstable as soon as a program draws: natively the notice appears before
+the program's own output, and through the container it appears after, because
+the daemon multiplexes the two streams and does not preserve terminal order.
+A harness that merges them will capture different byte orders from the same
+program depending on how it was invoked — this cost one earlier effort seven
+fabricated test failures before the cause was found.
+
 ## What it deliberately does not do
 
 Being explicit about this is part of the design, not an apology for it.

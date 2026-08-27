@@ -1,4 +1,5 @@
 (tests
+ (modules test_smoke test_print_format test_lexer test_parser test_program test_env test_interp test_tile)
  (names test_smoke test_print_format test_lexer test_parser test_program test_env
    test_interp test_tile)
  (libraries n88basic alcotest))
@@ -37,3 +38,12 @@
  (deps
   (source_tree conformance))
  (libraries n88basic raster alcotest))
+
+; deflate_samples is an EXECUTABLE, not a test: it emits sample streams that
+; tools/check_deflate.py inflates with Python's zlib. raster/Zlib has no
+; decompressor and should not grow one -- nothing here reads a PNG -- so the
+; round-trip has to be closed against an inflater this project did not write.
+(executable
+ (name deflate_samples)
+ (modules deflate_samples)
+ (libraries raster))

@@ -51,7 +51,7 @@ handler the caller supplies, so `basic/` still never sees a framebuffer. The
 same shape serves `PAINT`'s "is this point inside the window" question and
 the LP that `POINT(n)` reports.
 
-PNG encoding is written here — deflate with stored blocks, CRC-32 and
+PNG encoding is written here — deflate with fixed Huffman codes and LZ77, CRC-32 and
 Adler-32 — so the interpreter has no image-library dependency.
 
 ## The framebuffer stores palette numbers, not colours
