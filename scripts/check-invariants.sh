@@ -44,6 +44,21 @@ else
   report "sources-by-link-only" "ok"
 fi
 
+# 2b. No scan is ever tracked, anywhere in the tree.
+#
+#     The manual scans are copyrighted and were removed from this repository
+#     and its history when it was made public. They still have to be READ to
+#     write a clause, so they live outside the working tree -- which makes an
+#     accidental `git add` the realistic failure, not a deliberate one. The
+#     .gitignore is the first line; this is the one that fails the build.
+if git ls-files | grep -qiE '\.(pdf|djvu)$'; then
+  report "no-scans-tracked" "FAIL - a scan is tracked by git"
+  git ls-files | grep -iE '\.(pdf|djvu)$' | head -5
+  fail=1
+else
+  report "no-scans-tracked" "ok"
+fi
+
 # 3. The interpreter library performs no I/O.
 #
 #    The load-bearing rule of the design: because basic/ neither reads nor

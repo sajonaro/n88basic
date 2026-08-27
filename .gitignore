@@ -1,6 +1,12 @@
 # Reference scans. Large, copyrighted, and not ours to redistribute.
 # spec/sources.md records what each one is and where it came from.
-docs/*.pdf
+# The manual scans are copyrighted and are NOT redistributed. They were
+# removed from this repository and its history when it was made public.
+# Keep them OUTSIDE the working tree and cite them by printed page; this
+# rule is the backstop, and check-invariants.sh fails if one is ever
+# actually tracked.
+*.pdf
+*.djvu
 
 # OCaml / dune
 _build/
