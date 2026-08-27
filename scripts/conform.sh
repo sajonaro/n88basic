@@ -63,13 +63,40 @@ for bas in "$CASES"/*.bas; do
   fi
 done
 
-skipped=$(ls "$CASES"/*.digest 2>/dev/null | wc -l | tr -d ' ')
 echo
 echo "$pass of $((pass + fail)) text cases match through $(basename "$N88")."
-if [ "$skipped" -gt 0 ]; then
-  echo "$skipped framebuffer cases are NOT checked here -- they assert a digest of"
-  echo "an in-process display list, which a binary does not expose. Saying so"
-  echo "because a runner that dropped them silently would report a coverage it"
-  echo "has not earned."
-fi
+
+# The drawing cases assert a digest of the in-process display list, which a
+# binary does not expose -- so each carries a .pnghash as well, the sha256 of
+# the PNG it produces. That is a weaker claim than the digest (it says
+# "unchanged", never "correct") and it is the one decidable from outside a
+# process, which is what makes a released binary and a container checkable at
+# all. See tools/png_hashes.py.
+dpass=0; dfail=0
+for dg in "$CASES"/*.digest; do
+  [ -e "$dg" ] || continue
+  name="$(basename "$dg" .digest)"
+  want="$CASES/$name.pnghash"
+  if [ ! -f "$want" ]; then
+    echo "FAIL $name (drawing): no .pnghash -- run tools/png_hashes.py --write"
+    dfail=$((dfail + 1)); failed+=("$name"); continue
+  fi
+  cp "$CASES/$name.bas" "$work/$name.bas"
+  rm -f "$work/$name.png"
+  "$N88" "$work/$name.bas" >/dev/null 2>&1
+  if [ ! -f "$work/$name.png" ]; then
+    echo "FAIL $name (drawing): drew no PNG"
+    dfail=$((dfail + 1)); failed+=("$name"); continue
+  fi
+  got="$(sha256sum "$work/$name.png" | cut -d" " -f1)"
+  if [ "$got" = "$(cat "$want" | tr -d "[:space:]")" ]; then
+    dpass=$((dpass + 1))
+  else
+    echo "FAIL $name (drawing): PNG hash ${got:0:16}, expected $(cut -c1-16 "$want")"
+    dfail=$((dfail + 1)); failed+=("$name")
+  fi
+done
+echo "$dpass of $((dpass + dfail)) drawing cases match by PNG hash."
+
+fail=$((fail + dfail))
 [ "$fail" -eq 0 ] || { echo; echo "Failed: ${failed[*]}"; exit 1; }
