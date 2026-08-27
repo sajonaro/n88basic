@@ -161,6 +161,23 @@ other part of the system does not re-derive itself when that fact moves.
 re-read. It cannot catch everything — it once stayed silent on the clause it
 existed to catch, because the clause used a verb the pattern did not know.
 
+**A grep hit is not a citation.** This whole project rests on clauses that
+name a page, and `tools/check_spec.py` can verify that a page is named but
+never that anyone read it. A hollow citation is indistinguishable from a real
+one by any mechanical check, so the discipline has to hold at the point of
+writing: open the page, and quote the line rather than summarising what a
+search result appeared to say. A reader once reported a feature missing here
+on the strength of a grep hit in a spec file that, read in full, said the
+opposite — the correcting evidence was on their own disk, unopened.
+
+**When the diagnosis is "feature missing", check the SPELLING first.** A
+wrong syntax and an absent feature are indistinguishable from outside: both
+give you no output and no error worth the name. `PRINT USING`'s string fields
+were reported unimplemented when they were only being written `\...\`, the
+Microsoft form, rather than the `&...&` this dialect uses — `\` being taken
+here as integer division. Confirm the construct exists under the name the
+manual gives it before reading any implementation.
+
 **A difference from a secondary source is a question, not a defect.** Where
 a source describing a different machine in the same family disagrees with the
 PC-9801 manual, the manual is right. Changing correct code to match the other
