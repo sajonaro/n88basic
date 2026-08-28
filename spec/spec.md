@@ -79,6 +79,9 @@ document and covered by conformance tests.
 `LET` · `REM` and `'` · `END` · `STOP` · `CLEAR` · `OPTION BASE` · `DIM` ·
 `ERASE` · `SWAP` · `DEF FN` · `DEFINT` · `DEFSNG` · `DEFDBL` · `DEFSTR`
 
+**Session commands** (`n88 --immediate` only, not statements a program may contain)
+`RUN` · `NEW` · `LIST`
+
 **Control flow**
 `GOTO` · `GOSUB` · `RETURN` · `IF` / `THEN` / `ELSE` · `FOR` / `NEXT` ·
 `WHILE` / `WEND` · `ON…GOTO` · `ON…GOSUB`
@@ -233,11 +236,22 @@ violate the contract: the lexer has no such token at all, so it fails loudly
 with `Unexpected character` rather than quietly becoming a variable. It is a
 gap, not a defect.
 
-**Editing and direct-mode commands** — `AUTO` · `LIST` · `LLIST` · `DELETE` ·
-`RENUM` · `NEW` · `RUN` · `CONT` · `EDIT` · `TRON` · `TROFF` · `HELP` — are not
-interpreter features. They belong to the environment that hosts a program, and
-the ones worth having are provided by the VSCode extension instead: renumbering
-as a refactor, listing as the buffer itself.
+**Editing and direct-mode commands** — `AUTO` · `LLIST` · `DELETE` · `RENUM` ·
+`CONT` · `EDIT` · `TRON` · `TROFF` · `HELP` — are not interpreter features. They
+belong to the environment that hosts a program, and the ones worth having are
+provided by the VSCode extension instead: renumbering as a refactor, listing as
+the buffer itself.
+
+**`RUN`, `NEW` and `LIST` are in scope as of 2026-08-28**, and were out of it
+before, under the paragraph above. The reason given there was that they belong
+to the environment that hosts a program — and `n88 --immediate` is now that
+environment, so the ground the decision rested on moved rather than the decision
+being wrong when made. Each has a clause citing its own page (printed p.138,
+p.106 and p.97), and each is a command recognised at the prompt rather than a
+statement the parser accepts inside a program, which is the distinction the
+manual's own functional index draws between コマンド and 一般命令. The rest of
+the list stays out: `DELETE` and `RENUM` edit a stored program the way an editor
+does, and the buffer is the better place for both.
 
 ### 3.4 What "in scope" commits to
 

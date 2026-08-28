@@ -11,3 +11,8 @@ PRINT Q(1)
 10 PRINT "replaced"
 20
 LIST
+Z=5
+100 PRINT "Z is";Z
+RUN
+110 PRINT "second"
+RUN 110

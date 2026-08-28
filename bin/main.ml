@@ -163,14 +163,14 @@ let immediate () =
     |> List.sort (fun (a, _) (b, _) -> compare a b)
   in
   let ok () = print_string "Ok\n"; flush stdout in
-  let exec (source : string) =
+  let exec ?start_line (source : string) =
     let prog, errors = N88basic.Program.of_source source in
     match errors with
     | e :: _ -> prerr_endline (N88basic.Error.to_string e)
     | [] -> (
         match
           N88basic.Interp.run ~input:stdin_line ~on_draw ~on_point ~on_in_window
-            ~env ~writer ~write:print_string prog
+            ~env ~writer ?start_line ~write:print_string prog
         with
         | Ok () -> ()
         | Error e -> prerr_endline (N88basic.Error.to_string e))
@@ -188,19 +188,81 @@ let immediate () =
            | Some (num, text) -> Hashtbl.replace stored num text
            | None -> (
                match String.uppercase_ascii line with
-               | "RUN" ->
+               | cmd when cmd = "RUN" || String.length cmd > 4
+                                         && String.sub cmd 0 4 = "RUN " ->
+                   (* Printed p.138: "RUN は、プログラムの実行に先だち、変数を
+                      すべて初期化し" -- RUN INITIALISES ALL VARIABLES before it
+                      runs. It is not a way to enter the stored program with
+                      the variables a direct statement has just set, which is
+                      what this did before the page was read. Env.clear is the
+                      same reset CLEAR performs (printed p.46). *)
+                   let arg = String.trim (String.sub cmd 3 (String.length cmd - 3)) in
+                   let start_line = int_of_string_opt arg in
                    let source =
                      listing ()
                      |> List.map (fun (n, t) -> string_of_int n ^ " " ^ t)
                      |> String.concat "\n"
                    in
-                   if source <> "" then exec source;
+                   if arg <> "" && start_line = None then
+                     prerr_endline "RUN takes a line number"
+                   else begin
+                     N88basic.Env.clear env;
+                     if source <> "" then exec ?start_line source
+                   end;
                    ok ()
-               | "NEW" -> Hashtbl.reset stored; ok ()
-               | "LIST" ->
-                   List.iter
-                     (fun (n, t) -> Printf.printf "%d %s\n" n t)
-                     (listing ());
+               | "NEW" ->
+                   (* Printed p.106: NEW erases the program in memory AND
+                      initialises every variable. pp.4-6 mention only the
+                      erasing, and this cleared only the program until NEW's
+                      own page was read. *)
+                   Hashtbl.reset stored;
+                   N88basic.Env.clear env;
+                   ok ()
+               | cmd when cmd = "LIST" || String.length cmd > 5
+                                          && String.sub cmd 0 5 = "LIST " ->
+                   (* Printed p.97 gives five forms, and the table there is
+                      the whole rule: "start-end" lists that range, "start-"
+                      lists from there up, "-end" lists from the lowest line
+                      to there, "start" lists that one line, and no argument
+                      lists everything. The page's "." (the interpreter's
+                      current-line pointer) is NOT implemented: nothing here
+                      tracks a current line. LLIST, which sends the same
+                      listing to a printer, is out of scope with the rest of
+                      printer handling. *)
+                   let arg = String.trim (String.sub cmd 4 (String.length cmd - 4)) in
+                   let bounds =
+                     if arg = "" then Some (None, None)
+                     else
+                       match String.index_opt arg '-' with
+                       | None -> (
+                           match int_of_string_opt arg with
+                           | Some n -> Some (Some n, Some n)
+                           | None -> None)
+                       | Some i ->
+                           let lo = String.trim (String.sub arg 0 i)
+                           and hi =
+                             String.trim
+                               (String.sub arg (i + 1) (String.length arg - i - 1))
+                           in
+                           let parse t =
+                             if t = "" then Some None
+                             else match int_of_string_opt t with
+                               | Some n -> Some (Some n)
+                               | None -> None
+                           in
+                           (match (parse lo, parse hi) with
+                           | Some l, Some h -> Some (l, h)
+                           | _ -> None)
+                   in
+                   (match bounds with
+                   | None -> prerr_endline "LIST takes a line number or a range"
+                   | Some (lo, hi) ->
+                       List.iter
+                         (fun (n, t) ->
+                           let above = match lo with None -> true | Some l -> n >= l
+                           and below = match hi with None -> true | Some h -> n <= h in
+                           if above && below then Printf.printf "%d %s\n" n t)
+                         (listing ()));
                    ok ()
                | _ ->
                    (* An immediate statement has to reach a parser that only

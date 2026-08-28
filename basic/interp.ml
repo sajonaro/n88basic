@@ -1732,7 +1732,7 @@ let default_on_lp () : float * float = (0.0, 0.0)
    rather than restarting it, as it does on the machine. *)
 let run ?(input = default_input) ?printer ?(on_draw = ignore)
     ?(on_point = default_on_point) ?(on_in_window = default_on_in_window)
-    ?(on_lp = default_on_lp) ?env ?writer ?lwriter
+    ?(on_lp = default_on_lp) ?env ?writer ?lwriter ?start_line
     ~(write : string -> unit) (prog : Program.t) : (unit, Error.t) result =
   (* On real hardware, LPRINT output goes only to the printer, not the screen.
      This interpreter has no printer, so by default it merges the streams:
@@ -1752,7 +1752,14 @@ let run ?(input = default_input) ?printer ?(on_draw = ignore)
       on_point;
       on_lp;
       data_lines = [||];
-      pc = 0;
+      (* RUN <line> starts execution at that line (printed p.138). An unknown
+         line falls back to the start; the caller is the one positioned to
+         complain about it, not this function. *)
+      pc =
+        (match start_line with
+        | None -> 0
+        | Some n -> (
+            match Program.index_of_line prog n with Some i -> i | None -> 0));
       si = 0;
       jumped = false;
       halted = false;

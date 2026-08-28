@@ -1502,10 +1502,13 @@
     {
       "name": "LIST",
       "kind": "statement",
-      "syntax": null,
+      "syntax": "LIST [<start>][-[<end>]] -- lists all or part of the stored program; the \".\" current-line form and LLIST are not implemented",
       "summary": "lists program lines",
-      "scope": "out",
-      "clauses": []
+      "scope": "in",
+      "clauses": [
+        "PROG.LIST"
+      ],
+      "source": "ref-9801 printed p.97 / PDF p.108"
     },
     {
       "name": "LLIST",
@@ -1630,10 +1633,13 @@
     {
       "name": "NEW",
       "kind": "statement",
-      "syntax": null,
+      "syntax": "NEW -- erases the stored program and initialises every variable",
       "summary": "clears the program from memory",
-      "scope": "out",
-      "clauses": []
+      "scope": "in",
+      "clauses": [
+        "PROG.NEW"
+      ],
+      "source": "ref-9801 printed p.106 / PDF p.117"
     },
     {
       "name": "OPEN",
@@ -1734,10 +1740,13 @@
     {
       "name": "RUN",
       "kind": "statement",
-      "syntax": null,
+      "syntax": "RUN [<line number>] -- starts the stored program, initialising every variable first; the RUN <file descriptor> form is out of scope",
       "summary": "runs the program",
-      "scope": "out",
-      "clauses": []
+      "scope": "in",
+      "clauses": [
+        "PROG.RUN"
+      ],
+      "source": "ref-9801 printed p.138 / PDF p.149"
     },
     {
       "name": "SAVE",
