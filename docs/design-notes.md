@@ -161,6 +161,28 @@ other part of the system does not re-derive itself when that fact moves.
 re-read. It cannot catch everything — it once stayed silent on the clause it
 existed to catch, because the clause used a verb the pattern did not know.
 
+**A test can pin an assumption about the ENVIRONMENT as firmly as behaviour.**
+The extension's Run command shelled `eval $(opam env --switch=.) && dune exec
+bin/main.exe` — it built the interpreter from source in the current directory,
+so it worked in a checkout of this repository and nowhere else. The published
+extension's primary action could not run anything for anyone who had merely
+installed it. Its test asserted that exact command line and passed, because the
+assertion was true: the command *was* what the code produced. What the test
+never asked was whether the machine it described was the user's. Blast radius
+is the thing to weigh here — this was correct behaviour on one machine, in the
+one place a reader would never think to check, for as long as nobody outside
+had the extension. When a test pins a command, a path or a toolchain, ask
+whether it also pins a machine.
+
+**An automated signal that nobody reads is not a check.** `citation_coverage.py`
+had been reporting printed pp.4–8 as uncited on every run for eleven days.
+Direct mode — a whole documented operating mode of the language — was in there,
+and was implemented only when someone went and read the pages the tool had been
+naming. Every other failure in these notes is a question that was never asked;
+this one is a question that was asked, answered, printed, and skipped. A tool
+that reports into a void is a tool nobody has to disagree with. Read what the
+tools already say before adding one that says something new.
+
 **A grep hit is not a citation.** This whole project rests on clauses that
 name a page, and `tools/check_spec.py` can verify that a page is named but
 never that anyone read it. A hollow citation is indistinguishable from a real
