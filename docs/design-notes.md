@@ -161,6 +161,20 @@ other part of the system does not re-derive itself when that fact moves.
 re-read. It cannot catch everything — it once stayed silent on the clause it
 existed to catch, because the clause used a verb the pattern did not know.
 
+**Behaviour that is correct by accident is what the next improvement removes.**
+Every other case in these notes is about finding something wrong. This one is
+about something *right* whose rightness nobody has recorded, which is a latent
+regression waiting for a plausible refactor. A downstream consumer's prompt
+isolated variables across `RUN` exactly as printed p.138 requires — not because
+anyone had read the page, but because each `RUN` spawned a fresh process and
+the isolation fell out of the architecture. Sharing state between the prompt
+and `RUN` is precisely the change a later reader would make as an obvious
+enhancement, and it would have been a regression against a rule nobody knew
+existed. The fix is not a test, which pins the behaviour without the reason;
+it is writing down that the behaviour is load-bearing and which page requires
+it. Ask it of code that works and you don't know why: **is this correct, or is
+it correct by accident and undefended?**
+
 **A test can pin an assumption about the ENVIRONMENT as firmly as behaviour.**
 The extension's Run command shelled `eval $(opam env --switch=.) && dune exec
 bin/main.exe` — it built the interpreter from source in the current directory,
