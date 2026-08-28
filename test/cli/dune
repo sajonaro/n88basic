@@ -170,3 +170,30 @@
  (alias runtest)
  (action
   (diff version.out version.actual)))
+
+; "-" reads the program from stdin. Piped through `system` rather than dune's
+; own stdin redirection so that what is pinned is the shape a consumer
+; actually uses -- an editor or script writing a buffer into the process. The
+; same source is ALSO run as a file by the rule below, and both must produce
+; identical output: a second way in that quietly diverged would be worse than
+; not having one.
+(rule
+ (target stdin_program.actual)
+ (action
+  (system
+   "cat %{dep:stdin_program.bas} | %{exe:../../bin/main.exe} - > stdin_program.actual")))
+
+(rule
+ (alias runtest)
+ (action
+  (diff stdin_program.out stdin_program.actual)))
+
+(rule
+ (with-stdout-to
+  stdin_as_file.actual
+  (run %{exe:../../bin/main.exe} %{dep:stdin_program.bas})))
+
+(rule
+ (alias runtest)
+ (action
+  (diff stdin_program.out stdin_as_file.actual)))

@@ -13,20 +13,44 @@
    same shape as the missing-file message. Sys.is_directory raises for a
    path that does not exist at all, which is exactly the message that case
    already printed. *)
+(* "-" means the program arrives on stdin. Read in chunks rather than by
+   length: in_channel_length needs a seekable channel, which is why passing
+   /dev/stdin fails with "Illegal seek" rather than working by accident. *)
+let read_all (ic : in_channel) : string =
+  let buf = Buffer.create 4096 in
+  let chunk = Bytes.create 65536 in
+  let rec loop () =
+    let n = input ic chunk 0 (Bytes.length chunk) in
+    if n > 0 then begin
+      Buffer.add_subbytes buf chunk 0 n;
+      loop ()
+    end
+  in
+  loop ();
+  Buffer.contents buf
+
 let read_file (path : string) : string =
-  if Sys.is_directory path then raise (Sys_error (path ^ ": Is a directory"));
-  let ic = open_in_bin path in
-  Fun.protect
-    ~finally:(fun () -> close_in ic)
-    (fun () -> really_input_string ic (in_channel_length ic))
+  if path = "-" then read_all stdin
+  else begin
+    if Sys.is_directory path then raise (Sys_error (path ^ ": Is a directory"));
+    let ic = open_in_bin path in
+    Fun.protect
+      ~finally:(fun () -> close_in ic)
+      (fun () -> really_input_string ic (in_channel_length ic))
+  end
 
 let stdin_line () : string option =
   match input_line stdin with line -> Some line | exception End_of_file -> None
 
 (* Beside [path]: "demo.bas" draws into "demo.png". A path with no
-   extension at all just grows a ".png". *)
+   extension at all just grows a ".png".
+
+   A program read from stdin has no source file to sit beside, so it draws
+   into "n88.png" in the working directory. A caller running several should
+   give each its own directory rather than expect distinct names -- an
+   editor executing a buffer already has somewhere it wants the file. *)
 let png_path_for (path : string) : string =
-  Filename.remove_extension path ^ ".png"
+  if path = "-" then "n88.png" else Filename.remove_extension path ^ ".png"
 
 (* This was the one file operation the runner did not guard. Every other
    path here reports on stderr and picks an exit code deliberately; a
@@ -58,9 +82,14 @@ let write_png (path : string) (ops : N88basic.Display.op list) : unit =
 let version = "0.1.2"
 
 let usage =
-  "usage: n88 FILE.bas\n\n\
+  "usage: n88 FILE.bas\n\
+  \       n88 -\n\n\
   \  Runs an N88-BASIC(86) program. Output goes to stdout; a program that\n\
   \  draws also writes a PNG beside its source.\n\n\
+  \  \"-\" reads the program from stdin and draws into \"n88.png\" in the\n\
+  \  working directory. The program has then consumed stdin, so INPUT and\n\
+  \  LINE INPUT have nothing left to read and stop with \"Out of input\";\n\
+  \  pass a file when a program asks for input.\n\n\
   \  --version   print the version and exit\n\
   \  --help      print this message and exit\n"
 

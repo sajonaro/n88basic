@@ -1,7 +1,13 @@
 usage: n88 FILE.bas
+       n88 -
 
   Runs an N88-BASIC(86) program. Output goes to stdout; a program that
   draws also writes a PNG beside its source.
+
+  "-" reads the program from stdin and draws into "n88.png" in the
+  working directory. The program has then consumed stdin, so INPUT and
+  LINE INPUT have nothing left to read and stop with "Out of input";
+  pass a file when a program asks for input.
 
   --version   print the version and exit
   --help      print this message and exit
