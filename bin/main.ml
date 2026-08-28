@@ -90,8 +90,137 @@ let usage =
   \  working directory. The program has then consumed stdin, so INPUT and\n\
   \  LINE INPUT have nothing left to read and stop with \"Out of input\";\n\
   \  pass a file when a program asks for input.\n\n\
+  \  --immediate, -i\n\
+  \              the manual's direct mode (printed pp.4-6): statements are\n\
+  \              read from stdin and executed as they arrive, and the\n\
+  \              variables they set persist. A line typed with a number in\n\
+  \              front is stored instead; RUN executes the stored lines, LIST\n\
+  \              shows them, a bare line number deletes one, and NEW erases\n\
+  \              the program. A session that draws writes \"n88.png\" when it\n\
+  \              ends.\n\n\
   \  --version   print the version and exit\n\
   \  --help      print this message and exit\n"
+
+
+(* ---------------------------------------------------------------- immediate
+
+   The manual's direct mode, printed pp.4-6 (ch1 SS3). The rules implemented
+   here are all from those pages:
+
+     - A command typed WITHOUT a line number executes on its own and is not
+       stored in memory (p.5). BASIC then prints "Ok", which p.4 names as the
+       prompt.
+     - A command typed WITH a line number is stored in memory with its number
+       and produces no output (p.5); the program runs in line-number order
+       when RUN is typed.
+     - Typing a line number ALONE deletes that line (p.6).
+     - Typing an existing line number with new text replaces that line (p.6).
+     - Memory holds one program at a time; NEW erases it (p.5).
+     - Multi-statement (colon-separated) is allowed in direct mode (p.5).
+
+   WHAT IS OURS, and named so it is not mistaken for the page. RUN, NEW and
+   LIST are recognised HERE, at the prompt, rather than being statements the
+   parser knows -- the interpreter has none of them, and pp.4-6 describe them
+   as things typed at the prompt, so this is the smaller claim. Whether NEW
+   also clears variables is not stated on those pages: it erases the program
+   only, and CLEAR (printed p.46) is the statement the manual does define for
+   clearing variables. Errors print their message and are followed by "Ok",
+   the session continuing; the pages do not say, and stopping a session on a
+   typo would make it useless. *)
+
+let is_digit c = c >= '0' && c <= '9'
+
+(* "10 PRINT 1" -> Some (10, "PRINT 1");  "10" -> Some (10, "") *)
+let split_line_number (line : string) : (int * string) option =
+  let n = String.length line in
+  let i = ref 0 in
+  while !i < n && is_digit line.[!i] do incr i done;
+  if !i = 0 then None
+  else
+    match int_of_string_opt (String.sub line 0 !i) with
+    | None -> None
+    | Some num -> Some (num, String.trim (String.sub line !i (n - !i)))
+
+let immediate () =
+  let stored : (int, string) Hashtbl.t = Hashtbl.create 64 in
+  let env = N88basic.Env.create () in
+  let writer = N88basic.Print_format.make print_string in
+  let ops = ref [] in
+  let on_draw op = ops := op :: !ops in
+  (* The same boundary the file path crosses, and for the same reason: basic/
+     stays pixel-blind, so POINT is answered by rasterising the display list
+     so far. *)
+  let on_point (x : float) (y : float) : int =
+    let fb = Raster.Rasterize.to_framebuffer (List.rev !ops) in
+    let xi = int_of_float (Float.round x) and yi = int_of_float (Float.round y) in
+    if Raster.Framebuffer.in_bounds ~x:xi ~y:yi then
+      Raster.Framebuffer.get_pixel fb ~x:xi ~y:yi
+    else -1
+  in
+  let on_in_window p = Raster.Rasterize.in_window (List.rev !ops) p in
+  let listing () =
+    Hashtbl.fold (fun k v acc -> (k, v) :: acc) stored []
+    |> List.sort (fun (a, _) (b, _) -> compare a b)
+  in
+  let ok () = print_string "Ok\n"; flush stdout in
+  let exec (source : string) =
+    let prog, errors = N88basic.Program.of_source source in
+    match errors with
+    | e :: _ -> prerr_endline (N88basic.Error.to_string e)
+    | [] -> (
+        match
+          N88basic.Interp.run ~input:stdin_line ~on_draw ~on_point ~on_in_window
+            ~env ~writer ~write:print_string prog
+        with
+        | Ok () -> ()
+        | Error e -> prerr_endline (N88basic.Error.to_string e))
+  in
+  ok ();
+  let rec loop () =
+    match stdin_line () with
+    | None -> ()
+    | Some raw ->
+        let line = String.trim raw in
+        (if line = "" then ()
+         else
+           match split_line_number line with
+           | Some (num, "") -> Hashtbl.remove stored num
+           | Some (num, text) -> Hashtbl.replace stored num text
+           | None -> (
+               match String.uppercase_ascii line with
+               | "RUN" ->
+                   let source =
+                     listing ()
+                     |> List.map (fun (n, t) -> string_of_int n ^ " " ^ t)
+                     |> String.concat "\n"
+                   in
+                   if source <> "" then exec source;
+                   ok ()
+               | "NEW" -> Hashtbl.reset stored; ok ()
+               | "LIST" ->
+                   List.iter
+                     (fun (n, t) -> Printf.printf "%d %s\n" n t)
+                     (listing ());
+                   ok ()
+               | _ ->
+                   (* An immediate statement has to reach a parser that only
+                      reads numbered lines, so it is wrapped in one. It cannot
+                      collide with the stored program: exec builds a Program
+                      from this text alone. The number must be legal --
+                      PROG.LINE-NUMBERS is 1..65529 and 0 is refused -- and the
+                      visible cost is that an error in a direct statement
+                      reports "in line 1", where the machine would name no line
+                      at all. Recorded rather than hidden. *)
+                   exec ("1 " ^ line);
+                   ok ()));
+        flush stdout;
+        loop ()
+  in
+  loop ();
+  if !ops <> [] && Raster.Rasterize.produces_a_picture (List.rev !ops) then begin
+    write_png "n88.png" (List.rev !ops);
+    prerr_endline "wrote n88.png"
+  end
 
 let () =
   match Sys.argv with
@@ -100,6 +229,9 @@ let () =
       exit 0
   | [| _; ("--help" | "-help" | "-h") |] ->
       print_string usage;
+      exit 0
+  | [| _; ("--immediate" | "-i") |] ->
+      immediate ();
       exit 0
   | [| _; path |] -> (
       match read_file path with

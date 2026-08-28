@@ -1,0 +1,13 @@
+PRINT 21+6-5
+10 A=2
+20 B=-5
+30 PRINT A+B
+RUN
+A=7
+PRINT A
+DIM Q(3)
+Q(1)=99
+PRINT Q(1)
+10 PRINT "replaced"
+20
+LIST

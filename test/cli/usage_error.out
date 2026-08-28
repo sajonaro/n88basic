@@ -9,5 +9,14 @@ usage: n88 FILE.bas
   LINE INPUT have nothing left to read and stop with "Out of input";
   pass a file when a program asks for input.
 
+  --immediate, -i
+              the manual's direct mode (printed pp.4-6): statements are
+              read from stdin and executed as they arrive, and the
+              variables they set persist. A line typed with a number in
+              front is stored instead; RUN executes the stored lines, LIST
+              shows them, a bare line number deletes one, and NEW erases
+              the program. A session that draws writes "n88.png" when it
+              ends.
+
   --version   print the version and exit
   --help      print this message and exit

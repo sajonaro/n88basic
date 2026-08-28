@@ -197,3 +197,21 @@
  (alias runtest)
  (action
   (diff stdin_program.out stdin_as_file.actual)))
+
+; --immediate is the manual's direct mode (printed pp.4-6), and this pins the
+; two transcripts the pages themselves print -- PRINT 21+6-5 answering 22, and
+; the 10/20/30 + RUN program answering -3 -- alongside the part that makes it
+; a session rather than a replay: A, an array dimensioned by DIM, and the
+; stored program all share one environment across statements. It also pins
+; p.6's editing rules, where a repeated line number replaces and a bare one
+; deletes.
+(rule
+ (target immediate.actual)
+ (action
+  (system
+   "%{exe:../../bin/main.exe} --immediate < %{dep:immediate.stdin} > immediate.actual 2>/dev/null")))
+
+(rule
+ (alias runtest)
+ (action
+  (diff immediate.out immediate.actual)))

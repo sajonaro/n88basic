@@ -1719,10 +1719,21 @@ let default_on_in_window (_ : Display.point) : bool = true
    the same answer a rasteriser would before anything has drawn. *)
 let default_on_lp () : float * float = (0.0, 0.0)
 
+(* [?env], [?writer] and [?lwriter] exist for one caller: an immediate-mode
+   session, where the manual's direct mode (printed pp.4-6) executes a
+   statement on its own and the variables it sets are still there for the
+   next one. Without them every execution starts from Env.create (), which
+   is what makes a REPL over this interpreter an illusion rather than a
+   session.
+
+   The writers persist as well as the environment, and that is not an
+   afterthought: Print_format.writer carries the current print-zone column,
+   so "PRINT 1;" followed by a separate "PRINT 2" continues the same line
+   rather than restarting it, as it does on the machine. *)
 let run ?(input = default_input) ?printer ?(on_draw = ignore)
     ?(on_point = default_on_point) ?(on_in_window = default_on_in_window)
-    ?(on_lp = default_on_lp) ~(write : string -> unit) (prog : Program.t) :
-    (unit, Error.t) result =
+    ?(on_lp = default_on_lp) ?env ?writer ?lwriter
+    ~(write : string -> unit) (prog : Program.t) : (unit, Error.t) result =
   (* On real hardware, LPRINT output goes only to the printer, not the screen.
      This interpreter has no printer, so by default it merges the streams:
      PRINT and LPRINT both go to ~write unless the caller supplies a separate
@@ -1732,9 +1743,9 @@ let run ?(input = default_input) ?printer ?(on_draw = ignore)
   let st =
     {
       prog;
-      env = Env.create ();
-      w = Print_format.make write;
-      lw = Print_format.make printer;
+      env = (match env with Some e -> e | None -> Env.create ());
+      w = (match writer with Some w -> w | None -> Print_format.make write);
+      lw = (match lwriter with Some w -> w | None -> Print_format.make printer);
       on_in_window;
       input;
       on_draw;
