@@ -54,7 +54,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SECTIONS: list[tuple[int, str, str, int, int]] = [
     (1, "1", "ROM mode and DISK mode BASIC", 3, 3),
     (1, "2", "the main features of N88-BASIC(86)", 3, 3),
-    (1, "3", "BASIC's operating modes (direct and program)", 4, 8),
+    (1, "3", "BASIC's operating modes (direct and program)", 4, 6),
     (2, "1", "statements", 9, 9),
     (2, "2", "lines", 9, 9),
     (2, "3", "line numbers", 9, 9),
@@ -78,6 +78,15 @@ SECTIONS: list[tuple[int, str, str, int, int]] = [
 # SS14 from "chapter 3 starts at 35" and so reported pp.32-34 as three
 # uncited pages that do not exist -- phantom gaps in a tool whose whole
 # purpose is finding real ones.
+#
+# IT HAPPENED AGAIN, at the other end, and was found on 2026-08-28 only
+# because someone went to read the pages: ch1 SS3 was recorded as ending at
+# printed p.8 because chapter 2 starts at p.9. It ends at printed p.6. PDF
+# p.20 carries folio 6, PDF p.21 is the chapter 2 divider with no folio at
+# all, and PDF p.22 carries folio 9 -- so printed pp.7-8 do not exist, and
+# this tool reported two uncited pages that are not pages. The end of a
+# section CANNOT be derived from where the next one starts; it has to be
+# read off the last page the section actually occupies.
 PROSE_PAGES = sorted({p for (_, _, _, lo, hi) in SECTIONS for p in range(lo, hi + 1)})
 
 # "ref-9801 printed p.51 / PDF p.62" and "ref-9801 printed p.122-123 / ..."
