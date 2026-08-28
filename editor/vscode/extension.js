@@ -12,6 +12,7 @@ const { registerLanguageClient } = require('./src/language-client');
 const { registerHoverProvider } = require('./src/hover');
 const { registerCompletionProvider } = require('./src/completion');
 const { registerRunCommand } = require('./src/run');
+const { registerSessionCommands } = require('./src/session');
 const { registerRenumberCommand, registerInsertNextLineCommand } = require('./src/renumber-commands');
 const { registerCodeActionProvider } = require('./src/quickfix');
 const { registerNavigation } = require('./src/navigation');
@@ -30,6 +31,10 @@ function activate(context) {
   registerCompletionProvider(context, specData);
 
   registerRunCommand(context);
+  // Execute buffer / selection / immediate statement -- three commands rather
+  // than one, because "run the current line" is not a meaningful request in a
+  // numbered BASIC program (src/session.js says why).
+  registerSessionCommands(context);
   registerRenumberCommand(context);
   registerInsertNextLineCommand(context);
   registerCodeActionProvider(context);

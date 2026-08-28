@@ -51,6 +51,18 @@ jobs:
       - name: Deflate round-trips through a real inflater
         run: opam exec -- python3 tools/check_deflate.py
 
+      # The extension's pure logic under plain node, plus end-to-end checks
+      # that a real n88 accepts what the extension sends it. N88 points at the
+      # build so the second half actually runs -- without it those checks skip,
+      # and a skipped check is not a passing one.
+      - name: Extension features
+        run: |
+          set -eu
+          for t in editor/vscode/tools/test-*.js; do
+            echo "--- $t"
+            N88="$PWD/_build/default/bin/main.exe" node "$t"
+          done
+
       - name: Project invariants
         run: sh scripts/check-invariants.sh
 

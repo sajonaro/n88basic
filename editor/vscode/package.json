@@ -39,6 +39,23 @@
       {
         "command": "n88basic.insertNextLine",
         "title": "N88-BASIC: Insert Next Numbered Line"
+      },
+      {
+        "command": "n88basic.executeBuffer",
+        "title": "N88-BASIC: Execute Buffer",
+        "icon": "$(run-all)"
+      },
+      {
+        "command": "n88basic.executeSelection",
+        "title": "N88-BASIC: Execute Selection as a Program"
+      },
+      {
+        "command": "n88basic.immediateStatement",
+        "title": "N88-BASIC: Immediate Statement…"
+      },
+      {
+        "command": "n88basic.endSession",
+        "title": "N88-BASIC: End Immediate Session"
       }
     ],
     "menus": {
@@ -110,6 +127,11 @@
           "type": "boolean",
           "default": false,
           "description": "Run diagnostics through the N88-BASIC language server instead of in-process. Off by default: every editor feature works without it, so the server is opt-in until it has been proven on a real editor. Requires a window reload."
+        },
+        "n88basic.interpreterPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the n88 interpreter. Empty means \"n88\" on your PATH, which is where both the prebuilt release binary and `opam install n88basic` put it. Set this to run a specific build, or a wrapper script around the container image."
         }
       }
     }

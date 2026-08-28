@@ -163,10 +163,23 @@ check(!specData.isGrounded(null), 'isGrounded: false for a missing clause');
   check(run.findRepoRoot('/nowhere/at/all', existsSync) === '/nowhere/at/all', 'findRepoRoot: falls back to the start directory rather than throwing');
 }
 {
-  const cmd = run.buildRunCommand("/tmp/it's a file.bas");
-  check(cmd.includes('dune exec bin/main.exe --'), 'buildRunCommand: runs the CLI as documented');
-  check(cmd.includes('opam env --switch=. --set-switch'), 'buildRunCommand: sets up the opam switch first');
-  check(cmd.includes("/tmp/it'\\''s a file.bas"), 'buildRunCommand: single quotes in the path are escaped for the shell');
+  // Outside a checkout -- the case that matters, because it is every user who
+  // installed the extension rather than cloning the interpreter.
+  const plain = run.buildRunCommand("/tmp/it's a file.bas", '', false);
+  check(plain.startsWith('n88 '), 'buildRunCommand: runs the installed n88 by default');
+  check(!plain.includes('dune'), 'buildRunCommand: does not need a source checkout');
+  check(plain.includes("/tmp/it'\\''s a file.bas"), 'buildRunCommand: single quotes in the path are escaped for the shell');
+
+  const configured = run.buildRunCommand('/x.bas', '/opt/n88', false);
+  check(configured.startsWith('/opt/n88 '), 'buildRunCommand: a configured path wins');
+
+  // Inside a checkout with nothing configured, building from source is what a
+  // contributor wants and `n88` may not be installed at all.
+  const repo = run.buildRunCommand('/x.bas', '', true);
+  check(repo.includes('dune exec bin/main.exe --'), 'buildRunCommand: builds from source in a checkout');
+  check(repo.includes('opam env --switch=. --set-switch'), 'buildRunCommand: sets up the opam switch there');
+  check(run.buildRunCommand('/x.bas', '/opt/n88', true).startsWith('/opt/n88 '),
+    'buildRunCommand: a configured path wins even in a checkout');
 }
 
 if (failures > 0) {

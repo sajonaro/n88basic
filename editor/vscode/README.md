@@ -3,6 +3,47 @@
 Syntax highlighting and snippets for N88-BASIC(86), the ROM BASIC of the NEC
 PC-9801.
 
+## Running and executing
+
+**Run** (`N88-BASIC: Run`) opens a terminal and runs the saved file, which is
+what you want when you are watching a program work.
+
+Three further commands execute without leaving the editor, writing to the
+**N88-BASIC** output channel:
+
+| Command | What it does |
+| --- | --- |
+| `Execute Buffer` | pipes the whole document into `n88 -` |
+| `Execute Selection as a Program` | pipes just the selected lines; with nothing selected, the whole buffer |
+| `Immediate Statement…` | sends one unnumbered statement to a live `n88 --immediate` |
+
+**Why three commands and not "run the current line".** That request means
+something in Python it does not mean in BASIC: line 30 of a numbered program
+has no `DIM`, no `DATA` and none of the assignments above it, so running it
+alone is almost never useful. The manual draws the same line — printed pp.4–6
+separate direct mode, where a statement stands alone, from program mode, where
+numbered lines are stored and `RUN` executes them in order.
+
+**The immediate session is a real session.** `Immediate Statement…` talks to
+one long-lived `n88 --immediate` process, so `A=7` and then `PRINT A*2` prints
+14 — variables, `DIM` arrays and `DEF FN` definitions persist, and `RUN`, `LIST`
+and `NEW` work at that prompt. It is not a replay of earlier assignments, which
+would diverge the moment a statement had a side effect. `End Immediate Session`
+closes it; the next statement starts a fresh one.
+
+## Which interpreter it uses
+
+`n88basic.interpreterPath`, or `n88` from your `PATH` — where both the prebuilt
+release binary and `opam install n88basic` put it. Point it at a wrapper script
+to use the container image instead.
+
+Inside a checkout of the interpreter's own repository, with nothing configured,
+`Run` builds from source instead (`dune exec`), which is what a contributor
+wants. **That used to be the only thing it did**, unconditionally, so the
+published extension could not run anything for anyone who had merely installed
+it — the command was written when this repository was the only place the
+interpreter existed.
+
 ## What works today
 
 - **Syntax highlighting** for all 192 keywords the specification records —

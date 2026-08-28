@@ -37,11 +37,29 @@ function shellQuote(value) {
   return `'${String(value).replace(/'/g, `'\\''`)}'`;
 }
 
-// The exact command docs/superpowers/specs/2026-08-16-n88basic-design.md
-// §8 and this task specify, run with the repository root as cwd so
-// `--switch=.` resolves.
-function buildRunCommand(filePath) {
-  return `eval $(opam env --switch=. --set-switch) && dune exec bin/main.exe -- ${shellQuote(filePath)}`;
+// Runs the INSTALLED interpreter, which is what a person who has the
+// extension actually has.
+//
+// This used to be, unconditionally:
+//
+//   eval $(opam env --switch=. --set-switch) && dune exec bin/main.exe -- FILE
+//
+// which builds the interpreter from source in the current directory. That
+// works in a checkout of the interpreter's own repository and NOWHERE ELSE, so
+// the published extension's Run command could not run anything for anyone who
+// had merely installed it. It was written when this repository was the only
+// place the interpreter existed; a release binary, a container and an opam
+// package have all appeared since.
+//
+// Now: the configured n88basic.interpreterPath, or `n88` from PATH. The
+// dune form is kept for a checkout, where `n88` may well not be installed and
+// building from source is what a contributor wants -- but it is chosen by
+// looking for the repository, not assumed.
+function buildRunCommand(filePath, interpreter, inRepo) {
+  if (inRepo && !interpreter) {
+    return `eval $(opam env --switch=. --set-switch) && dune exec bin/main.exe -- ${shellQuote(filePath)}`;
+  }
+  return `${interpreter || 'n88'} ${shellQuote(filePath)}`;
 }
 
 const POLL_MS = 750;
@@ -88,12 +106,17 @@ function registerRunCommand(context) {
 
     const filePath = document.fileName;
     const repoRoot = findRepoRoot(path.dirname(filePath), fs.existsSync);
+    // findRepoRoot falls back to the starting directory when there is no
+    // dune-project above it, so "is there one" is the actual question.
+    const inRepo = fs.existsSync(path.join(repoRoot, 'dune-project'));
+    const configured = vscode.workspace.getConfiguration('n88basic').get('interpreterPath');
+    const interpreter = configured && String(configured).trim() ? String(configured).trim() : '';
     const terminal =
       vscode.window.terminals.find((t) => t.name === 'n88basic') ||
       vscode.window.createTerminal({ name: 'n88basic', cwd: repoRoot });
     terminal.show();
     const startTime = Date.now();
-    terminal.sendText(buildRunCommand(filePath));
+    terminal.sendText(buildRunCommand(filePath, interpreter, inRepo));
 
     offerPngWhenReady(vscode, pngPathFor(filePath), startTime);
   });
