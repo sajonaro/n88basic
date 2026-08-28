@@ -11,7 +11,13 @@
 # thing we tested.
 #
 # Usage:  scripts/conform.sh /path/to/n88
-#         scripts/conform.sh 'docker run --rm -i -v CASEDIR:/work IMAGE'
+#
+# To check a container, hand it a wrapper that presents the image as a plain
+# executable. PULL THE IMAGE FIRST: docker prints pull progress on the
+# streams this reads, so an image fetched lazily by the first `docker run`
+# contaminates whichever case happens to run first -- observed exactly once,
+# on color_palette_form, which is simply the alphabetically first case and
+# had nothing to do with palettes.
 #
 # Exit status is 0 only if every runnable case matches.
 

@@ -71,6 +71,10 @@ jobs:
           exec docker run --rm -i -v "\$d":/work "${IMAGE}:${GITHUB_REF_NAME#v}" "\$(basename "\$1")"
           EOF
           chmod +x /tmp/n88-container
+          # Pull before checking: docker writes pull progress to the streams
+          # conform.sh reads, so a lazy fetch inside the first `docker run`
+          # corrupts the first case's captured output.
+          docker pull -q "${IMAGE}:${GITHUB_REF_NAME#v}"
           ./scripts/conform.sh /tmp/n88-container
 
   binary:
