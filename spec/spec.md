@@ -165,6 +165,29 @@ reasons — it reads the PC-8801's text VRAM through `PEEK` (see
 `test/programs/README.md`). Revisit this if a real listing needs it; do not
 revisit it to make a count go up.
 
+**Raw keyboard input stays out, ruled 2026-09-03.** `INKEY$` and `INPUT$(1)`
+were both proposed, and the analysis is worth keeping so it is not rebuilt: the
+dialect already has the blocking spelling (`INPUT$` reads *n* characters, per
+its own entry), so nothing would need inventing; `INPUT$(1)` is a fraction of
+`INKEY$`'s cost because it can set raw mode, read one byte and restore inside a
+single function, where `INKEY$`'s polling idiom holds the terminal raw across
+arbitrary interpreter execution; and the headless case needs no decision, since
+`tcgetattr` raises `ENOTTY` under a pipe and a plain byte read is already what
+the entry describes.
+
+It is still out, and the reason is not cost. It would be the first thing here
+to take custody of **OS terminal state**, where a bug does not stop at the
+process boundary: a missed restore on any exit path leaves a user's shell with
+no echo after `n88` has exited, and they will not attribute that to this
+interpreter. Everything else in this project fails inside its own process. That
+is a different class of risk from a wrong answer, and it is not one to take on
+alongside everything else in flight.
+
+Consequences, stated so nobody mistakes them for oversights: there is no way
+for a program to react to a keypress, no `ON KEY`, and no `TIMER`, so a program
+responds to nothing but its own control flow. `INPUT` covers "ask a question,
+get an answer", which is what the chapter material actually needs.
+
 ### 3.3 Out of scope
 
 Not specified and not executed. These **parse**, and the interpreter reports
