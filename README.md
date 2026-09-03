@@ -60,8 +60,18 @@ python3 tools/run_programs.py
 
 Three ways, in rough order of convenience.
 
-**A prebuilt binary.** Every release attaches `n88-linux-x86_64`, a native
-Linux build (glibc):
+**One command, first time and every time.** It installs to `~/.local/bin`,
+and running it again upgrades — printing what it replaced, so a version that
+moved does not move silently:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh
+#  n88 0.1.3 -> 0.1.4 (/home/you/.local/bin/n88)
+```
+
+`PREFIX=/usr/local` to install elsewhere, `VERSION=v0.1.3` to pin one. Or take
+the asset directly — every release attaches `n88-linux-x86_64`, a native glibc
+build:
 
 ```sh
 curl -LO https://github.com/sajonaro/n88basic/releases/latest/download/n88-linux-x86_64
@@ -222,6 +232,14 @@ python3 tools/check_spec.py          # structural gate, and a scan for stale rea
 python3 tools/citation_coverage.py   # pages of the manual no clause cites
 python3 tools/run_programs.py        # the example programs
 ```
+
+## Versions
+
+**The interpreter and the extension are released under one tag and carry the
+same version**, so extension X.Y.Z expects `n88` X.Y.Z. An interpreter *newer*
+than the extension is fine; an older one is what causes trouble, and the
+extension checks at startup and tells you rather than failing obscurely later.
+`n88 --version` answers the question directly.
 
 ## The VS Code extension
 

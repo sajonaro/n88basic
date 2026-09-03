@@ -147,10 +147,34 @@ jobs:
       - name: The binary must pass the conformance corpus
         run: ./scripts/conform.sh "$PWD/n88-linux-x86_64"
 
+      # Only THIS job writes the release body. Both jobs used to pass
+      # generate_release_notes, and they append to the same release, which is
+      # why v0.1.4's notes carried the compare link twice.
+      #
+      # The body leads with the tag's own annotation. A reader deciding whether
+      # an upgrade is worth taking reads one line, and "fixes the extension in
+      # remote/WSL windows" is the line that would have saved a user hours --
+      # a bare compare link is not something anyone reads.
+      - name: Release notes from the tag annotation
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -eu
+          git fetch --force --tags --depth=1 origin "+refs/tags/${GITHUB_REF_NAME}:refs/tags/${GITHUB_REF_NAME}"
+          {
+            git tag -l --format='%(contents:subject)' "${GITHUB_REF_NAME}"
+            echo
+            body=$(git tag -l --format='%(contents:body)' "${GITHUB_REF_NAME}")
+            [ -n "$body" ] && { echo "$body"; echo; } || true
+            echo "The interpreter and the extension are released together and carry the"
+            echo "same version: extension ${GITHUB_REF_NAME#v} expects n88 ${GITHUB_REF_NAME#v}."
+          } > RELEASE_BODY.md
+          cat RELEASE_BODY.md
+
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           files: n88-linux-x86_64
+          body_path: RELEASE_BODY.md
           generate_release_notes: true
 
   extension:
@@ -195,8 +219,9 @@ jobs:
           name: n88basic-vsix
           path: n88basic.vsix
 
+      # No generate_release_notes here: the binary job owns the body, and two
+      # jobs generating into one release duplicates it.
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           files: n88basic.vsix
-          generate_release_notes: true

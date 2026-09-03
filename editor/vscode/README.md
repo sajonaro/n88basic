@@ -13,6 +13,13 @@ with live error checking, and a real interpreter behind the Run button.
 > ```
 >
 > Older than 0.1.3 and the three interactive commands below will not work.
+>
+> **The extension checks this for you** when a window opens, and says so if the
+> interpreter is behind or missing. It never installs or upgrades anything —
+> if your fixtures depend on exact output, nothing here will move it under you.
+>
+> To upgrade:
+> `curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh`
 
 ---
 
