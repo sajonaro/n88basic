@@ -29,6 +29,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "n88basic.openOverview",
+        "title": "N88-BASIC: Open Overview"
+      },
+      {
         "command": "n88basic.run",
         "title": "N88-BASIC: Run",
         "icon": "$(play)"

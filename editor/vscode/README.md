@@ -54,6 +54,18 @@ If the interpreter is missing or behind, this is where it says so, with a
 **How to upgrade** button. It works with no file open — that is the point of
 putting it there.
 
+**Don't see the icon?** You are not missing an install. VS Code can register a
+new Activity Bar entry as hidden — it happens on a crowded bar, where a new
+container lands well down the order and is stored as `visible: false`. There is
+no icon and no error, so there is nothing to search for.
+
+Two ways through, either takes seconds:
+
+- **F1 → `N88-BASIC: Open Overview`** — opens the panel whatever the Activity
+  Bar is doing. This always works, so it is the one to reach for.
+- **Right-click the Activity Bar → tick N88-BASIC(86)** — makes the icon
+  appear for good.
+
 ## Two things happen to your file, and they are separate
 
 ```

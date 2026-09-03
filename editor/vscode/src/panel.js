@@ -126,7 +126,22 @@ function registerPanel(context) {
   };
 
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider('n88basic.home', provider)
+    vscode.window.registerWebviewViewProvider('n88basic.home', provider),
+
+    // A Command Palette route to the panel, because the Activity Bar entry can
+    // be INVISIBLE through no fault of the manifest. VSCode stores per-user
+    // workbench state in workbench.activity.pinnedViewlets2, and on a crowded
+    // bar a newly contributed container can land there as
+    // {"pinned": true, "visible": false} -- registered, ordered 22nd, and
+    // never drawn. Observed on a real install: the view itself was not hidden,
+    // everything contributed was correct, and there was no icon and no error.
+    //
+    // It fails for experienced users with many extensions, which is not the
+    // population anyone would guess, and "click the icon" is a dead end with
+    // nothing to search for. VSCode generates <viewId>.focus for a contributed
+    // view; this wraps it under a name a person can find by typing "n88".
+    vscode.commands.registerCommand('n88basic.openOverview', () =>
+      vscode.commands.executeCommand('n88basic.home.focus'))
   );
 }
 

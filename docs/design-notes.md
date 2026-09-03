@@ -161,6 +161,23 @@ other part of the system does not re-derive itself when that fact moves.
 re-read. It cannot catch everything — it once stayed silent on the clause it
 existed to catch, because the clause used a verb the pattern did not know.
 
+**Green tests, correct artifact, and the user still cannot use it.** Three
+instances in one day, and they are one class rather than three bugs. The
+extension's `extensionKind` was `["ui", "workspace"]`, so correct code ran on
+the wrong machine — the MANIFEST decides whether working code runs at all.
+`n88` did not flush before blocking, so a prompt arrived after the answer — a
+fixture capturing stdout cannot see a timing defect. And a correctly
+contributed Activity Bar container was registered by VS Code as
+`visible: false` on a crowded bar — the WORKBENCH decides whether a correct
+contribution is ever seen. In each, every artifact is right, every test is
+green, and the claim *"a user can use this"* is false, with nothing
+inconsistent for review to notice. Two of the three were found only by
+installing it and watching a person try. The lesson is not another check: it
+is that a class of defect lives strictly between a correct artifact and a
+person's hands, and only running it there finds them. Where a check IS
+possible, put it where the decision is made — the manifest test, not the
+feature test.
+
 **A fixture that captures stdout cannot see an interactivity bug.** For five
 releases `n88` did not flush stdout before blocking on `INPUT`, so a prompt
 appeared only after the user had typed — they were typing blind into something

@@ -87,6 +87,24 @@ check(
     );
 }
 
+// Every contributed command must actually be registered by some module. A
+// manifest entry with no registerCommand behind it appears in the Command
+// Palette and fails with "command not found" when chosen -- which looks like a
+// broken extension rather than a missing line. Nothing else here would catch
+// it: the manifest is valid JSON and the code compiles.
+{
+  const srcDir = path.join(root, 'src');
+  let code = fs.readFileSync(path.join(root, 'extension.js'), 'utf8');
+  for (const f of fs.readdirSync(srcDir))
+    if (f.endsWith('.js')) code += fs.readFileSync(path.join(srcDir, f), 'utf8');
+  for (const c of manifest.contributes?.commands ?? [])
+    check(
+      code.includes(`registerCommand('${c.command}'`) ||
+        code.includes(`registerCommand("${c.command}"`),
+      `${c.command} is registered by some module, not just declared`
+    );
+}
+
 const contributedPaths = [];
 if (manifest.main) contributedPaths.push(['main', manifest.main]);
 for (const [i, g] of (manifest.contributes?.grammars ?? []).entries())
