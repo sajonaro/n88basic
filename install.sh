@@ -11,6 +11,7 @@
 #
 #   PREFIX=/usr/local sh install.sh     install somewhere else
 #   VERSION=v0.1.3    sh install.sh     pin a specific release
+#   sh install.sh --extension           also install the VSCode extension
 #   sh install.sh --uninstall           remove it again
 #
 # It never runs itself on a schedule and never upgrades anything but n88.
@@ -32,10 +33,12 @@ PREFIX="${PREFIX:-$HOME/.local}"
 BINDIR="$PREFIX/bin"
 VERSION="${VERSION:-latest}"
 UNINSTALL=no
+EXTENSION=no
 ASSUME_YES=no
 for arg in "$@"; do
   case "$arg" in
     --uninstall) UNINSTALL=yes ;;
+    --extension) EXTENSION=yes ;;
     -y|--yes)    ASSUME_YES=yes ;;
     *) echo "unknown option: $arg" >&2; exit 2 ;;
   esac
@@ -147,3 +150,32 @@ case ":$PATH:" in
   *":$BINDIR:"*) ;;
   *) echo "Note: $BINDIR is not on your PATH." ;;
 esac
+
+# The extension is NOT on the VSCode Marketplace, so
+# `code --install-extension n88basic.n88basic` cannot work -- that form
+# resolves against the Marketplace and returns "Extension not found", which
+# reads to a user as their own mistake. Installing means fetching the .vsix
+# from the release and handing `code` the FILE. This does that.
+#
+# (Uninstalling by ID is different and does work: once installed, the
+# extension is known locally by n88basic.n88basic.)
+if [ "$EXTENSION" = yes ]; then
+  echo
+  if ! command -v code >/dev/null 2>&1; then
+    echo 'No "code" command on PATH, so the extension cannot be installed here.' >&2
+    echo "In VSCode: Command Palette -> 'Shell Command: Install code command in PATH'." >&2
+    exit 1
+  fi
+  if [ "$VERSION" = latest ]; then
+    vsix_url="https://github.com/$REPO/releases/latest/download/n88basic.vsix"
+  else
+    vsix_url="https://github.com/$REPO/releases/download/$VERSION/n88basic.vsix"
+  fi
+  vtmp="$(mktemp -d)"
+  echo "Fetching $vsix_url"
+  curl -fsSL -o "$vtmp/n88basic.vsix" "$vsix_url"
+  code --install-extension "$vtmp/n88basic.vsix" --force
+  rm -rf "$vtmp"
+  echo "Extension installed. In a remote window (WSL, SSH, a container) run this"
+  echo "on the REMOTE side, which is where the extension and n88 both belong."
+fi

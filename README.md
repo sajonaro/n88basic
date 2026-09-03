@@ -66,7 +66,17 @@ moved does not move silently:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh
-#  n88 0.1.3 -> 0.1.4 (/home/you/.local/bin/n88)
+#  n88 0.1.4 -> 0.2.0 (/home/you/.local/bin/n88)
+```
+
+Add `--extension` to install the VS Code extension in the same step. It fetches
+the `.vsix` from the release and hands `code` the file — **`code
+--install-extension n88basic.n88basic` cannot work**, because that form
+resolves against the VS Code Marketplace and this extension is not published
+there:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh -s -- --extension
 ```
 
 `PREFIX=/usr/local` to install elsewhere, `VERSION=v0.1.3` to pin one. Or take

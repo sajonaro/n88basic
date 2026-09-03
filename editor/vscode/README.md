@@ -18,8 +18,16 @@ with live error checking, and a real interpreter behind the Run button.
 > interpreter is behind or missing. It never installs or upgrades anything —
 > if your fixtures depend on exact output, nothing here will move it under you.
 >
-> To upgrade:
-> `curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh`
+> To install or upgrade both halves:
+> `curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh -s -- --extension`
+>
+> **`code --install-extension n88basic.n88basic` does not work.** That form
+> resolves against the VS Code Marketplace, where this extension is not
+> published, and fails with `Extension not found` — which reads as your
+> mistake and sends you looking for a publisher prefix that was already right.
+> Install the `.vsix` file instead, which is what the line above does.
+> (Uninstalling *by* that ID is fine: once installed, the extension is known
+> locally as `n88basic.n88basic`.)
 
 ---
 
