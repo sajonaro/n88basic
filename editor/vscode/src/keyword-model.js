@@ -135,7 +135,7 @@ function mergeCandidates(candidates) {
         text: list[0].words.join(' '),
         candidates: distinct.map((d) => ({ kind: d.kind, scope: d.scope, source: d.source })),
         resolvedScope: chosen.scope,
-        rule: 'ambiguous keyword text (same literal source, different scope); resolved by priority in > deferred > out -- see editor/vscode/README.md',
+        rule: 'ambiguous keyword text (same literal source, different scope); resolved by priority in > deferred > out -- see editor/vscode/DEVELOPING.md',
       });
     }
     groups.push({

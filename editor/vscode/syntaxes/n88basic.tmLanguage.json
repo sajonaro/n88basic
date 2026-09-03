@@ -28,7 +28,7 @@
         }
       ],
       "resolvedScope": "deferred",
-      "rule": "ambiguous keyword text (same literal source, different scope); resolved by priority in > deferred > out -- see editor/vscode/README.md"
+      "rule": "ambiguous keyword text (same literal source, different scope); resolved by priority in > deferred > out -- see editor/vscode/DEVELOPING.md"
     },
     {
       "text": "PUT",
@@ -45,7 +45,7 @@
         }
       ],
       "resolvedScope": "deferred",
-      "rule": "ambiguous keyword text (same literal source, different scope); resolved by priority in > deferred > out -- see editor/vscode/README.md"
+      "rule": "ambiguous keyword text (same literal source, different scope); resolved by priority in > deferred > out -- see editor/vscode/DEVELOPING.md"
     }
   ],
   "patterns": [

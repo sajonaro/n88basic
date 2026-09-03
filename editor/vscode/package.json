@@ -78,6 +78,14 @@
         {
           "command": "n88basic.insertNextLine",
           "when": "resourceLangId == n88basic"
+        },
+        {
+          "command": "n88basic.executeBuffer",
+          "when": "resourceLangId == n88basic"
+        },
+        {
+          "command": "n88basic.executeSelection",
+          "when": "resourceLangId == n88basic"
         }
       ]
     },
