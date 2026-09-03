@@ -63,6 +63,9 @@ jobs:
             N88="$PWD/_build/default/bin/main.exe" node "$t"
           done
 
+      - name: Release-tag rule
+        run: python3 tools/test_check_version_bump.py
+
       - name: Project invariants
         run: sh scripts/check-invariants.sh
 

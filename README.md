@@ -254,6 +254,14 @@ binary removes the program; there is nothing hidden to clean up afterwards.
 
 ## Versions
 
+**Every release bumps the minor component.** `v0.1.4` is followed by `v0.2.0`,
+never `v0.1.5`. The rule is enforced by `tools/check_version_bump.py` in the
+release workflow, before anything is built or published, because five releases
+were tagged as patch bumps by hand and nothing objected. There is no hotfix
+exception: changing the scheme means editing that file, in the same commit that
+tags the exception, so the decision shows up in the diff.
+
+
 **The interpreter and the extension are released under one tag and carry the
 same version**, so extension X.Y.Z expects `n88` X.Y.Z. An interpreter *newer*
 than the extension is fine; an older one is what causes trouble, and the
