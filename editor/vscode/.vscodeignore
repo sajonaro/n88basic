@@ -1,0 +1,21 @@
+# What does NOT belong in the published extension.
+#
+# node_modules is NOT excluded, deliberately: vscode-languageclient is a
+# runtime dependency (src/language-client.js requires it when the language
+# server is enabled), so dropping it would break that feature for anyone who
+# turns the setting on. vsce warns about the file count; bundling is the real
+# answer and is a separate job.
+
+# Test harnesses. They run from a checkout against the repo, never from an
+# installed extension.
+tools/**
+
+# The maintainer reference. README.md is what the install page shows and what
+# a user needs; DEVELOPING.md is for people changing the extension, and lives
+# in the repository for them.
+DEVELOPING.md
+
+# Build leavings.
+**/*.map
+**/.DS_Store
+.vscodeignore
