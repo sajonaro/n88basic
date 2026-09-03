@@ -215,3 +215,18 @@
  (alias runtest)
  (action
   (diff immediate.out immediate.actual)))
+
+; --uninstall deletes a file, so this exercises a COPY. The behaviour worth
+; pinning is not the deletion but the refusal: a binary inside an opam switch
+; must not be removed, because rm corrupts opam's view and `opam remove` is
+; the right command. Exit 1, and the file still there afterwards.
+(rule
+ (target uninstall_refusal.actual)
+ (action
+  (system
+   "mkdir -p _opam/bin && cp %{exe:../../bin/main.exe} _opam/bin/n88 && (./_opam/bin/n88 --uninstall --yes > uninstall_refusal.actual 2>&1; test $? -eq 1) && test -f _opam/bin/n88 && sed -i 's|^.*/_opam/bin/n88 is|<path> is|' uninstall_refusal.actual")))
+
+(rule
+ (alias runtest)
+ (action
+  (diff uninstall_refusal.out uninstall_refusal.actual)))

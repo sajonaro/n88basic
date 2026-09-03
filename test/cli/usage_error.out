@@ -18,5 +18,7 @@ usage: n88 FILE.bas
               the program. A session that draws writes "n88.png" when it
               ends.
 
+  --uninstall remove this binary, and list what else came with n88
+              (add --yes to skip the confirmation)
   --version   print the version and exit
   --help      print this message and exit

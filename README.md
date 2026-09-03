@@ -233,6 +233,25 @@ python3 tools/citation_coverage.py   # pages of the manual no clause cites
 python3 tools/run_programs.py        # the example programs
 ```
 
+## Removing it
+
+```sh
+sh install.sh --uninstall          # or: n88 --uninstall
+```
+
+Either removes the binary and then **lists what it did not install** — the VS
+Code extension, any container images, an editor setting — with the exact
+command for each. Neither touches those itself: a tool that removed one of
+several artifacts and reported "uninstalled" would leave an extension driving a
+missing interpreter.
+
+The script detects them; the binary can only list them, since it did not place
+them and cannot know. Both refuse to remove an `n88` inside an opam switch,
+where `opam remove n88basic` is the right command.
+
+**n88 writes no config file, no cache and no state directory.** Removing the
+binary removes the program; there is nothing hidden to clean up afterwards.
+
 ## Versions
 
 **The interpreter and the extension are released under one tag and carry the

@@ -1,0 +1,2 @@
+<path> is inside an opam switch. Removing it would corrupt opam's view.
+Use:  opam remove n88basic

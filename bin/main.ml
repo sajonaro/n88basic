@@ -98,6 +98,8 @@ let usage =
   \              shows them, a bare line number deletes one, and NEW erases\n\
   \              the program. A session that draws writes \"n88.png\" when it\n\
   \              ends.\n\n\
+  \  --uninstall remove this binary, and list what else came with n88\n\
+  \              (add --yes to skip the confirmation)\n\
   \  --version   print the version and exit\n\
   \  --help      print this message and exit\n"
 
@@ -284,6 +286,74 @@ let immediate () =
     prerr_endline "wrote n88.png"
   end
 
+
+(* ---------------------------------------------------------------- uninstall
+
+   Removes the binary and REPORTS everything else, because the binary can
+   honestly account for exactly one of the things a user ends up with. It did
+   not install the editor extension, knows nothing about container images, and
+   must not touch anyone's editor settings. An --uninstall that silently
+   removed one of those and called itself done would leave an extension driving
+   a missing interpreter, which is the confusing failure the version check
+   exists to prevent.
+
+   It refuses where it is not the owner. Inside an opam switch, rm corrupts
+   opam's view of the world and `opam remove n88basic` is the right command.
+   Inside the container, uninstalling is meaningless -- the image is the unit,
+   and `docker rmi` is what removes it. The path is a good enough signal for
+   both.
+
+   Removing a running executable is fine on Linux: the inode survives until the
+   process exits, so this can unlink itself and finish printing. *)
+
+let contains (haystack : string) (needle : string) : bool =
+  let n = String.length needle and h = String.length haystack in
+  let rec go i = i + n <= h && (String.sub haystack i n = needle || go (i + 1)) in
+  n = 0 || go 0
+
+let the_rest =
+  String.concat "\n"
+    [ "";
+      "n88 also usually comes with things this binary did not install:";
+      "";
+      "  the VSCode extension:";
+      "    code --uninstall-extension n88basic.n88basic";
+      "  any container images:";
+      "    docker images --format '{{.Repository}}:{{.Tag}}' | grep n88basic";
+      "    docker rmi <each one>";
+      "  a \"remote.extensionKind\" override in VSCode settings.json, if you added";
+      "  one as a workaround before v0.1.4 -- delete the \"n88basic.n88basic\" key.";
+      "";
+      "There is nothing else: n88 writes no config, cache or state directory.";
+      "" ]
+
+let uninstall ~(assume_yes : bool) : unit =
+  let self = Sys.executable_name in
+  if contains self "/_opam/" || contains self "/.opam/" then begin
+    prerr_endline (self ^ " is inside an opam switch. Removing it would corrupt opam's view.");
+    prerr_endline "Use:  opam remove n88basic";
+    exit 1
+  end;
+  if Sys.file_exists "/.dockerenv" then begin
+    prerr_endline "This is the container image; there is nothing to uninstall inside it.";
+    prerr_endline "Remove the image instead:  docker rmi ghcr.io/sajonaro/n88basic";
+    exit 1
+  end;
+  Printf.printf "Will remove: %s (%s)\n" self version;
+  if not assume_yes then begin
+    print_string "Proceed? [y/N] ";
+    flush stdout;
+    match String.lowercase_ascii (String.trim (try input_line stdin with End_of_file -> "")) with
+    | "y" | "yes" -> ()
+    | _ -> print_endline "Cancelled."; exit 1
+  end;
+  (match Sys.remove self with
+  | () -> Printf.printf "Removed %s\n" self
+  | exception Sys_error m ->
+      prerr_endline ("Could not remove " ^ self ^ ": " ^ m);
+      exit 1);
+  print_string the_rest
+
 let () =
   match Sys.argv with
   | [| _; ("--version" | "-version" | "-v") |] ->
@@ -294,6 +364,12 @@ let () =
       exit 0
   | [| _; ("--immediate" | "-i") |] ->
       immediate ();
+      exit 0
+  | [| _; "--uninstall" |] ->
+      uninstall ~assume_yes:false;
+      exit 0
+  | [| _; "--uninstall"; ("--yes" | "-y") |] ->
+      uninstall ~assume_yes:true;
       exit 0
   | [| _; path |] -> (
       match read_file path with
