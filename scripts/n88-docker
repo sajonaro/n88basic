@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+# n88-docker -- present the container as an executable speaking n88's interface.
+#
+# WHY THIS IS A SCRIPT AND NOT A FEATURE. The VSCode extension's
+# n88basic.interpreterPath is a PATH, not a "use Docker" boolean, so anything
+# on disk that accepts a file argument, "-", "--immediate" and "--version" can
+# stand in for the binary. Teaching the editor about containers would mean it
+# owning host-path translation on three platforms (Windows drive letters, WSL
+# paths, macOS bind mounts), container lifecycle for the long-lived immediate
+# session, and a choice between docker, podman, nerdctl and whatever a
+# corporate environment wraps them in. A path in a setting is backend-agnostic;
+# a boolean picks a winner. So the editor stays ignorant of containers and this
+# eight-line shim carries the whole feature.
+#
+#   "n88basic.interpreterPath": "/path/to/n88-docker"
+#
+# Pin the tag for anything whose fixtures depend on exact output -- PNG bytes
+# changed in v0.1.2, and "latest" will move again.
+#
+#   N88_IMAGE=ghcr.io/sajonaro/n88basic:0.1.3 n88-docker prog.bas
+#
+# THE ONE SUBTLETY, and the reason the file case is separate: a drawing program
+# writes its PNG beside its source, so the FILE's directory is mounted and the
+# basename passed. Mounting $PWD instead would put the PNG somewhere the
+# extension does not look for it.
+
+IMAGE="${N88_IMAGE:-ghcr.io/sajonaro/n88basic:latest}"
+
+if [ "$#" -eq 1 ] && [ -f "$1" ]; then
+  dir=$(cd "$(dirname "$1")" && pwd)
+  exec docker run --rm -i -v "$dir:/work" "$IMAGE" "$(basename "$1")"
+fi
+
+# Everything else -- "-", "--immediate", "--version", "--help" -- reads stdin
+# or takes no path at all, so the working directory is the right mount.
+exec docker run --rm -i -v "$PWD:/work" "$IMAGE" "$@"

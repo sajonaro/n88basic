@@ -37,6 +37,35 @@ closes it; the next statement starts a fresh one.
 release binary and `opam install n88basic` put it. Point it at a wrapper script
 to use the container image instead.
 
+### Using the container instead of a binary
+
+`interpreterPath` is a **path**, not a "use Docker" switch, so anything on disk
+that speaks the CLI's interface — a file argument, `-`, `--immediate`,
+`--version` — can stand in for the binary. `scripts/n88-docker` in the
+interpreter's repository is that shim for the published image:
+
+```json
+"n88basic.interpreterPath": "/path/to/n88-docker"
+```
+
+It mounts the **file's** directory rather than the working directory, so a
+drawing program's PNG lands beside its source where `Run` looks for it. Set
+`N88_IMAGE` to pin a tag; `latest` will move, and PNG bytes changed once
+already in v0.1.2.
+
+**Why this is a script and not a feature.** Teaching the editor about
+containers would mean it owning host-path translation on three platforms
+(Windows drive letters, WSL paths, macOS bind mounts), container lifecycle for
+the long-lived immediate session, and a choice between docker, podman, nerdctl
+and whatever a corporate environment wraps them in. A path in a setting is
+backend-agnostic; a boolean picks a winner. The shim is eight lines and the
+editor stays ignorant of containers.
+
+Verified through the extension's own code paths — `test-session.js` passes
+end to end with the shim as the interpreter, and the command `run.js` builds
+executes with the PNG landing where `Run` polls for it. **Not** verified inside
+a running VS Code instance, which is the one gap.
+
 Inside a checkout of the interpreter's own repository, with nothing configured,
 `Run` builds from source instead (`dune exec`), which is what a contributor
 wants. **That used to be the only thing it did**, unconditionally, so the

@@ -62,6 +62,22 @@ jobs:
       # image is THIS INTERPRETER: the container is an Alpine/musl build,
       # while the suite that vets the language runs in process against a
       # glibc dev build, and nothing had ever compared the two.
+      # scripts/n88-docker is documented as the way to drive the image from
+      # the editor, so it has to keep speaking the CLI's interface. Cheap to
+      # check here, where the image already exists.
+      - name: The container shim must speak the CLI's interface
+        run: |
+          set -eu
+          export N88_IMAGE="${IMAGE}:${GITHUB_REF_NAME#v}"
+          mkdir -p /tmp/shim && cd /tmp/shim
+          printf '10 PRINT "shim";6*7\n20 CIRCLE(320,100),40,5\n' > s.bas
+          test "$(${GITHUB_WORKSPACE}/scripts/n88-docker --version)" = "${GITHUB_REF_NAME#v}"
+          "${GITHUB_WORKSPACE}/scripts/n88-docker" /tmp/shim/s.bas
+          test -f /tmp/shim/s.png || { echo "PNG did not land beside the source"; exit 1; }
+          printf '10 PRINT 1+1\n' | "${GITHUB_WORKSPACE}/scripts/n88-docker" -
+          printf 'A=7\nPRINT A*2\n' | "${GITHUB_WORKSPACE}/scripts/n88-docker" --immediate | grep -q 14
+          echo "shim ok in all four modes"
+
       - name: The image must pass the conformance corpus
         run: |
           set -eu
