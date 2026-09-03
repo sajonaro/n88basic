@@ -141,7 +141,6 @@
     "check": "node tools/check-grammar.js"
   },
   "extensionKind": [
-    "ui",
     "workspace"
   ],
   "dependencies": {

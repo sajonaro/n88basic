@@ -28,6 +28,37 @@ const check = (ok, message) => {
 };
 
 // VSCode requires these to register the extension at all.
+// extensionKind decides WHICH MACHINE the extension runs on, and everything
+// this one does belongs where the files are: run.js and session.js spawn the
+// interpreter, the language client talks to a server that parses workspace
+// files, and diagnostics, hover and completion all read them. Nothing here is
+// UI-only.
+//
+// It was ["ui", "workspace"], and "ui" first means VSCode loads the extension
+// on the LOCAL machine. In any remote window -- WSL, SSH, a dev container,
+// Codespaces -- the workspace and the interpreter are on the remote and the UI
+// is local, so Run created a terminal on the wrong side and handed it a path
+// from the other one:
+//
+//   The terminal process failed to launch: Starting directory (cwd)
+//   "\root\docs\projects\..." does not exist.
+//
+// The newer commands would fail differently and more confusingly: session.js
+// spawns the interpreter directly, and on the local side n88 is not installed
+// at all, so an immediate session dies with a missing binary rather than a bad
+// path.
+//
+// This is checked HERE, in the manifest test, because the manifest is what
+// decides which machine the code paths run on -- the feature tests exercise
+// the code and would pass on either side of the boundary. Same shape as the
+// Run command that shelled `dune exec`: correct behaviour, wrong machine.
+check(
+  Array.isArray(manifest.extensionKind) &&
+    manifest.extensionKind.length === 1 &&
+    manifest.extensionKind[0] === 'workspace',
+  'extensionKind is exactly ["workspace"] -- it spawns the interpreter and reads workspace files'
+);
+
 for (const field of ['name', 'publisher', 'version', 'engines', 'main']) {
   check(
     manifest[field] !== undefined && manifest[field] !== '',

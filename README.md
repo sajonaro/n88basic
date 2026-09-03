@@ -251,6 +251,17 @@ for machines without `vsce`. Prefer the `.vsix`: a copied directory carries
 no version metadata, so the editor cannot tell an updated copy from a stale
 one.
 
+**Installing it, in one place people get wrong.** The extension runs where your
+files are (`extensionKind: ["workspace"]`), so in a remote window — WSL, SSH, a
+dev container, Codespaces — `n88` must be installed **on the remote**, not on
+the machine showing the UI.
+
+**Upgrading from a pre-v0.1.1 `.vsix`: uninstall it first.** Those builds
+declared no publisher and registered as `undefined_publisher.n88basic`, which
+VS Code treats as an unrelated extension from the current
+`n88basic.n88basic` — it will not upgrade one to the other, and the stale copy
+can shadow the new one.
+
 ## Licence
 
 MIT — see [`LICENSE`](LICENSE).

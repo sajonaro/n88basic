@@ -3,6 +3,34 @@
 Syntax highlighting and snippets for N88-BASIC(86), the ROM BASIC of the NEC
 PC-9801.
 
+## Upgrading from an early build
+
+**If you installed a `.vsix` before v0.1.1, uninstall it first.** Those builds
+declared no `publisher`, so VS Code registered them as
+`undefined_publisher.n88basic` while current builds are `n88basic.n88basic`.
+Different identifiers mean VS Code treats them as unrelated extensions: it will
+not upgrade one to the other, and both stay loaded. The stale copy can win —
+which looks exactly like a bug you have already fixed still being present.
+
+Check with `code --list-extensions | grep n88basic`, and uninstall anything
+reading `undefined_publisher.n88basic`. VS Code will never do this for you.
+
+## Remote windows (WSL, SSH, dev containers, Codespaces)
+
+The extension declares `extensionKind: ["workspace"]`, so it runs where your
+files are. That is the only correct side: it spawns the interpreter, and its
+diagnostics, hover and completion read workspace files.
+
+`n88` must be installed **on the remote**, not on the machine running the VS
+Code UI. In a WSL window that means inside WSL; over SSH, on the server.
+
+This was `["ui", "workspace"]` until v0.1.4, and `ui` first meant VS Code
+loaded the extension locally: Run then created a terminal on the wrong machine
+and handed it a path from the other one, failing with `Starting directory (cwd)
+"\root\docs\..." does not exist`. The interactive commands failed differently
+and worse — they spawn the interpreter directly, and on the UI side `n88` is
+usually not installed at all.
+
 ## Running and executing
 
 **Run** (`N88-BASIC: Run`) opens a terminal and runs the saved file, which is
