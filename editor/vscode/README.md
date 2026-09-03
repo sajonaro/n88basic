@@ -178,6 +178,12 @@ Being straight about this is part of the design.
 - **One screen mode**, in the default eight-colour palette.
 - **`INPUT` needs a terminal.** Use **Run**; the panel-based commands cannot
   type back.
+- **Nothing can interrupt a running program.** `stdin` is sequential input
+  consumed at each `INPUT`, not a channel the program watches — typing while a
+  program runs does not stop it, and Ctrl-C is your terminal killing the
+  process rather than the program noticing anything. There is no `INKEY$`, no
+  `ON KEY` and no `TIMER`, so a program responds to nothing but its own
+  control flow.
 
 ---
 

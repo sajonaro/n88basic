@@ -66,6 +66,12 @@ jobs:
       - name: Release-tag rule
         run: python3 tools/test_check_version_bump.py
 
+      # The one defect class no fixture here can see: a prompt that arrives
+      # after the answer. Capturing stdout is exactly the case where full
+      # buffering is correct, so this measures timing instead of bytes.
+      - name: A prompt is visible before the answer
+        run: sh tools/check_interactive_flush.sh
+
       - name: Project invariants
         run: sh scripts/check-invariants.sh
 

@@ -39,7 +39,25 @@ let read_file (path : string) : string =
       (fun () -> really_input_string ic (in_channel_length ic))
   end
 
+(* FLUSH BEFORE BLOCKING. stdout is fully buffered when it is not a terminal,
+   and that is the right default -- a consumer capturing output to a file wants
+   whole writes, not line-by-line syscalls. But a program that has printed a
+   prompt and is now waiting for an answer has to have shown the prompt first,
+   or the person is typing blind into something that looks hung. This is the
+   one place where the semantics genuinely demand a flush, so it is the one
+   place that flushes: at the point of blocking, not globally.
+
+   It covers the prompt itself as much as earlier output -- INPUT "X"; X emits
+   `X? ` through the same writer and would otherwise sit in the buffer with
+   everything else, leaving no visible cursor position.
+
+   Invisible to every fixture this project has, and that is worth knowing: a
+   test capturing stdout cannot see this, because capturing stdout is exactly
+   the case where full buffering is correct. The bytes were always right; only
+   their arrival time was wrong, and the only observer who can see that is a
+   human at a terminal. *)
 let stdin_line () : string option =
+  flush stdout;
   match input_line stdin with line -> Some line | exception End_of_file -> None
 
 (* Beside [path]: "demo.bas" draws into "demo.png". A path with no

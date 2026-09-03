@@ -161,6 +161,19 @@ other part of the system does not re-derive itself when that fact moves.
 re-read. It cannot catch everything — it once stayed silent on the clause it
 existed to catch, because the clause used a verb the pattern did not know.
 
+**A fixture that captures stdout cannot see an interactivity bug.** For five
+releases `n88` did not flush stdout before blocking on `INPUT`, so a prompt
+appeared only after the user had typed — they were typing blind into something
+that looked hung. Every check here passed, and correctly: the bytes were never
+wrong, and redirecting stdout to a file produced a perfect file. Capturing
+stdout is *precisely* the case where full buffering is right, so no fixture
+this project owns could have caught it. The defect was in *when* the bytes
+arrived, and the only observer who can see that is a person at a terminal.
+`tools/check_interactive_flush.sh` therefore measures rather than compares:
+it supplies input three seconds late and asserts the prompt is already there.
+When a property is temporal, a byte comparison is not a weak test of it — it
+is not a test of it at all.
+
 **Behaviour that is correct by accident is what the next improvement removes.**
 Every other case in these notes is about finding something wrong. This one is
 about something *right* whose rightness nobody has recorded, which is a latent
