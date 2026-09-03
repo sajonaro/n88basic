@@ -73,6 +73,20 @@ check(
 
 // Every path the manifest contributes must exist, or the contribution is
 // dropped on load -- again silently.
+// The Overview panel is opened BEFORE you have a BASIC file -- possibly on
+// first install, which is the whole point of putting it in the Activity Bar.
+// With only onLanguage activation the icon appears and the panel stays empty
+// exactly when it matters most.
+{
+  const views = manifest.contributes?.views?.n88basic ?? [];
+  const ae = manifest.activationEvents ?? [];
+  for (const v of views)
+    check(
+      ae.includes(`onView:${v.id}`),
+      `activationEvents contains onView:${v.id}, so the panel works with no BASIC file open`
+    );
+}
+
 const contributedPaths = [];
 if (manifest.main) contributedPaths.push(['main', manifest.main]);
 for (const [i, g] of (manifest.contributes?.grammars ?? []).entries())
@@ -84,6 +98,14 @@ for (const [i, l] of (manifest.contributes?.languages ?? []).entries()) {
 }
 for (const [i, s] of (manifest.contributes?.snippets ?? []).entries())
   contributedPaths.push([`contributes.snippets[${i}].path`, s.path]);
+// The marketplace image and the Activity Bar mark. Neither is loaded at
+// runtime by anything this suite exercises, so a path that points nowhere here
+// ships silently: a missing marketplace icon fails at publish time and a
+// missing Activity Bar icon leaves a blank square in the strip. This is the
+// only check either of them gets.
+if (manifest.icon) contributedPaths.push(['icon', manifest.icon]);
+for (const [i, v] of (manifest.contributes?.viewsContainers?.activitybar ?? []).entries())
+  contributedPaths.push([`contributes.viewsContainers.activitybar[${i}].icon`, v.icon]);
 
 for (const [label, rel] of contributedPaths)
   check(fs.existsSync(path.join(root, rel)), `${label} points at ${rel}, which does not exist`);

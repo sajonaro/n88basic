@@ -23,7 +23,8 @@
   ],
   "main": "./extension.js",
   "activationEvents": [
-    "onLanguage:n88basic"
+    "onLanguage:n88basic",
+    "onView:n88basic.home"
   ],
   "contributes": {
     "commands": [
@@ -142,6 +143,24 @@
           "description": "Path to the n88 interpreter. Empty means \"n88\" on your PATH, which is where both the prebuilt release binary and `opam install n88basic` put it. Set this to run a specific build, or a wrapper script around the container image."
         }
       }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "n88basic",
+          "title": "N88-BASIC(86)",
+          "icon": "icons/n88basic-activitybar.svg"
+        }
+      ]
+    },
+    "views": {
+      "n88basic": [
+        {
+          "type": "webview",
+          "id": "n88basic.home",
+          "name": "Overview"
+        }
+      ]
     }
   },
   "scripts": {
@@ -163,5 +182,6 @@
   "bugs": {
     "url": "https://github.com/sajonaro/n88basic/issues"
   },
-  "homepage": "https://github.com/sajonaro/n88basic#readme"
+  "homepage": "https://github.com/sajonaro/n88basic#readme",
+  "icon": "icons/n88basic-marketplace.png"
 }

@@ -23,6 +23,29 @@ with live error checking, and a real interpreter behind the Run button.
 
 ---
 
+## The N88-BASIC icon in the left-hand bar
+
+Click it for an **Overview** panel showing which versions you have and whether
+they match:
+
+```
+  Versions
+  Extension     0.1.4
+  Interpreter   0.1.4
+  n88 (from PATH)
+
+  The extension and the interpreter are in step.
+
+  [ Execute Buffer            ]
+  [ Immediate Statement…      ]
+  [ Run in a terminal         ]
+  [ Open the full guide       ]
+```
+
+If the interpreter is missing or behind, this is where it says so, with a
+**How to upgrade** button. It works with no file open — that is the point of
+putting it there.
+
 ## Two things happen to your file, and they are separate
 
 ```

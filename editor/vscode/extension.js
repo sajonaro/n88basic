@@ -14,6 +14,7 @@ const { registerCompletionProvider } = require('./src/completion');
 const { registerRunCommand } = require('./src/run');
 const { registerSessionCommands } = require('./src/session');
 const { registerVersionCheck } = require('./src/version-check');
+const { registerPanel } = require('./src/panel');
 const { registerRenumberCommand, registerInsertNextLineCommand } = require('./src/renumber-commands');
 const { registerCodeActionProvider } = require('./src/quickfix');
 const { registerNavigation } = require('./src/navigation');
@@ -39,6 +40,8 @@ function activate(context) {
   // Asks the interpreter its version once, and says so if it is behind. Never
   // installs anything -- see src/version-check.js.
   registerVersionCheck(context);
+  // The Activity Bar panel: versions, a status line and the primary actions.
+  registerPanel(context);
   registerRenumberCommand(context);
   registerInsertNextLineCommand(context);
   registerCodeActionProvider(context);
