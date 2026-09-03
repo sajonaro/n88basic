@@ -207,6 +207,33 @@ Being straight about this is part of the design.
 
 ---
 
+## Installing and removing, from the command line
+
+```sh
+# install or upgrade — the FILE, from the release
+code --install-extension n88basic.vsix
+
+# see what is actually installed
+code --list-extensions --show-versions | grep n88
+
+# remove — by id, and only this way
+code --uninstall-extension n88basic.n88basic
+```
+
+**`code --install-extension n88basic.n88basic` cannot work.** That form
+resolves against the VS Code Marketplace, where this extension is not
+published. Installing takes the `.vsix` file; *uninstalling* takes the id,
+because once installed the extension is known locally by that name.
+
+**Never rename or delete the extension's directory.** It does not disable
+anything. VS Code rescans the folder, reads the `package.json` *inside* it, and
+re-registers the extension under whatever publisher and name it finds there —
+so renaming a stale copy promotes it rather than retiring it. Uninstall by id.
+
+**`--list-extensions` is per host.** A WSL window and a local window have
+separate extension sets, and a copy installed in one is invisible from the
+other. Run it on the side you are actually working on.
+
 ## If something looks wrong
 
 **Installed an early build?** Uninstall it first. Anything from before v0.1.1
@@ -222,6 +249,26 @@ wrong machine. Upgrade, or set `"remote.extensionKind": {"n88basic.n88basic": ["
 **A squiggle you disagree with?** Hover it — the source is named. If it says
 `n88basic`, please
 [open an issue](https://github.com/sajonaro/n88basic/issues) with the line.
+
+**Commands work, but there is no Activity Bar icon and `View: Open View…`
+cannot find Overview?** An older copy of the extension is shadowing the current
+one. The commands exist in both versions, so they keep working; the panel was
+added in 0.2.0, so it is missing — that split is the fingerprint, and it is the
+fastest way to recognise this.
+
+It happens in a remote setup when a stale copy is installed on the *local* side
+and declares `extensionKind: ["ui", "workspace"]`: the workbench resolves the
+id to the local one and the good remote copy never loads.
+
+```sh
+code --uninstall-extension n88basic.n88basic     # on BOTH sides
+code --install-extension n88basic.vsix           # on the remote side only
+```
+
+Then **quit VS Code entirely and start it again**. `Developer: Reload Window`
+is not enough: the client keeps a cached copy of extension manifests that only
+a full restart rebuilds, which is why reloading twice appears to change
+nothing.
 
 ---
 
