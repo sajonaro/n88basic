@@ -69,11 +69,7 @@ curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh |
 #  n88 0.1.4 -> 0.2.0 (/home/you/.local/bin/n88)
 ```
 
-Add `--extension` to install the VS Code extension in the same step. It fetches
-the `.vsix` from the release and hands `code` the file — **`code
---install-extension n88basic.n88basic` cannot work**, because that form
-resolves against the VS Code Marketplace and this extension is not published
-there:
+Add `--extension` to install the VS Code extension in the same step:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh -s -- --extension
@@ -286,36 +282,19 @@ line numbering and renumbering, and a Run command. Diagnostics come from the
 interpreter's own parser compiled to JavaScript, so the editor and the
 interpreter cannot disagree about what parses.
 
-Every tagged release attaches a packaged `n88basic.vsix`, so the usual route
-is to download it from the [releases
-page](https://github.com/sajonaro/n88basic/releases) and:
-
 ```sh
-code --install-extension n88basic.vsix
+code --install-extension n88basic.n88basic
 ```
 
-To build one from a checkout instead:
+Every tagged release also attaches a packaged `n88basic.vsix`, which is the
+route until the extension reaches the Marketplace, and `scripts/package
+-extension.sh` builds one from a checkout.
 
-```sh
-scripts/package-extension.sh     # produces n88basic.vsix (needs @vscode/vsce)
-code --install-extension n88basic.vsix
-```
-
-`scripts/install-extension.sh` installs by copying the directory instead,
-for machines without `vsce`. Prefer the `.vsix`: a copied directory carries
-no version metadata, so the editor cannot tell an updated copy from a stale
-one.
-
-**Installing it, in one place people get wrong.** The extension runs where your
-files are (`extensionKind: ["workspace"]`), so in a remote window — WSL, SSH, a
-dev container, Codespaces — `n88` must be installed **on the remote**, not on
-the machine showing the UI.
-
-**Upgrading from a pre-v0.1.1 `.vsix`: uninstall it first.** Those builds
-declared no publisher and registered as `undefined_publisher.n88basic`, which
-VS Code treats as an unrelated extension from the current
-`n88basic.n88basic` — it will not upgrade one to the other, and the stale copy
-can shadow the new one.
+**The one place people get it wrong:** the extension runs where your files are
+(`extensionKind: ["workspace"]`), so in a remote window — WSL, SSH, a dev
+container, Codespaces — install both it and `n88` **on the remote**, not on the
+machine showing the UI. [The extension's own
+guide](editor/vscode/README.md) covers the rest.
 
 ## Licence
 

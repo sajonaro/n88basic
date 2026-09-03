@@ -18,16 +18,8 @@ with live error checking, and a real interpreter behind the Run button.
 > interpreter is behind or missing. It never installs or upgrades anything —
 > if your fixtures depend on exact output, nothing here will move it under you.
 >
-> To install or upgrade both halves:
+> To install or upgrade both halves at once:
 > `curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh -s -- --extension`
->
-> **`code --install-extension n88basic.n88basic` does not work.** That form
-> resolves against the VS Code Marketplace, where this extension is not
-> published, and fails with `Extension not found` — which reads as your
-> mistake and sends you looking for a publisher prefix that was already right.
-> Install the `.vsix` file instead, which is what the line above does.
-> (Uninstalling *by* that ID is fine: once installed, the extension is known
-> locally as `n88basic.n88basic`.)
 
 ---
 
@@ -210,65 +202,45 @@ Being straight about this is part of the design.
 ## Installing and removing, from the command line
 
 ```sh
-# install or upgrade — the FILE, from the release
-code --install-extension n88basic.vsix
-
-# see what is actually installed
-code --list-extensions --show-versions | grep n88
-
-# remove — by id, and only this way
-code --uninstall-extension n88basic.n88basic
+code --install-extension n88basic.n88basic          # install or upgrade
+code --uninstall-extension n88basic.n88basic        # remove
+code --list-extensions --show-versions | grep n88   # what you actually have
 ```
 
-**`code --install-extension n88basic.n88basic` cannot work.** That form
-resolves against the VS Code Marketplace, where this extension is not
-published. Installing takes the `.vsix` file; *uninstalling* takes the id,
-because once installed the extension is known locally by that name.
+*Not on the Marketplace yet? Until it is, install the `n88basic.vsix` from
+[the latest release](https://github.com/sajonaro/n88basic/releases/latest)
+instead — `code --install-extension /path/to/n88basic.vsix` — or run the
+installer with `--extension`, which fetches it for you.*
 
-**Never rename or delete the extension's directory.** It does not disable
-anything. VS Code rescans the folder, reads the `package.json` *inside* it, and
-re-registers the extension under whatever publisher and name it finds there —
-so renaming a stale copy promotes it rather than retiring it. Uninstall by id.
+Two things worth knowing whichever route you took:
 
-**`--list-extensions` is per host.** A WSL window and a local window have
-separate extension sets, and a copy installed in one is invisible from the
-other. Run it on the side you are actually working on.
+- **Never rename or delete the extension's directory** to disable it. VS Code
+  rescans the folder and reads the `package.json` *inside*, so a renamed copy
+  is re-registered rather than retired. Uninstall by id.
+- **`--list-extensions` is per host.** A WSL or SSH window has its own
+  extension set, separate from your local one; a copy in one is invisible from
+  the other. Install on the side your files are on.
 
 ## If something looks wrong
 
-**Installed an early build?** Uninstall it first. Anything from before v0.1.1
-registered as `undefined_publisher.n88basic`, which VS Code treats as a
-*different* extension from today's `n88basic.n88basic` — it will not upgrade
-one to the other, both stay loaded, and the old one can win. Check with
-`code --list-extensions | grep n88basic`.
+**No Activity Bar icon?** VS Code can register a new entry as hidden on a
+crowded bar — no icon, no error. **F1 → `N88-BASIC: Open Overview`** always
+works; right-clicking the Activity Bar and ticking N88-BASIC(86) brings the
+icon back for good.
 
-**Run says a directory does not exist**, or an immediate session says `n88` is
-missing, in a WSL/SSH window: you are on v0.1.3 or older, which loaded on the
-wrong machine. Upgrade, or set `"remote.extensionKind": {"n88basic.n88basic": ["workspace"]}`.
+**Commands work, but no icon and no Overview view?** An older copy is shadowing
+the current one — the commands exist in both versions, the panel only from
+0.2.0, and that split is the giveaway. Uninstall by id on **both** sides of a
+remote setup, reinstall on the remote, then **quit VS Code entirely** rather
+than reloading the window: a reload does not rebuild its cached manifests.
+
+**Run says a directory does not exist**, or a session says `n88` is missing, in
+a WSL/SSH window: upgrade — extensions before v0.1.4 loaded on the wrong
+machine.
 
 **A squiggle you disagree with?** Hover it — the source is named. If it says
 `n88basic`, please
 [open an issue](https://github.com/sajonaro/n88basic/issues) with the line.
-
-**Commands work, but there is no Activity Bar icon and `View: Open View…`
-cannot find Overview?** An older copy of the extension is shadowing the current
-one. The commands exist in both versions, so they keep working; the panel was
-added in 0.2.0, so it is missing — that split is the fingerprint, and it is the
-fastest way to recognise this.
-
-It happens in a remote setup when a stale copy is installed on the *local* side
-and declares `extensionKind: ["ui", "workspace"]`: the workbench resolves the
-id to the local one and the good remote copy never loads.
-
-```sh
-code --uninstall-extension n88basic.n88basic     # on BOTH sides
-code --install-extension n88basic.vsix           # on the remote side only
-```
-
-Then **quit VS Code entirely and start it again**. `Developer: Reload Window`
-is not enough: the client keeps a cached copy of extension manifests that only
-a full restart rebuilds, which is why reloading twice appears to change
-nothing.
 
 ---
 
