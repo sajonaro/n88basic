@@ -351,6 +351,18 @@ let tokenize ~(line : int) (src : string) : Token.t list =
         | Some kw_end -> Some ("GOTO", kw_end)
         | None ->
             if has_sigil && is_keyword_text with_sigil then Some (with_sigil, base_end + 1)
+              (* A reserved word this interpreter does not implement, whose
+                 own spelling ends in a sigil, must be kept whole even though
+                 its prefix IS an implemented keyword. "INPUT$" would otherwise
+                 lex as INPUT followed by a stray "$" and report `Unexpected
+                 character '$'`, which reads as a typo -- while INKEY$ and
+                 DSKI$, whose prefixes are not keywords, got the message that
+                 names the word and says it is not implemented. Two members of
+                 one family, two different experiences. Returning None makes
+                 the run an Ident, so the parser's reserved-word check answers
+                 it. *)
+            else if has_sigil && List.mem with_sigil Token.reserved_unimplemented
+            then None
             else if is_keyword_text base then Some (base, base_end)
             else None
       in

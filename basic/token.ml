@@ -67,3 +67,27 @@ let keywords =
        scanned CONSOLE as an ordinary identifier and the statement failed
        asking for the "=" of an assignment. *)
     "CONSOLE" ]
+
+
+(* Reserved words this interpreter does not implement. Kept here rather than
+   in the parser because the lexer consults it too -- see lexer.ml's sigil
+   case. Naming them gives a listing that uses one a message saying so,
+   instead of a syntax error that reads like a typo. *)
+let reserved_unimplemented =
+  [ (* deferred: spec/spec.md §3.2 *)
+    "VIEW"; "WINDOW"; "GET"; "PUT"; "DRAW"; "INKEY$"; "DATE$"; "TIME$";
+    (* out of scope: spec/spec.md §3.3 *)
+    "BEEP"; "OPEN"; "CLOSE"; "INPUT$"; "FIELD"; "LSET"; "RSET"; "EOF"; "LOC";
+    (* The "#" file forms, for the same reason as INPUT$: their prefixes
+       are implemented keywords, so without naming them here PRINT#1 lexes
+       as PRINT followed by a stray "#". Only the closed-up spelling is
+       caught -- "PRINT #1" with a space still reports the character, which
+       is a remaining rough edge rather than a fix. *)
+    "PRINT#"; "INPUT#"; "WRITE#";
+    "LOF"; "FPOS"; "KILL"; "NAME"; "FILES"; "LFILES"; "ATTR$"; "DSKF";
+    "DSKI$"; "DSKO$"; "MKI$"; "MKS$"; "MKD$"; "CVI"; "CVS"; "CVD"; "LOAD";
+    "SAVE"; "MERGE"; "CHAIN"; "COMMON"; "BLOAD"; "BSAVE"; "CALL"; "USR";
+    "PEEK"; "POKE"; "VARPTR"; "INP"; "OUT"; "WAIT"; "FRE"; "MON"; "TERM";
+    "KINPUT"; "KLEN"; "KMID$"; "KINSTR"; "KTYPE"; "KNJ$"; "KEXT$"; "KPLOAD";
+    "JIS$"; "AKCONV$"; "KACNV$"; "MOTOR"; "PEN"; "COPY"; "LCOPY"; "LPOS";
+    "SET"; "SEARCH"; "MAP"; "ROLL"; "PICTURE"; "GETPICT"; "MOVETO"; "LINETO" ]

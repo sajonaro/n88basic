@@ -124,18 +124,11 @@ let reserved_word_error (k : string) : 'a =
    evaluates to 0 or "" -- see [Token.keywords] for the in-scope half of the
    same bug. Compound tokens (PRINT#, DEF USR, LINE INPUT#, the COM: device,
    KEY beyond OFF) are not single identifiers and are not listed here. *)
-let reserved_unimplemented =
-  [ (* deferred: spec/spec.md §3.2 *)
-    "VIEW"; "WINDOW"; "GET"; "PUT"; "DRAW"; "INKEY$"; "DATE$"; "TIME$";
-    (* out of scope: spec/spec.md §3.3 *)
-    "BEEP"; "OPEN"; "CLOSE"; "INPUT$"; "FIELD"; "LSET"; "RSET"; "EOF"; "LOC";
-    "LOF"; "FPOS"; "KILL"; "NAME"; "FILES"; "LFILES"; "ATTR$"; "DSKF";
-    "DSKI$"; "DSKO$"; "MKI$"; "MKS$"; "MKD$"; "CVI"; "CVS"; "CVD"; "LOAD";
-    "SAVE"; "MERGE"; "CHAIN"; "COMMON"; "BLOAD"; "BSAVE"; "CALL"; "USR";
-    "PEEK"; "POKE"; "VARPTR"; "INP"; "OUT"; "WAIT"; "FRE"; "MON"; "TERM";
-    "KINPUT"; "KLEN"; "KMID$"; "KINSTR"; "KTYPE"; "KNJ$"; "KEXT$"; "KPLOAD";
-    "JIS$"; "AKCONV$"; "KACNV$"; "MOTOR"; "PEN"; "COPY"; "LCOPY"; "LPOS";
-    "SET"; "SEARCH"; "MAP"; "ROLL"; "PICTURE"; "GETPICT"; "MOVETO"; "LINETO" ]
+(* Lives in Token because the LEXER needs it too: a reserved word whose own
+   spelling ends in a sigil has to be recognised before the run is split, or
+   "INPUT$" lexes as the INPUT keyword followed by a stray "$" and never
+   reaches the check below. *)
+let reserved_unimplemented = Token.reserved_unimplemented
 
 let check_not_reserved (name : string) : unit =
   if List.mem name reserved_unimplemented then
