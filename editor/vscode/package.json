@@ -3,7 +3,7 @@
   "publisher": "n88basic",
   "displayName": "N88-BASIC(86)",
   "description": "N88-BASIC(86) for VS Code: syntax highlighting, live diagnostics from the interpreter's own parser, hover documentation drawn from a cited specification, completion, quick fixes, automatic line numbering and renumbering, and Run.",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "license": "MIT",
   "engines": {
     "vscode": "^1.75.0"
