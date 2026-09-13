@@ -35,8 +35,20 @@
    examples.js
    (run ./bundle.exe ../test/programs))))
 
-; The page is four files that have to end up in one directory to be served.
+; The checker, as the editor uses it.
+;
+; This is the same artifact the VS Code extension ships -- one bundle exported
+; from editor/lsp/, which is the interpreter's own front end. The console does
+; not get a second opinion about what parses: if the editor underlines a line,
+; so does this page, because it is literally the same function.
+(rule
+ (target n88basic-check.js)
+ (deps ../editor/lsp/js_main.bc.js)
+ (action
+  (copy ../editor/lsp/js_main.bc.js n88basic-check.js)))
+
+; The page is five files that have to end up in one directory to be served.
 ; This alias is what puts them there.
 (alias
  (name web)
- (deps index.html console.css examples.js main.bc.js))
+ (deps index.html console.css examples.js main.bc.js n88basic-check.js))

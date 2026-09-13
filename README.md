@@ -50,11 +50,7 @@ n88 rings.bas            # a program that draws leaves rings.png beside it
 Add `--extension` for the VS Code extension. Flags and variables:
 [Reference](#reference).
 
-Or run it with nothing installed:
-
-```sh
-docker run --rm -v "$PWD:/work" ghcr.io/sajonaro/n88basic rings.bas
-```
+Or run it with nothing installed: [as a container](#using-it-as-a-container).
 
 **From source**, with OCaml 5 and dune:
 
@@ -63,9 +59,9 @@ make build && make test
 scripts/install-from-source.sh
 ```
 
-`opam pin add n88basic 'git+https://github.com/sajonaro/n88basic.git#v0.2.0'`
-is the only route that gives you the library rather than the command. Pin a
-tag; it is not on the opam repository.
+`opam pin add n88basic 'git+https://github.com/sajonaro/n88basic.git#<tag>'`
+is the only route that gives you the library rather than the command. It is
+not on the opam repository.
 
 ## Using it as a container
 
@@ -172,9 +168,10 @@ The same command installs and upgrades; run it again whenever.
 | Target | |
 | --- | --- |
 | `build` | the interpreter |
-| `test` | every gate: unit suites, conformance, spec, invariants |
+| `test` | the suites — the fast loop while you work |
+| `ci` | **every** gate, in Docker: the one pipeline, the same one CI runs. Needs no OCaml, python or node on your machine |
 | `web` | build the browser console and check it runs the corpus |
-| `webconsole`, `wc` | build it and serve it on `localhost:8088` (`PORT=…` to change). Falls back to building inside Docker when `js_of_ocaml` is missing |
+| `webconsole`, `wc` | build it and serve it on `localhost:8088` (`PORT=…` to change). Docker serves it, and builds it too when `js_of_ocaml` is missing |
 | `install` | put `n88` on your PATH from this checkout |
 | `extension` | package the VS Code extension |
 | `clean` | remove build output |
@@ -230,16 +227,6 @@ Removes the binary and lists what it did not install — the extension, containe
 images, an editor setting — with the command for each. n88 writes no config,
 cache or state directory, so that list is the whole of it.
 
-## Versions
-
-The interpreter and the extension ship under one tag and carry the same version,
-so extension X.Y.Z expects `n88` X.Y.Z. A newer interpreter is fine; an older
-one the extension notices and tells you about.
-
-Every release bumps the **minor** component — `v0.1.4` is followed by `v0.2.0`,
-never `v0.1.5` — enforced by `tools/check_version_bump.py` before anything is
-built.
-
 ## In a browser
 
 ```sh
@@ -248,15 +235,11 @@ make wc          # http://localhost:8088 — stays running until Ctrl-C
 
 ![n88basic compiled to JavaScript: the interpreter, the renderer and the page all inside one browser tab](docs/diagrams/browser.svg)
 
-Docker is enough — without `js_of_ocaml`, `make wc` builds the console in a
-container. It runs the conformance corpus through the JavaScript build first,
-so the page provably runs the same language as the binary.
+Docker is the only thing you need. The editor colours itself and reports
+problems from the interpreter's own lexer and checker, and drawings arrive as
+vectors. `make web` writes the console to `web-console/` for any static host.
 
-Drawings arrive as vectors, about ten times smaller than the PNG and sharp at
-any zoom. `n88 --svg` writes the same from the command line.
-
-The console is four static files; `make web` puts them in `web-console/` for
-any static host to serve.
+[The console's own guide](web/README.md).
 
 ## The VS Code extension
 
@@ -269,6 +252,10 @@ or a single statement in a live session.
 ```sh
 code --install-extension n88basic.n88basic
 ```
+
+The extension and the interpreter ship under one tag and carry the same
+version. A newer interpreter is fine; an older one the extension tells you
+about.
 
 In a remote window — WSL, SSH, a dev container — install it and `n88` **on the
 remote**. [Full guide](editor/vscode/README.md).

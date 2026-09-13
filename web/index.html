@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- How this is put together, in one picture: how-it-works.svg -->
 <meta charset="utf-8">
 <title>N88-BASIC(86) — web console</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -14,20 +15,35 @@
     <div class="bar">
       <label for="examples">example</label>
       <select id="examples"></select>
+      <button id="open" type="button" class="secondary">Open…</button>
+      <button id="save-src" type="button" class="secondary">Save</button>
       <button id="run" type="button">Run &#9654;</button>
+      <input id="file" type="file" multiple hidden
+             accept=".bas,.n88,.txt,.dat,.csv,text/plain">
     </div>
-    <textarea id="source" spellcheck="false" aria-label="BASIC program"></textarea>
+    <div class="editor">
+      <pre id="hl" aria-hidden="true"></pre>
+      <textarea id="source" spellcheck="false" aria-label="BASIC program"></textarea>
+    </div>
+    <ul id="problems" aria-live="polite" aria-label="problems in the program"></ul>
     <details id="stdin-box">
-      <summary>Input for <code>INPUT</code> — one answer per line</summary>
+      <summary>Input for <code>INPUT</code> — one answer per line<span id="stdin-note"></span></summary>
       <textarea id="stdin" spellcheck="false" rows="3"
                 aria-label="input supplied to the program"></textarea>
     </details>
   </section>
 
   <section class="pane">
-    <div class="bar"><span class="label">output</span></div>
+    <div class="bar">
+      <span class="label">output</span>
+      <button id="save-out" type="button" class="secondary" disabled>Save text</button>
+    </div>
     <pre id="output" aria-live="polite"></pre>
-    <div class="bar"><span class="label">screen</span> <span id="drew"></span></div>
+    <div class="bar">
+      <span class="label">screen</span> <span id="drew"></span>
+      <button id="save-svg" type="button" class="secondary" disabled>Save SVG</button>
+      <button id="save-png" type="button" class="secondary" disabled>Save PNG</button>
+    </div>
     <div id="screen"><div id="art" role="img" aria-label="what the program drew"></div><p id="noscreen">Programs that draw show their picture here.</p></div>
   </section>
 </main>
@@ -40,6 +56,7 @@
 
 <script src="examples.js"></script>
 <script src="main.bc.js"></script>
+<script src="n88basic-check.js"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -52,11 +69,19 @@
     $('examples').appendChild(o);
   });
 
-  function load(name) { $('source').value = window.N88_EXAMPLES[name] || ''; }
+  function load(name) { $('source').value = window.N88_EXAMPLES[name] || ''; name_it(name); repaint(); }
   $('examples').addEventListener('change', function () { load(this.value); run(); });
+
+  // The name a saved file gets. Whatever was opened or chosen, so saving
+  // returns what you brought rather than "download.bas".
+  var stem = 'program';
+  function name_it(n) { stem = String(n).replace(/\.[^.]*$/, '') || 'program'; }
+
+  var last = {};   // the most recent run, for the save buttons
 
   function run() {
     var r = n88.run($('source').value, $('stdin').value);
+    last = r;
     var out = $('output');
     out.textContent = r.output || '';
     if (r.error) {
@@ -84,7 +109,213 @@
       $('screen').classList.remove('has-image');
       $('drew').textContent = '';
     }
+
+    $('save-out').disabled = !(r.output || r.error);
+    $('save-svg').disabled = !r.svg;
+    $('save-png').disabled = !r.png;
+    lint();
   }
+
+  // ---- opening and saving -------------------------------------------------
+  //
+  // Nothing is uploaded and nothing is downloaded from anywhere: FileReader
+  // reads on this machine, the interpreter is already in the page, and saving
+  // is a Blob the browser writes. The file never leaves the browser, which is
+  // worth knowing before you drop one on a web page.
+
+  // A .bas or .n88 is a program; anything else is the INPUT a program reads.
+  // Split by extension rather than by a second button: someone dragging in
+  // sales.txt wants it as data and someone dragging in game.bas wants to run
+  // it, and asking would be asking about something the name already said.
+  function isProgram(name) { return /\.(bas|n88)$/i.test(name); }
+
+  function open_files(files) {
+    var pending = files.length;
+    if (!pending) return;
+    Array.prototype.forEach.call(files, function (f) {
+      var r = new FileReader();
+      r.onload = function () {
+        if (isProgram(f.name)) { $('source').value = r.result; name_it(f.name); repaint(); }
+        else {
+          $('stdin').value = r.result;
+          $('stdin-box').open = true;
+          $('stdin-note').textContent = ' · ' + f.name;
+        }
+        if (--pending === 0) run();
+      };
+      r.onerror = function () {
+        $('output').textContent = 'Could not read ' + f.name;
+        pending--;
+      };
+      r.readAsText(f);
+    });
+  }
+
+  function save(name, text, type) {
+    var url = URL.createObjectURL(new Blob([text], { type: type }));
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    // Revoked on the next turn of the loop: revoking immediately can beat the
+    // download in some browsers.
+    setTimeout(function () { URL.revokeObjectURL(url); }, 0);
+  }
+
+  $('open').addEventListener('click', function () { $('file').click(); });
+  $('file').addEventListener('change', function () { open_files(this.files); this.value = ''; });
+
+  $('save-src').addEventListener('click', function () {
+    save(stem + '.bas', $('source').value, 'text/plain');
+  });
+  $('save-out').addEventListener('click', function () {
+    save(stem + '.txt', (last.output || '') + (last.error ? last.error + '\n' : ''), 'text/plain');
+  });
+  $('save-svg').addEventListener('click', function () {
+    save(stem + '.svg', last.svg, 'image/svg+xml');
+  });
+  $('save-png').addEventListener('click', function () {
+    // The PNG arrives one character per byte; Blob wants the bytes themselves.
+    var b = new Uint8Array(last.png.length);
+    for (var i = 0; i < last.png.length; i++) b[i] = last.png.charCodeAt(i) & 0xff;
+    save(stem + '.png', b, 'image/png');
+  });
+
+  // Drop anywhere: aiming at a particular box is work the reader should not
+  // have to do.
+  ['dragenter', 'dragover'].forEach(function (ev) {
+    document.addEventListener(ev, function (e) {
+      e.preventDefault(); document.body.classList.add('dropping');
+    });
+  });
+  document.addEventListener('dragleave', function (e) {
+    if (!e.relatedTarget) document.body.classList.remove('dropping');
+  });
+  document.addEventListener('drop', function (e) {
+    e.preventDefault();
+    document.body.classList.remove('dropping');
+    if (e.dataTransfer) open_files(e.dataTransfer.files);
+  });
+
+  // ---- colour, as you type ------------------------------------------------
+  //
+  // Painted from the interpreter's OWN lexer, exported from the same bundle
+  // as the checker. Not a regular-expression mode that approximates the
+  // language: a second description of the syntax is a second thing to keep in
+  // step, and when it drifts the colours go on looking plausible while
+  // disagreeing with what actually parses. Here they cannot disagree.
+  var paintTokens = (typeof n88basicTokens === 'function') ? n88basicTokens : null;
+  var SCOPE = { keyword: 'k', 'function': 'f', string: 's', number: 'n',
+                linenumber: 'l', comment: 'c', punct: 'p', invalid: 'i' };
+
+  function esc(t) {
+    return t.replace(/[&<>]/g, function (c) {
+      return c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;';
+    });
+  }
+
+  function paint() {
+    var src = $('source').value;
+    var hl = $('hl');
+    // The trailing newline is load-bearing: a <pre> drops a final empty line,
+    // so without it the last line scrolls differently from the textarea's.
+    if (!paintTokens) { hl.textContent = src + '\n'; return; }
+    var found;
+    try { found = paintTokens(src); } catch (e) { hl.textContent = src + '\n'; return; }
+
+    var lines = src.split('\n');
+    var byLine = [];
+    found.forEach(function (t) { (byLine[t.line] || (byLine[t.line] = [])).push(t); });
+
+    var out = lines.map(function (text, i) {
+      var ts = byLine[i] || [], col = 0, parts = [];
+      ts.forEach(function (t) {
+        if (t.startCol < col) return;           // never paint the same run twice
+        if (t.startCol > col) parts.push(esc(text.slice(col, t.startCol)));
+        var cls = SCOPE[t.scope], body = esc(text.slice(t.startCol, t.endCol));
+        parts.push(cls ? '<span class="' + cls + '">' + body + '</span>' : body);
+        col = t.endCol;
+      });
+      if (col < text.length) parts.push(esc(text.slice(col)));
+      return parts.join('');
+    });
+
+    hl.innerHTML = out.join('\n') + '\n';
+    sync();
+  }
+
+  // The pre does not scroll itself -- it is dragged to wherever the textarea is.
+  function sync() {
+    $('hl').scrollTop = $('source').scrollTop;
+    $('hl').scrollLeft = $('source').scrollLeft;
+  }
+
+  // One repaint per frame however fast you type; lexing every keystroke
+  // separately is work nobody sees.
+  var queued = false;
+  function repaint() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; paint(); });
+  }
+
+  $('source').addEventListener('scroll', sync);
+
+  // ---- problems, as you type ---------------------------------------------
+  //
+  // The same checker the VS Code extension underlines with: one bundle built
+  // from editor/lsp/, which wraps the interpreter's own front end. Not a
+  // second opinion about what parses -- literally the same function, so the
+  // editor and this page cannot disagree.
+  //
+  // It never RUNS anything. That is the whole point of the split: reading a
+  // program and executing it are different questions, and only one of them is
+  // safe to ask on every keystroke.
+  //
+  // Shown as a list rather than as underlines because a <textarea> has no way
+  // to draw on its own text. Clicking an entry selects the offending range,
+  // which is the part of an underline that actually matters.
+  var check = (typeof n88basicCheck === 'function') ? n88basicCheck : null;
+
+  function offsetOf(text, line, col) {
+    var lines = text.split('\n');
+    var n = 0;
+    for (var i = 0; i < line && i < lines.length; i++) n += lines[i].length + 1;
+    return n + col;
+  }
+
+  function lint() {
+    var box = $('problems');
+    box.innerHTML = '';
+    if (!check) return;
+    var src = $('source').value;
+    var found;
+    try { found = check(src); } catch (e) { return; }   // never break the page
+    box.classList.toggle('some', found.length > 0);
+    found.slice(0, 20).forEach(function (d) {
+      var li = document.createElement('li');
+      li.className = d.severity === 'error' ? 'err' : 'warn';
+      li.innerHTML = '<span class="where">' + (d.line + 1) + ':' + (d.startCol + 1) +
+                     '</span> ' + d.message.replace(/[<&]/g, function (c) {
+                       return c === '<' ? '&lt;' : '&amp;'; });
+      li.addEventListener('click', function () {
+        var t = $('source');
+        t.focus();
+        t.setSelectionRange(offsetOf(src, d.line, d.startCol),
+                            offsetOf(src, d.line, d.endCol));
+      });
+      box.appendChild(li);
+    });
+  }
+
+  // Colour keeps up with the keyboard; the problem list waits until you stop.
+  // Different jobs deserve different latencies -- a list that rewrote itself
+  // mid-word would be reporting on a half-typed statement.
+  var lintTimer;
+  $('source').addEventListener('input', function () {
+    repaint();
+    clearTimeout(lintTimer);
+    lintTimer = setTimeout(lint, 300);
+  });
 
   $('run').addEventListener('click', run);
   $('source').addEventListener('keydown', function (e) {
@@ -92,5 +323,7 @@
   });
 
   if (names.length) { load(names[0]); run(); }
+  paint();
+  lint();
 })();
 </script>

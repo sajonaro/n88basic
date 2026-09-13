@@ -6,96 +6,48 @@ on:
   pull_request:
   workflow_dispatch:
 
+# There is one list of what must pass, and it is the gate-* stages in the
+# Dockerfile. This file used to be that list -- thirteen steps -- while
+# scripts/check-everything.sh held six and the Makefile held four, all three
+# calling themselves "everything" and none of them agreeing. Whatever you ran,
+# you did not know what you had run.
+#
+# So CI does not enumerate checks any more. It builds the gates, and the gates
+# are the same ones `make ci` builds on a laptop. A check added here that is
+# not in the Dockerfile would be a check nobody running `make ci` performs,
+# which is the drift this replaced.
 jobs:
-  test:
+  gates:
     runs-on: ubuntu-latest
     steps:
+      # The invariant gate reads the git index -- a scan tracked by mistake,
+      # a local path committed into a source file -- so it needs real history,
+      # not the default shallow clone.
       - uses: actions/checkout@v4
-
-      - uses: ocaml/setup-ocaml@v3
         with:
-          ocaml-compiler: "5.2"
+          fetch-depth: 0
 
-      # n88basic.opam names the test dependencies under {with-test}, which
-      # setup-ocaml does not install by default, so they are named here too.
-      # dune builds the interpreter; alcotest runs the tests; js_of_ocaml
-      # compiles the editor's checker; menhir checks the grammar.
-      #
-      # This comment used to say the project had no *.opam file at all. That
-      # was true when written and stopped being true in c42666b, which is the
-      # failure this project keeps finding: a remark that was correct when
-      # made and outlived the fact it rested on.
-      - name: Install build dependencies
-        run: opam install -y dune alcotest js_of_ocaml js_of_ocaml-compiler menhir
+      - uses: docker/setup-buildx-action@v3
 
-      - name: Build
-        run: opam exec -- dune build
+      # --progress=plain because the default renderer collapses each stage to a
+      # spinner, and the output of these checks is the evidence: how many
+      # conformance cases matched, which clauses are uncited. A log that only
+      # says a stage finished is not a record of anything.
+      - name: Every gate
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: gates
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Unit tests and conformance cases
-        run: opam exec -- dune test
-
-      # The specification is checked as well as the code: every clause must
-      # cite a manual page, every implemented clause must carry a conformance
-      # case, and the project invariants must hold.
-      # dune test links the library and runs the cases in process. This runs
-      # the same corpus through the built EXECUTABLE, which is the only way
-      # the CLI's own layer -- argument handling, the stdout/stderr split,
-      # buffering -- is ever vetted against the spec.
-      - name: Conformance through the built binary
-        run: opam exec -- ./scripts/check-conformance.sh "$PWD/_build/default/bin/main.exe"
-
-      # raster/Zlib writes zlib streams and has no decompressor, so its
-      # correctness is checked against Python's inflater rather than against
-      # itself. Bit order is the thing this guards: a stream with the extra
-      # bits reversed inflates for a while and then fails.
-      - name: Deflate round-trips through a real inflater
-        run: opam exec -- python3 tools/check_deflate.py
-
-      # The extension's pure logic under plain node, plus end-to-end checks
-      # that a real n88 accepts what the extension sends it. N88 points at the
-      # build so the second half actually runs -- without it those checks skip,
-      # and a skipped check is not a passing one.
-      - name: Extension features
-        run: |
-          set -eu
-          for t in editor/vscode/tools/test-*.js; do
-            echo "--- $t"
-            N88="$PWD/_build/default/bin/main.exe" node "$t"
-          done
-
-      - name: Release-tag rule
-        run: python3 tools/test_check_version_bump.py
-
-      # The one defect class no fixture here can see: a prompt that arrives
-      # after the answer. Capturing stdout is exactly the case where full
-      # buffering is correct, so this measures timing instead of bytes.
-      - name: A prompt is visible before the answer
-        run: sh tools/check_interactive_flush.sh
-
-      # The browser build is a second HOST over the same libraries, and the
-      # SVG renderer is a second RENDERER over the same display list. Both
-      # claims are checkable and nothing else checks them: dune test links the
-      # library natively and conform.sh drives the CLI.
-      - name: The browser build runs the same language
-        run: |
-          opam exec -- dune build @web/web
-          node tools/check_web.js
-
-      # The Dockerfile's web stage is what someone without a toolchain gets, so
-      # it has to keep building. It also guards a bug the native path cannot
-      # see: WORKDIR creates /src as root, which buildx tolerates and the
-      # classic builder does not.
-      - name: The console also builds with nothing but Docker
-        run: docker build --target web-assets -t n88basic-web-assets:ci .
-
-      - name: Project invariants
-        run: sh scripts/check-invariants.sh
-
-      - name: Specification gates
-        run: |
-          python3 tools/check_spec.py
-          python3 tools/coverage.py
-          python3 tools/citation_coverage.py
-
-      - name: Example programs
-        run: python3 tools/run_programs.py
+      # The image is the thing people actually run, and it is a different
+      # final stage. It cannot be built without the gates above, so this costs
+      # only the two COPY layers on top of them.
+      - name: The image builds on top of them
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
