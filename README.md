@@ -253,6 +253,11 @@ when `js_of_ocaml` is missing. The build runs the conformance corpus through
 the JavaScript build first, so the page provably runs the same language as the
 binary.
 
+The editor colours itself and lists problems as you type, from the
+interpreter's own lexer and checker rather than a separate description of the
+syntax — the same bundle the VS Code extension ships, so the two cannot
+disagree.
+
 Drawings arrive as vectors, about ten times smaller than the PNG and sharp at
 any zoom. `n88 --svg` writes the same from the command line.
 

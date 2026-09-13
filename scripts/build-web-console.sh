@@ -39,9 +39,25 @@ node tools/check_web.js
 # `make wc` serves one place and nothing has to read out of _build -- which is
 # dune's, and is not ours to rummage in or write to.
 mkdir -p web-console
-for f in index.html console.css examples.js main.bc.js; do
+for f in index.html console.css examples.js main.bc.js n88basic-check.js; do
   cp "_build/default/web/$f" "web-console/$f"
 done
+
+# That list and the (alias (name web)) deps in web/dune are two spellings of
+# the same set, and they HAVE drifted: n88basic-check.js was added to the alias
+# and not to the loop, so the console shipped without the checker and quietly
+# lost its diagnostics. Nothing failed -- the page loads fine without a script
+# it never gets to call. So ask the page itself what it needs.
+missing=""
+for f in $(sed -n 's/.*<\(script\|link\)[^>]*\(src\|href\)="\([^"]*\)".*/\3/p' web-console/index.html); do
+  case "$f" in http*|//*) continue ;; esac
+  [ -f "web-console/$f" ] || missing="$missing $f"
+done
+if [ -n "$missing" ]; then
+  echo "index.html asks for files the build did not produce:$missing" >&2
+  echo "Add them to the copy loop in $0 and to web/dune's web alias." >&2
+  exit 1
+fi
 echo "Console built into web-console/"
 
 # Optional, and says so: comparing a vector rendering against its raster needs

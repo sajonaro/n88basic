@@ -3,10 +3,12 @@
   <title id="console-title">How the web console is put together</title>
   <desc id="console-desc">Dune compiles the interpreter and rasteriser into one JavaScript bundle
     that exports a global called n88, and compiles the interpreter's front end separately into a
-    much smaller bundle that exports n88basicCheck -- the same bundle the VS Code extension ships.
+    much smaller bundle that exports n88basicTokens and n88basicCheck -- the same bundle the VS
+    Code extension ships.
     The example programs are packed into a third file by a native OCaml program. One HTML page
-    loads all three: it calls the checker as you type to list problems, and the interpreter when
-    you press Run to get text and a drawing. There is no server.</desc>
+    loads all three: as you type it calls the lexer to colour the editor and the checker to list
+    problems, and when you press Run it calls the interpreter for text and a drawing. There is no
+    server.</desc>
 
   <defs>
     <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
@@ -51,7 +53,10 @@
   <rect x="221" y="136" width="62" height="12" fill="#1e1e2e"/>
   <text x="252" y="145" fill="#cba6f7" font-size="8" font-family="'Geist Mono',ui-monospace,monospace"
         text-anchor="middle">js_of_ocaml</text>
-  <rect x="773" y="176" width="84" height="12" fill="#1e1e2e"/>
+  <rect x="772" y="162" width="86" height="12" fill="#1e1e2e"/>
+  <text x="815" y="171" fill="#bac2de" font-size="8" font-family="'Geist Mono',ui-monospace,monospace"
+        text-anchor="middle">n88basicTokens()</text>
+  <rect x="775" y="176" width="80" height="12" fill="#1e1e2e"/>
   <text x="815" y="185" fill="#bac2de" font-size="8" font-family="'Geist Mono',ui-monospace,monospace"
         text-anchor="middle">n88basicCheck()</text>
   <rect x="794" y="320" width="60" height="12" fill="#1e1e2e"/>
@@ -104,7 +109,7 @@
   <rect x="860" y="160" width="180" height="72" rx="6" fill="#1e1e2e" stroke="rgba(205,214,244,0.28)" stroke-width="1"/>
   <rect x="868" y="168" width="62" height="12" rx="2" fill="none" stroke="rgba(205,214,244,0.28)" stroke-width="0.8"/>
   <text x="899" y="177" fill="#a6adc8" font-size="7" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle" letter-spacing="0.08em">AS YOU TYPE</text>
-  <text x="950" y="200" fill="#cdd6f4" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',system-ui,sans-serif">Problems</text>
+  <text x="950" y="200" fill="#cdd6f4" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',system-ui,sans-serif">Colour, and problems</text>
   <text x="950" y="216" fill="#bac2de" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">it reads, it never runs</text>
 
   <rect x="860" y="304" width="180" height="72" rx="6" fill="#1e1e2e" stroke="rgba(205,214,244,0.28)" stroke-width="1"/>

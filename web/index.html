@@ -21,7 +21,10 @@
       <input id="file" type="file" multiple hidden
              accept=".bas,.n88,.txt,.dat,.csv,text/plain">
     </div>
-    <textarea id="source" spellcheck="false" aria-label="BASIC program"></textarea>
+    <div class="editor">
+      <pre id="hl" aria-hidden="true"></pre>
+      <textarea id="source" spellcheck="false" aria-label="BASIC program"></textarea>
+    </div>
     <ul id="problems" aria-live="polite" aria-label="problems in the program"></ul>
     <details id="stdin-box">
       <summary>Input for <code>INPUT</code> — one answer per line<span id="stdin-note"></span></summary>
@@ -66,7 +69,7 @@
     $('examples').appendChild(o);
   });
 
-  function load(name) { $('source').value = window.N88_EXAMPLES[name] || ''; name_it(name); }
+  function load(name) { $('source').value = window.N88_EXAMPLES[name] || ''; name_it(name); repaint(); }
   $('examples').addEventListener('change', function () { load(this.value); run(); });
 
   // The name a saved file gets. Whatever was opened or chosen, so saving
@@ -132,7 +135,7 @@
     Array.prototype.forEach.call(files, function (f) {
       var r = new FileReader();
       r.onload = function () {
-        if (isProgram(f.name)) { $('source').value = r.result; name_it(f.name); }
+        if (isProgram(f.name)) { $('source').value = r.result; name_it(f.name); repaint(); }
         else {
           $('stdin').value = r.result;
           $('stdin-box').open = true;
@@ -193,6 +196,70 @@
     if (e.dataTransfer) open_files(e.dataTransfer.files);
   });
 
+  // ---- colour, as you type ------------------------------------------------
+  //
+  // Painted from the interpreter's OWN lexer, exported from the same bundle
+  // as the checker. Not a regular-expression mode that approximates the
+  // language: a second description of the syntax is a second thing to keep in
+  // step, and when it drifts the colours go on looking plausible while
+  // disagreeing with what actually parses. Here they cannot disagree.
+  var paintTokens = (typeof n88basicTokens === 'function') ? n88basicTokens : null;
+  var SCOPE = { keyword: 'k', 'function': 'f', string: 's', number: 'n',
+                linenumber: 'l', comment: 'c', punct: 'p', invalid: 'i' };
+
+  function esc(t) {
+    return t.replace(/[&<>]/g, function (c) {
+      return c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;';
+    });
+  }
+
+  function paint() {
+    var src = $('source').value;
+    var hl = $('hl');
+    // The trailing newline is load-bearing: a <pre> drops a final empty line,
+    // so without it the last line scrolls differently from the textarea's.
+    if (!paintTokens) { hl.textContent = src + '\n'; return; }
+    var found;
+    try { found = paintTokens(src); } catch (e) { hl.textContent = src + '\n'; return; }
+
+    var lines = src.split('\n');
+    var byLine = [];
+    found.forEach(function (t) { (byLine[t.line] || (byLine[t.line] = [])).push(t); });
+
+    var out = lines.map(function (text, i) {
+      var ts = byLine[i] || [], col = 0, parts = [];
+      ts.forEach(function (t) {
+        if (t.startCol < col) return;           // never paint the same run twice
+        if (t.startCol > col) parts.push(esc(text.slice(col, t.startCol)));
+        var cls = SCOPE[t.scope], body = esc(text.slice(t.startCol, t.endCol));
+        parts.push(cls ? '<span class="' + cls + '">' + body + '</span>' : body);
+        col = t.endCol;
+      });
+      if (col < text.length) parts.push(esc(text.slice(col)));
+      return parts.join('');
+    });
+
+    hl.innerHTML = out.join('\n') + '\n';
+    sync();
+  }
+
+  // The pre does not scroll itself -- it is dragged to wherever the textarea is.
+  function sync() {
+    $('hl').scrollTop = $('source').scrollTop;
+    $('hl').scrollLeft = $('source').scrollLeft;
+  }
+
+  // One repaint per frame however fast you type; lexing every keystroke
+  // separately is work nobody sees.
+  var queued = false;
+  function repaint() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; paint(); });
+  }
+
+  $('source').addEventListener('scroll', sync);
+
   // ---- problems, as you type ---------------------------------------------
   //
   // The same checker the VS Code extension underlines with: one bundle built
@@ -240,8 +307,12 @@
     });
   }
 
+  // Colour keeps up with the keyboard; the problem list waits until you stop.
+  // Different jobs deserve different latencies -- a list that rewrote itself
+  // mid-word would be reporting on a half-typed statement.
   var lintTimer;
   $('source').addEventListener('input', function () {
+    repaint();
     clearTimeout(lintTimer);
     lintTimer = setTimeout(lint, 300);
   });
@@ -252,6 +323,7 @@
   });
 
   if (names.length) { load(names[0]); run(); }
+  paint();
   lint();
 })();
 </script>
