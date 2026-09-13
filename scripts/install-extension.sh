@@ -7,6 +7,7 @@
 # updated copy from a stale one.
 set -eu
 cd "$(dirname "$0")/.."
+. "$(dirname "$0")/lib/switch.sh"
 
 dest="${1:-$HOME/.vscode/extensions/n88basic.n88basic-0.1.0}"
 

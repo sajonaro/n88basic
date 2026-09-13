@@ -5,6 +5,7 @@
 #   scripts/install-from-source.sh /usr/local   installs to /usr/local/bin
 set -eu
 cd "$(dirname "$0")/.."
+. "$(dirname "$0")/lib/switch.sh"
 
 prefix="${1:-$HOME/.local}"
 bindir="$prefix/bin"

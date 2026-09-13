@@ -3,6 +3,7 @@
 # and the example programs.
 set -eu
 cd "$(dirname "$0")/.."
+. "$(dirname "$0")/lib/switch.sh"
 
 dune test
 sh scripts/check-invariants.sh

@@ -12,32 +12,7 @@
 # otherwise show the build's own error rather than a guess about it.
 set -eu
 cd "$(dirname "$0")/.."
-
-# The project keeps a local opam switch. A caller who has not run
-# `eval $(opam env)` still has one right here -- but putting ./_opam/bin on
-# PATH is NOT enough: dune finds its libraries through the switch's
-# environment, not its bin directory, so it would then fail with "Library
-# js_of_ocaml not found" while ocamlfind could see it perfectly well. Ask opam
-# for the environment instead of assembling it by hand.
-if command -v dune >/dev/null 2>&1; then
-  :                                   # the caller already activated a switch
-elif command -v opam >/dev/null 2>&1 && [ -d ./_opam ]; then
-  eval "$(opam env --switch=. --set-switch)"
-elif command -v opam >/dev/null 2>&1; then
-  eval "$(opam env)" 2>/dev/null || true
-fi
-
-if ! command -v dune >/dev/null 2>&1; then
-  echo "dune is not available." >&2
-  if [ -d ./_opam ]; then
-    echo "This tree has a switch at ./_opam -- activate it with:" >&2
-    echo "    eval \$(opam env --switch=. --set-switch)" >&2
-  else
-    echo "Create one with:" >&2
-    echo "    opam switch create . --deps-only" >&2
-  fi
-  exit 1
-fi
+. "$(dirname "$0")/lib/switch.sh"
 
 # js_of_ocaml is the one genuinely optional dependency: web/dune marks the
 # executable (optional), so a tree without it still builds and tests the
