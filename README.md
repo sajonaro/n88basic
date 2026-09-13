@@ -243,7 +243,7 @@ built.
 ## In a browser
 
 ```sh
-make wc          # http://localhost:8088
+make wc          # http://localhost:8088 — stays running until Ctrl-C
 ```
 
 ![n88basic compiled to JavaScript: the interpreter, the renderer and the page all inside one browser tab](docs/diagrams/browser.svg)

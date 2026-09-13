@@ -35,10 +35,7 @@ web:
 	@./scripts/build-web-console.sh
 
 webconsole: web
-	@echo ""
-	@echo "  n88basic console at http://localhost:$(PORT)/   (ctrl-c stops it)"
-	@echo ""
-	@cd web-console && python3 -m http.server $(PORT) --bind 127.0.0.1 2>/dev/null
+	@PORT=$(PORT) ./scripts/serve-web-console.sh
 
 wc: webconsole
 
