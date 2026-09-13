@@ -77,3 +77,35 @@ summary { padding: 8px 10px; font-size: 12px; color: var(--dim); cursor: pointer
 footer { max-width: 1200px; margin: 0 auto; padding: 4px 20px 40px;
          color: var(--dim); font-size: 13px; }
 a { color: var(--accent); }
+
+/* Opening a file. The drop target is the whole page -- aiming at a box is work
+   the reader should not have to do -- so the cue is a border on the body. */
+button.secondary { margin-left: 0; padding: 3px 10px; background: transparent;
+                   color: var(--dim); border-color: var(--line); font-weight: 500; }
+button.secondary:disabled { opacity: .4; cursor: default; }
+button.secondary:disabled:hover { color: var(--dim); border-color: var(--line); }
+.bar { flex-wrap: wrap; }
+#save-svg, #save-png { margin-left: 0; }
+#save-out { margin-left: auto; }
+button.secondary:hover { color: var(--ink); border-color: var(--accent); }
+#run { margin-left: auto; }
+#stdin-note { color: var(--accent); }
+body.dropping { outline: 2px dashed var(--accent); outline-offset: -8px; }
+body.dropping::after {
+  content: 'Drop a .bas to run it, or any other file to use as input';
+  position: fixed; inset: auto 0 24px 0; text-align: center;
+  font-size: 13px; color: var(--accent); pointer-events: none;
+}
+
+/* Problems, as the checker finds them. A list rather than underlines: a
+   textarea cannot draw on its own text, and the clickable range is the part of
+   an underline that does the work. */
+#problems { list-style: none; margin: 0; padding: 0; max-height: 132px;
+            overflow: auto; font-family: var(--mono); font-size: 12px; }
+#problems.some { border-top: 1px solid var(--line); }
+#problems li { padding: 5px 12px; cursor: pointer; display: flex; gap: 8px;
+               border-left: 2px solid transparent; }
+#problems li:hover { background: var(--bg); }
+#problems li.err  { border-left-color: var(--err); }
+#problems li.warn { border-left-color: var(--accent); }
+.where { color: var(--dim); min-width: 44px; }

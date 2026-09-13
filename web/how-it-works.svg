@@ -1,0 +1,129 @@
+<svg viewBox="0 0 1080 540" role="img" aria-labelledby="console-title console-desc"
+     xmlns="http://www.w3.org/2000/svg">
+  <title id="console-title">How the web console is put together</title>
+  <desc id="console-desc">Dune compiles the interpreter and rasteriser into one JavaScript bundle
+    that exports a global called n88, and compiles the interpreter's front end separately into a
+    much smaller bundle that exports n88basicCheck -- the same bundle the VS Code extension ships.
+    The example programs are packed into a third file by a native OCaml program. One HTML page
+    loads all three: it calls the checker as you type to list problems, and the interpreter when
+    you press Run to get text and a drawing. There is no server.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#bac2de"/></marker>
+    <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#cba6f7"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#1e1e2e"/>
+
+  <!-- zones -->
+  <rect x="24" y="88" width="496" height="368" rx="8"
+        fill="rgba(205,214,244,0.04)" stroke="rgba(205,214,244,0.12)" stroke-width="0.8"/>
+  <rect x="182" y="82" width="180" height="12" fill="#1e1e2e"/>
+  <text x="272" y="91" fill="#a6adc8" font-size="7" font-family="'Geist Mono',ui-monospace,monospace"
+        text-anchor="middle" letter-spacing="0.14em">BUILD TIME &#183; make web &#8594; web-console/</text>
+
+  <rect x="568" y="88" width="488" height="368" rx="8"
+        fill="rgba(205,214,244,0.04)" stroke="rgba(205,214,244,0.12)" stroke-width="0.8"/>
+  <rect x="682" y="82" width="260" height="12" fill="#1e1e2e"/>
+  <text x="812" y="91" fill="#a6adc8" font-size="7" font-family="'Geist Mono',ui-monospace,monospace"
+        text-anchor="middle" letter-spacing="0.14em">RUN TIME &#183; one tab loads all three with &lt;script&gt;</text>
+
+  <!-- connectors, drawn before the boxes -->
+  <line x1="216" y1="156" x2="288" y2="156" stroke="#cba6f7" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+  <path d="M 216,180 H 240 Q 248,180 248,188 V 264 Q 248,272 256,272 H 288"
+        fill="none" stroke="#cba6f7" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+  <line x1="216" y1="380" x2="288" y2="380" stroke="#bac2de" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <path d="M 508,156 H 532 Q 540,156 540,164 V 246 Q 540,254 548,254 H 584"
+        fill="none" stroke="#bac2de" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="508" y1="272" x2="584" y2="272" stroke="#bac2de" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <path d="M 508,380 H 548 Q 556,380 556,372 V 298 Q 556,290 564,290 H 584"
+        fill="none" stroke="#bac2de" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <path d="M 748,254 H 754 Q 762,254 762,246 V 204 Q 762,196 770,196 H 860"
+        fill="none" stroke="#bac2de" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <path d="M 748,290 H 770 Q 778,290 778,298 V 332 Q 778,340 786,340 H 860"
+        fill="none" stroke="#bac2de" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- connector labels -->
+  <rect x="221" y="136" width="62" height="12" fill="#1e1e2e"/>
+  <text x="252" y="145" fill="#cba6f7" font-size="8" font-family="'Geist Mono',ui-monospace,monospace"
+        text-anchor="middle">js_of_ocaml</text>
+  <rect x="773" y="176" width="84" height="12" fill="#1e1e2e"/>
+  <text x="815" y="185" fill="#bac2de" font-size="8" font-family="'Geist Mono',ui-monospace,monospace"
+        text-anchor="middle">n88basicCheck()</text>
+  <rect x="794" y="320" width="60" height="12" fill="#1e1e2e"/>
+  <text x="824" y="329" fill="#bac2de" font-size="8" font-family="'Geist Mono',ui-monospace,monospace"
+        text-anchor="middle">n88.run()</text>
+
+  <!-- sources -->
+  <rect x="40" y="144" width="176" height="72" rx="6" fill="#313244" stroke="#cdd6f4" stroke-width="1"/>
+  <rect x="48" y="152" width="40" height="12" rx="2" fill="none" stroke="rgba(205,214,244,0.35)" stroke-width="0.8"/>
+  <text x="68" y="161" fill="#bac2de" font-size="7" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle" letter-spacing="0.08em">OCAML</text>
+  <text x="128" y="184" fill="#cdd6f4" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',system-ui,sans-serif">basic/ + raster/</text>
+  <text x="128" y="200" fill="#bac2de" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">the language &#183; no I/O</text>
+
+  <rect x="40" y="344" width="176" height="72" rx="6" fill="#313244" stroke="#cdd6f4" stroke-width="1"/>
+  <rect x="48" y="352" width="40" height="12" rx="2" fill="none" stroke="rgba(205,214,244,0.35)" stroke-width="0.8"/>
+  <text x="68" y="361" fill="#bac2de" font-size="7" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle" letter-spacing="0.08em">BASIC</text>
+  <text x="128" y="384" fill="#cdd6f4" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',system-ui,sans-serif">test/programs/</text>
+  <text x="128" y="400" fill="#bac2de" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">twelve .bas examples</text>
+
+  <!-- artifacts -->
+  <rect x="288" y="112" width="220" height="88" rx="6" fill="rgba(203,166,247,0.12)" stroke="#cba6f7" stroke-width="1"/>
+  <rect x="296" y="120" width="52" height="12" rx="2" fill="none" stroke="rgba(203,166,247,0.55)" stroke-width="0.8"/>
+  <text x="322" y="129" fill="#cba6f7" font-size="7" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle" letter-spacing="0.08em">3.5 MB</text>
+  <text x="398" y="152" fill="#cdd6f4" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',system-ui,sans-serif">main.bc.js</text>
+  <text x="398" y="168" fill="#bac2de" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">n88basic + raster &#8594; window.n88</text>
+  <text x="398" y="184" fill="#a6adc8" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">the same code the n88 binary runs</text>
+
+  <rect x="288" y="228" width="220" height="88" rx="6" fill="rgba(203,166,247,0.12)" stroke="#cba6f7" stroke-width="1"/>
+  <rect x="296" y="236" width="52" height="12" rx="2" fill="none" stroke="rgba(203,166,247,0.55)" stroke-width="0.8"/>
+  <text x="322" y="245" fill="#cba6f7" font-size="7" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle" letter-spacing="0.08em">108 KB</text>
+  <text x="398" y="268" fill="#cdd6f4" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',system-ui,sans-serif">n88basic-check.js</text>
+  <text x="398" y="284" fill="#bac2de" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">n88lsp &#8594; window.n88basicCheck</text>
+  <text x="398" y="300" fill="#a6adc8" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">the extension&#8217;s own bundle, verbatim</text>
+
+  <rect x="288" y="336" width="220" height="88" rx="6" fill="#313244" stroke="#cdd6f4" stroke-width="1"/>
+  <rect x="296" y="344" width="52" height="12" rx="2" fill="none" stroke="rgba(205,214,244,0.35)" stroke-width="0.8"/>
+  <text x="322" y="353" fill="#bac2de" font-size="7" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle" letter-spacing="0.08em">9.7 KB</text>
+  <text x="398" y="376" fill="#cdd6f4" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',system-ui,sans-serif">examples.js</text>
+  <text x="398" y="392" fill="#bac2de" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">window.N88_EXAMPLES</text>
+  <text x="398" y="408" fill="#a6adc8" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">packed by bundle.exe at build time</text>
+
+  <!-- the page -->
+  <rect x="584" y="236" width="164" height="72" rx="6" fill="#313244" stroke="#cdd6f4" stroke-width="1"/>
+  <rect x="592" y="244" width="44" height="12" rx="2" fill="none" stroke="rgba(205,214,244,0.35)" stroke-width="0.8"/>
+  <text x="614" y="253" fill="#bac2de" font-size="7" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle" letter-spacing="0.08em">15 KB</text>
+  <text x="666" y="276" fill="#cdd6f4" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',system-ui,sans-serif">index.html</text>
+  <text x="666" y="292" fill="#bac2de" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">textarea + 90 lines of JS</text>
+
+  <!-- what you see -->
+  <rect x="860" y="160" width="180" height="72" rx="6" fill="#1e1e2e" stroke="rgba(205,214,244,0.28)" stroke-width="1"/>
+  <rect x="868" y="168" width="62" height="12" rx="2" fill="none" stroke="rgba(205,214,244,0.28)" stroke-width="0.8"/>
+  <text x="899" y="177" fill="#a6adc8" font-size="7" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle" letter-spacing="0.08em">AS YOU TYPE</text>
+  <text x="950" y="200" fill="#cdd6f4" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',system-ui,sans-serif">Problems</text>
+  <text x="950" y="216" fill="#bac2de" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">it reads, it never runs</text>
+
+  <rect x="860" y="304" width="180" height="72" rx="6" fill="#1e1e2e" stroke="rgba(205,214,244,0.28)" stroke-width="1"/>
+  <rect x="868" y="312" width="68" height="12" rx="2" fill="none" stroke="rgba(205,214,244,0.28)" stroke-width="0.8"/>
+  <text x="902" y="321" fill="#a6adc8" font-size="7" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle" letter-spacing="0.08em">WHEN YOU RUN</text>
+  <text x="950" y="344" fill="#cdd6f4" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',system-ui,sans-serif">Output, and a drawing</text>
+  <text x="950" y="360" fill="#bac2de" font-size="9" font-family="'Geist Mono',ui-monospace,monospace" text-anchor="middle">inline SVG &#183; PNG for PAINT</text>
+
+  <!-- aside -->
+  <text x="584" y="406" fill="#bac2de" font-size="13" font-style="italic" font-family="'Instrument Serif',Georgia,serif">Files arrive through FileReader and leave as a Blob.</text>
+  <text x="584" y="426" fill="#bac2de" font-size="13" font-style="italic" font-family="'Instrument Serif',Georgia,serif">Nothing is uploaded &#8212; there is nothing to upload to.</text>
+
+  <!-- legend -->
+  <line x1="24" y1="480" x2="1056" y2="480" stroke="rgba(205,214,244,0.12)" stroke-width="0.8"/>
+  <text x="24" y="500" fill="#bac2de" font-size="8" font-family="'Geist Mono',ui-monospace,monospace" letter-spacing="0.14em">LEGEND</text>
+  <rect x="120" y="490" width="14" height="12" rx="3" fill="rgba(203,166,247,0.12)" stroke="#cba6f7" stroke-width="1"/>
+  <text x="142" y="500" fill="#bac2de" font-size="9" font-family="'Geist',system-ui,sans-serif">compiled from OCaml by js_of_ocaml</text>
+  <rect x="400" y="490" width="14" height="12" rx="3" fill="#313244" stroke="#cdd6f4" stroke-width="1"/>
+  <text x="422" y="500" fill="#bac2de" font-size="9" font-family="'Geist',system-ui,sans-serif">source, or generated from it</text>
+  <rect x="640" y="490" width="14" height="12" rx="3" fill="#1e1e2e" stroke="rgba(205,214,244,0.28)" stroke-width="1"/>
+  <text x="662" y="500" fill="#bac2de" font-size="9" font-family="'Geist',system-ui,sans-serif">what you end up looking at</text>
+</svg>
