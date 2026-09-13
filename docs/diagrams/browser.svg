@@ -1,0 +1,89 @@
+<svg viewBox="0 0 1080 500" role="img" aria-labelledby="browser-title browser-desc"
+     xmlns="http://www.w3.org/2000/svg">
+  <title id="browser-title">How n88basic runs in a browser</title>
+  <desc id="browser-desc">A program typed into the page is run by the interpreter and renderer
+    compiled to JavaScript and loaded in the tab. Text output is shown directly; drawing becomes
+    a display list, which is turned into vector SVG, or into a raster PNG when the program used
+    a flood fill that has no vector form. Nothing leaves the browser.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6b6079"/></marker>
+    <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#8a5cae"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f7f5fa"/>
+
+  <!-- the tab -->
+  <rect x="248" y="100" width="768" height="308" rx="8"
+        fill="rgba(46,42,56,0.02)" stroke="rgba(46,42,56,0.10)" stroke-width="0.8"/>
+  <rect x="440" y="104" width="384" height="12" rx="2" fill="#f7f5fa"/>
+  <text x="632" y="113" fill="rgba(46,42,56,0.45)" font-size="7" font-family="'Geist Mono',monospace"
+        text-anchor="middle" letter-spacing="0.14em">ALL OF THIS IS YOUR BROWSER TAB · NO SERVER · NOTHING INSTALLED</text>
+
+  <!-- ARROWS -->
+  <line x1="180" y1="268" x2="280" y2="268" stroke="#6b6079" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <path d="M 492,244 H 516 Q 524,244 524,236 V 176 Q 524,168 532,168 H 548"
+        fill="none" stroke="#6b6079" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="492" y1="268" x2="548" y2="268" stroke="#8a5cae" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+  <path d="M 736,256 H 760 Q 768,256 768,248 V 240 Q 768,232 776,232 H 792"
+        fill="none" stroke="#8a5cae" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+  <path d="M 736,280 H 760 Q 768,280 768,288 V 332 Q 768,340 776,340 H 792"
+        fill="none" stroke="#6b6079" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+
+  <!-- NODES -->
+  <rect x="40" y="232" width="140" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="40" y="232" width="140" height="72" rx="6" fill="rgba(107,96,121,0.10)" stroke="#938aa0" stroke-width="1"/>
+  <rect x="48" y="240" width="30" height="12" rx="2" fill="transparent" stroke="rgba(147,138,160,0.5)" stroke-width="0.8"/>
+  <text x="63" y="249" fill="#938aa0" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">YOU</text>
+  <text x="110" y="276" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Type a program</text>
+  <text x="110" y="290" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">press Run</text>
+
+  <rect x="288" y="232" width="204" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="288" y="232" width="204" height="72" rx="6" fill="rgba(138,92,174,0.10)" stroke="#8a5cae" stroke-width="1"/>
+  <rect x="296" y="240" width="46" height="12" rx="2" fill="transparent" stroke="rgba(138,92,174,0.5)" stroke-width="0.8"/>
+  <text x="319" y="249" fill="#8a5cae" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">ONE FILE</text>
+  <text x="390" y="276" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">The interpreter, compiled</text>
+  <text x="390" y="290" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">same code as the binary</text>
+
+  <rect x="548" y="132" width="188" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="548" y="132" width="188" height="72" rx="6" fill="rgba(46,42,56,0.03)" stroke="rgba(46,42,56,0.30)" stroke-width="1"/>
+  <rect x="556" y="140" width="38" height="12" rx="2" fill="transparent" stroke="rgba(46,42,56,0.3)" stroke-width="0.8"/>
+  <text x="575" y="149" fill="rgba(46,42,56,0.7)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">SHOWN</text>
+  <text x="642" y="176" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">What it printed</text>
+  <text x="642" y="190" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">straight into the page</text>
+
+  <rect x="548" y="232" width="188" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="548" y="232" width="188" height="72" rx="6" fill="rgba(138,92,174,0.10)" stroke="#8a5cae" stroke-width="1"/>
+  <rect x="556" y="240" width="38" height="12" rx="2" fill="transparent" stroke="rgba(138,92,174,0.5)" stroke-width="0.8"/>
+  <text x="575" y="249" fill="#8a5cae" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">STATE</text>
+  <text x="642" y="276" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">What it drew</text>
+  <text x="642" y="290" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">shapes, not pixels</text>
+
+  <rect x="792" y="196" width="188" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="792" y="196" width="188" height="72" rx="6" fill="#ffffff" stroke="#2e2a38" stroke-width="1"/>
+  <rect x="800" y="204" width="34" height="12" rx="2" fill="transparent" stroke="rgba(46,42,56,0.4)" stroke-width="0.8"/>
+  <text x="817" y="213" fill="rgba(46,42,56,0.8)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">VECTOR</text>
+  <text x="886" y="240" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Drawn as SVG</text>
+  <text x="886" y="254" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">~10x smaller, sharp at any zoom</text>
+
+  <rect x="792" y="304" width="188" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="792" y="304" width="188" height="72" rx="6" fill="rgba(46,42,56,0.02)" stroke="rgba(46,42,56,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+  <rect x="800" y="312" width="48" height="12" rx="2" fill="transparent" stroke="rgba(46,42,56,0.25)" stroke-width="0.8"/>
+  <text x="824" y="321" fill="rgba(46,42,56,0.6)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">FALLBACK</text>
+  <text x="886" y="348" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Drawn as pixels</text>
+  <text x="886" y="362" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">when PAINT filled a region</text>
+
+  <!-- LEGEND -->
+  <line x1="40" y1="440" x2="1040" y2="440" stroke="rgba(46,42,56,0.10)" stroke-width="0.8"/>
+  <text x="40" y="460" fill="#6b6079" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+  <rect x="140" y="450" width="14" height="12" rx="3" fill="rgba(138,92,174,0.10)" stroke="#8a5cae" stroke-width="1"/>
+  <text x="162" y="460" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">the interpreter and what it records</text>
+  <rect x="436" y="450" width="14" height="12" rx="3" fill="#ffffff" stroke="#2e2a38" stroke-width="1"/>
+  <text x="458" y="460" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">the usual result</text>
+  <rect x="608" y="450" width="14" height="12" rx="3" fill="rgba(46,42,56,0.02)" stroke="rgba(46,42,56,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="630" y="460" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">the fallback</text>
+  <rect x="760" y="450" width="14" height="12" rx="3" fill="rgba(46,42,56,0.03)" stroke="rgba(46,42,56,0.30)" stroke-width="1"/>
+  <text x="782" y="460" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">what you end up looking at</text>
+</svg>

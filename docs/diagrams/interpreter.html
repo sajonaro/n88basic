@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How the n88basic interpreter works</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f7f5fa;--paper2:#efeaf4;--ink:#2e2a38;--muted:#6b6079;--soft:#938aa0;
+        --rule:rgba(46,42,56,0.12);--accent:#8a5cae;--link:#4a5fa8}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font-family:'Geist',system-ui,sans-serif;padding:2.5rem 2rem}
+  .wrap{max-width:1080px;margin:0 auto}
+  .eyebrow{font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:.18em;
+           text-transform:uppercase;color:var(--muted);margin:0 0 .4rem}
+  h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:1.75rem;margin:0 0 .3rem}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 1.5rem;max-width:62ch}
+  svg{display:block;width:100%;height:auto}
+  footer{margin-top:1.5rem;padding-top:.8rem;border-top:1px solid var(--rule);
+         font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">n88basic · architecture</p>
+  <h1>One interpreter, no I/O of its own</h1>
+  <p class="sub">The core neither opens a file nor touches a pixel. It reads a parsed program,
+     calls back to whoever is hosting it for text and input, and <em>records</em> drawing as a
+     list of operations. That list is the whole graphics interface.</p>
+
+<svg viewBox="0 0 1080 560" role="img" aria-labelledby="interpreter-title interpreter-desc"
+     xmlns="http://www.w3.org/2000/svg">
+  <title id="interpreter-title">How the n88basic interpreter works</title>
+  <desc id="interpreter-desc">A BASIC source file is parsed into a program and evaluated by an
+    interpreter that performs no input or output itself. Text reaches the host through a write
+    callback; drawing is appended to a display list, which a separate renderer turns into a PNG
+    or SVG. The POINT statement reads the drawing back through that renderer.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6b6079"/></marker>
+    <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#8a5cae"/></marker>
+    <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#4a5fa8"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f7f5fa"/>
+
+  <!-- zone: the pure core -->
+  <rect x="196" y="116" width="624" height="132" rx="8"
+        fill="rgba(46,42,56,0.02)" stroke="rgba(46,42,56,0.10)" stroke-width="0.8"/>
+  <rect x="222" y="120" width="136" height="12" rx="2" fill="#f7f5fa"/>
+  <text x="290" y="129" fill="rgba(46,42,56,0.45)" font-size="7" font-family="'Geist Mono',monospace"
+        text-anchor="middle" letter-spacing="0.14em">NO FILES · NO PIXELS</text>
+
+  <!-- ARROWS (before boxes) -->
+  <line x1="172" y1="188" x2="204" y2="188" stroke="#6b6079" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="368" y1="188" x2="400" y2="188" stroke="#6b6079" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="600" y1="188" x2="632" y2="188" stroke="#8a5cae" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+  <line x1="804" y1="188" x2="836" y2="188" stroke="#6b6079" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="504" y1="228" x2="504" y2="332" stroke="#6b6079" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="922" y1="224" x2="922" y2="332" stroke="#6b6079" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- POINT reads the drawing back: renderer top, over the spine, into the interpreter -->
+  <path d="M 922,152 V 104 Q 922,96 914,96 H 512 Q 504,96 504,104 V 140"
+        fill="none" stroke="#4a5fa8" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow-link)"/>
+
+  <!-- arrow labels: mask sits >=6px clear of the stroke -->
+  <rect x="470" y="168" width="68" height="12" rx="2" fill="#f7f5fa"/>
+  <text x="504" y="177" fill="#8a5cae" font-size="8" font-family="'Geist Mono',monospace"
+        text-anchor="middle" letter-spacing="0.06em">ON_DRAW</text>
+  <rect x="512" y="272" width="52" height="12" rx="2" fill="#f7f5fa"/>
+  <text x="538" y="281" fill="#938aa0" font-size="8" font-family="'Geist Mono',monospace"
+        text-anchor="middle" letter-spacing="0.06em">WRITE</text>
+  <rect x="930" y="272" width="72" height="12" rx="2" fill="#f7f5fa"/>
+  <text x="966" y="281" fill="#938aa0" font-size="8" font-family="'Geist Mono',monospace"
+        text-anchor="middle" letter-spacing="0.06em">PNG / SVG</text>
+  <rect x="636" y="76" width="88" height="12" rx="2" fill="#f7f5fa"/>
+  <text x="680" y="85" fill="#4a5fa8" font-size="8" font-family="'Geist Mono',monospace"
+        text-anchor="middle" letter-spacing="0.06em">POINT READS</text>
+
+  <!-- NODES -->
+  <!-- source -->
+  <rect x="40" y="156" width="132" height="64" rx="6" fill="#f7f5fa"/>
+  <rect x="40" y="156" width="132" height="64" rx="6" fill="rgba(107,96,121,0.10)" stroke="#938aa0" stroke-width="1"/>
+  <rect x="48" y="162" width="34" height="12" rx="2" fill="transparent" stroke="rgba(147,138,160,0.5)" stroke-width="0.8"/>
+  <text x="65" y="171" fill="#938aa0" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">INPUT</text>
+  <text x="106" y="196" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Your program</text>
+  <text x="106" y="210" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">10 CIRCLE …</text>
+
+  <!-- program -->
+  <rect x="212" y="156" width="156" height="64" rx="6" fill="#f7f5fa"/>
+  <rect x="212" y="156" width="156" height="64" rx="6" fill="#ffffff" stroke="#2e2a38" stroke-width="1"/>
+  <rect x="220" y="162" width="38" height="12" rx="2" fill="transparent" stroke="rgba(46,42,56,0.4)" stroke-width="0.8"/>
+  <text x="239" y="171" fill="rgba(46,42,56,0.8)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">PARSE</text>
+  <text x="290" y="196" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Numbered lines</text>
+  <text x="290" y="210" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">checked, not run</text>
+
+  <!-- interpreter (focal) -->
+  <rect x="408" y="148" width="192" height="80" rx="6" fill="#f7f5fa"/>
+  <rect x="408" y="148" width="192" height="80" rx="6" fill="rgba(138,92,174,0.10)" stroke="#8a5cae" stroke-width="1"/>
+  <rect x="416" y="156" width="34" height="12" rx="2" fill="transparent" stroke="rgba(138,92,174,0.5)" stroke-width="0.8"/>
+  <text x="433" y="165" fill="#8a5cae" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">CORE</text>
+  <text x="504" y="196" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Evaluate</text>
+  <text x="504" y="214" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">one statement at a time</text>
+
+  <!-- display list (focal) -->
+  <rect x="640" y="156" width="164" height="64" rx="6" fill="#f7f5fa"/>
+  <rect x="640" y="156" width="164" height="64" rx="6" fill="rgba(138,92,174,0.10)" stroke="#8a5cae" stroke-width="1"/>
+  <rect x="648" y="162" width="38" height="12" rx="2" fill="transparent" stroke="rgba(138,92,174,0.5)" stroke-width="0.8"/>
+  <text x="667" y="171" fill="#8a5cae" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">STATE</text>
+  <text x="722" y="196" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Display list</text>
+  <text x="722" y="210" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">what to draw, not drawn</text>
+
+  <!-- renderer -->
+  <rect x="844" y="156" width="156" height="64" rx="6" fill="#f7f5fa"/>
+  <rect x="844" y="156" width="156" height="64" rx="6" fill="#ffffff" stroke="#2e2a38" stroke-width="1"/>
+  <rect x="852" y="162" width="44" height="12" rx="2" fill="transparent" stroke="rgba(46,42,56,0.4)" stroke-width="0.8"/>
+  <text x="874" y="171" fill="rgba(46,42,56,0.8)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">RENDER</text>
+  <text x="922" y="196" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Draw it</text>
+  <text x="922" y="210" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">pure function</text>
+
+  <!-- text out -->
+  <rect x="408" y="332" width="192" height="64" rx="6" fill="#f7f5fa"/>
+  <rect x="408" y="332" width="192" height="64" rx="6" fill="rgba(46,42,56,0.03)" stroke="rgba(46,42,56,0.30)" stroke-width="1"/>
+  <rect x="416" y="338" width="34" height="12" rx="2" fill="transparent" stroke="rgba(46,42,56,0.3)" stroke-width="0.8"/>
+  <text x="433" y="347" fill="rgba(46,42,56,0.7)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">HOST</text>
+  <text x="504" y="372" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Whatever PRINT said</text>
+  <text x="504" y="386" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">terminal · panel · page</text>
+
+  <!-- picture -->
+  <rect x="844" y="332" width="156" height="64" rx="6" fill="#f7f5fa"/>
+  <rect x="844" y="332" width="156" height="64" rx="6" fill="rgba(46,42,56,0.03)" stroke="rgba(46,42,56,0.30)" stroke-width="1"/>
+  <rect x="852" y="338" width="34" height="12" rx="2" fill="transparent" stroke="rgba(46,42,56,0.3)" stroke-width="0.8"/>
+  <text x="869" y="347" fill="rgba(46,42,56,0.7)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">HOST</text>
+  <text x="922" y="372" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">A picture</text>
+  <text x="922" y="386" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">file · panel · page</text>
+
+  <!-- LEGEND -->
+  <line x1="40" y1="452" x2="1040" y2="452" stroke="rgba(46,42,56,0.10)" stroke-width="0.8"/>
+  <text x="40" y="472" fill="#6b6079" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+  <rect x="140" y="462" width="14" height="12" rx="3" fill="rgba(138,92,174,0.10)" stroke="#8a5cae" stroke-width="1"/>
+  <text x="162" y="472" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">the part that never does I/O</text>
+  <rect x="368" y="462" width="14" height="12" rx="3" fill="#ffffff" stroke="#2e2a38" stroke-width="1"/>
+  <text x="390" y="472" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">pure step</text>
+  <rect x="504" y="462" width="14" height="12" rx="3" fill="rgba(46,42,56,0.03)" stroke="rgba(46,42,56,0.30)" stroke-width="1"/>
+  <text x="526" y="472" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">supplied by the host</text>
+  <line x1="700" y1="468" x2="740" y2="468" stroke="#4a5fa8" stroke-width="1.2" stroke-dasharray="5,4"/>
+  <text x="748" y="472" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">the one place drawing is read back</text>
+</svg>
+
+  <footer>n88basic · the same core runs in a terminal, an editor and a browser</footer>
+</div>
+</body>
+</html>

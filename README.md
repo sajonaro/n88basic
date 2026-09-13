@@ -30,6 +30,18 @@ produce, on a modern desktop, with no ROM image and no emulator.
 "Faithfully" is the hard part, and it is why this repository contains a
 specification as well as an interpreter.
 
+## How it works
+
+![The n88basic interpreter: a core that performs no I/O, a display list, and a separate renderer](docs/diagrams/interpreter.png)
+
+The core neither opens a file nor touches a pixel. It reads a parsed program and calls back to
+whoever is hosting it — for text, for input, and to record drawing. That recording is a **display
+list**: a program does not paint, it appends *what to paint*, and a separate renderer turns the
+list into a PNG or an SVG.
+
+That one decision is why the same interpreter runs unchanged in a terminal, inside VS Code, and
+in a browser tab. Each host supplies its own edges; none of them changes the language.
+
 ## Quick start
 
 Requires OCaml 5 and dune.
@@ -274,7 +286,34 @@ than the extension is fine; an older one is what causes trouble, and the
 extension checks at startup and tells you rather than failing obscurely later.
 `n88 --version` answers the question directly.
 
+## In a browser
+
+```sh
+make wc        # http://localhost:8088
+```
+
+![n88basic compiled to JavaScript: the interpreter, the renderer and the page all inside one browser tab](docs/diagrams/browser.png)
+
+Compiling the same libraries to JavaScript puts the language *and* its renderer in the page.
+Nothing is installed and nothing is sent anywhere. Because a drawing is a list of shapes rather
+than pixels, the console shows it as vectors that stay sharp at any zoom — about ten times
+smaller than the equivalent PNG — and falls back to pixels only for `PAINT`, which is a flood
+fill and has no vector form.
+
+`n88 --svg prog.bas` writes the same vector drawing from the command line.
+
+The browser build is not a second interpreter, and that is checked rather than asserted:
+`tools/check_web.js` runs the whole conformance corpus through it, drawings included, against the
+same hashes the released binary and the container are held to.
+
 ## The VS Code extension
+
+![The extension's two paths: an in-editor checker that never runs your program, and commands that spawn n88](docs/diagrams/extension.png)
+
+**Two paths, and only one of them runs anything.** The squiggles come from the interpreter's own
+front end compiled to JavaScript and living inside the editor — it reads your program and never
+executes it. Running is a separate path that starts a real `n88` process. So a red underline is
+not a failed run, and a clean file is not a program that works.
 
 `editor/vscode/` provides syntax highlighting, live diagnostics, hover
 documentation drawn from the spec data, completion, quick fixes, automatic
@@ -323,11 +362,17 @@ with or endorsed by NEC.
 ## Layout
 
 ```
-basic/    the interpreter: lexer, parser, evaluator
-raster/   display list to framebuffer to PNG, no dependencies
+basic/    the interpreter: lexer, parser, evaluator — no I/O of its own
+raster/   display list to a picture: framebuffer, PNG, SVG, no dependencies
 bin/      the n88 command-line runner
+web/      the browser console — the same libraries, compiled to JavaScript
 editor/   the VS Code extension and its checker
 spec/     the cited specification and its data
 test/     unit tests, conformance cases, example programs
-tools/    the spec and example-program checkers
+tools/    the checkers: spec, coverage, browser build, SVG, deflate
+docs/     design notes, the diagrams above, and the manual scans (untracked)
 ```
+
+`basic/` performing no I/O is load-bearing rather than tidy: it is what lets the same code be
+the command-line interpreter, the editor's checker, and the browser console. An invariant in
+`scripts/check-invariants.sh` enforces it.

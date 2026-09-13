@@ -1,0 +1,106 @@
+<svg viewBox="0 0 1080 520" role="img" aria-labelledby="extension-title extension-desc"
+     xmlns="http://www.w3.org/2000/svg">
+  <title id="extension-title">How the n88basic VS Code extension works</title>
+  <desc id="extension-desc">The editor buffer feeds two independent paths. The first is always
+    on: a checker built from the interpreter's own front end, compiled to JavaScript, which
+    produces diagnostics, hover text and completions without executing the program. The second
+    runs only on a command, starting the n88 binary as a process, whose text output goes to a
+    panel and whose drawing becomes a picture.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6b6079"/></marker>
+    <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#8a5cae"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f7f5fa"/>
+
+  <!-- ZONES -->
+  <rect x="256" y="84" width="512" height="124" rx="8"
+        fill="rgba(46,42,56,0.02)" stroke="rgba(46,42,56,0.10)" stroke-width="0.8"/>
+  <rect x="336" y="88" width="352" height="12" rx="2" fill="#f7f5fa"/>
+  <text x="512" y="97" fill="rgba(46,42,56,0.45)" font-size="7" font-family="'Geist Mono',monospace"
+        text-anchor="middle" letter-spacing="0.14em">ALWAYS ON · NEVER RUNS YOUR PROGRAM</text>
+
+  <rect x="256" y="284" width="760" height="124" rx="8"
+        fill="rgba(46,42,56,0.02)" stroke="rgba(46,42,56,0.10)" stroke-width="0.8"/>
+  <rect x="440" y="288" width="240" height="12" rx="2" fill="#f7f5fa"/>
+  <text x="560" y="297" fill="rgba(46,42,56,0.45)" font-size="7" font-family="'Geist Mono',monospace"
+        text-anchor="middle" letter-spacing="0.14em">ONLY WHEN YOU ASK FOR IT</text>
+
+  <!-- ARROWS -->
+  <path d="M 180,256 H 222 Q 230,256 230,248 V 160 Q 230,152 238,152 H 272"
+        fill="none" stroke="#8a5cae" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+  <path d="M 180,280 H 222 Q 230,280 230,288 V 344 Q 230,352 238,352 H 272"
+        fill="none" stroke="#6b6079" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="476" y1="152" x2="540" y2="152" stroke="#6b6079" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="476" y1="352" x2="540" y2="352" stroke="#8a5cae" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+  <line x1="724" y1="352" x2="788" y2="352" stroke="#6b6079" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- arrow labels, 6-10px clear of the stroke -->
+  <rect x="148" y="196" width="74" height="12" rx="2" fill="#f7f5fa"/>
+  <text x="185" y="205" fill="#8a5cae" font-size="8" font-family="'Geist Mono',monospace"
+        text-anchor="middle" letter-spacing="0.06em">AS YOU TYPE</text>
+  <rect x="144" y="304" width="78" height="12" rx="2" fill="#f7f5fa"/>
+  <text x="183" y="313" fill="#938aa0" font-size="8" font-family="'Geist Mono',monospace"
+        text-anchor="middle" letter-spacing="0.06em">ON COMMAND</text>
+  <rect x="476" y="330" width="64" height="12" rx="2" fill="#f7f5fa"/>
+  <text x="508" y="339" fill="#8a5cae" font-size="8" font-family="'Geist Mono',monospace"
+        text-anchor="middle" letter-spacing="0.06em">SPAWN</text>
+
+  <!-- NODES -->
+  <rect x="40" y="232" width="140" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="40" y="232" width="140" height="72" rx="6" fill="rgba(107,96,121,0.10)" stroke="#938aa0" stroke-width="1"/>
+  <rect x="48" y="240" width="42" height="12" rx="2" fill="transparent" stroke="rgba(147,138,160,0.5)" stroke-width="0.8"/>
+  <text x="69" y="249" fill="#938aa0" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">EDITOR</text>
+  <text x="110" y="276" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Your buffer</text>
+  <text x="110" y="290" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">.bas / .n88</text>
+
+  <rect x="280" y="116" width="196" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="280" y="116" width="196" height="72" rx="6" fill="rgba(138,92,174,0.10)" stroke="#8a5cae" stroke-width="1"/>
+  <rect x="288" y="124" width="46" height="12" rx="2" fill="transparent" stroke="rgba(138,92,174,0.5)" stroke-width="0.8"/>
+  <text x="311" y="133" fill="#8a5cae" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">IN EDITOR</text>
+  <text x="378" y="160" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">The same parser</text>
+  <text x="378" y="174" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">compiled to JavaScript</text>
+
+  <rect x="548" y="116" width="196" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="548" y="116" width="196" height="72" rx="6" fill="#ffffff" stroke="#2e2a38" stroke-width="1"/>
+  <rect x="556" y="124" width="38" height="12" rx="2" fill="transparent" stroke="rgba(46,42,56,0.4)" stroke-width="0.8"/>
+  <text x="575" y="133" fill="rgba(46,42,56,0.8)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">SHOWN</text>
+  <text x="646" y="160" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Squiggles, hover, completion</text>
+  <text x="646" y="174" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">each cites a manual page</text>
+
+  <rect x="280" y="316" width="196" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="280" y="316" width="196" height="72" rx="6" fill="#ffffff" stroke="#2e2a38" stroke-width="1"/>
+  <rect x="288" y="324" width="52" height="12" rx="2" fill="transparent" stroke="rgba(46,42,56,0.4)" stroke-width="0.8"/>
+  <text x="314" y="333" fill="rgba(46,42,56,0.8)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">COMMAND</text>
+  <text x="378" y="360" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Run · Execute · Immediate</text>
+  <text x="378" y="374" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">you pressed something</text>
+
+  <rect x="548" y="316" width="176" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="548" y="316" width="176" height="72" rx="6" fill="rgba(138,92,174,0.10)" stroke="#8a5cae" stroke-width="1"/>
+  <rect x="556" y="324" width="52" height="12" rx="2" fill="transparent" stroke="rgba(138,92,174,0.5)" stroke-width="0.8"/>
+  <text x="582" y="333" fill="#8a5cae" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">PROCESS</text>
+  <text x="636" y="360" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">n88 on your PATH</text>
+  <text x="636" y="374" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">a separate install</text>
+
+  <rect x="796" y="316" width="196" height="72" rx="6" fill="#f7f5fa"/>
+  <rect x="796" y="316" width="196" height="72" rx="6" fill="rgba(46,42,56,0.03)" stroke="rgba(46,42,56,0.30)" stroke-width="1"/>
+  <rect x="804" y="324" width="42" height="12" rx="2" fill="transparent" stroke="rgba(46,42,56,0.3)" stroke-width="0.8"/>
+  <text x="825" y="333" fill="rgba(46,42,56,0.7)" font-size="7" font-family="'Geist Mono',monospace" text-anchor="middle" letter-spacing="0.08em">RESULT</text>
+  <text x="894" y="360" fill="#2e2a38" font-size="12" font-weight="600" text-anchor="middle" font-family="'Geist',sans-serif">Output panel, and a picture</text>
+  <text x="894" y="374" fill="#6b6079" font-size="9" font-family="'Geist Mono',monospace" text-anchor="middle">.png beside your file</text>
+
+  <!-- LEGEND -->
+  <line x1="40" y1="440" x2="1040" y2="440" stroke="rgba(46,42,56,0.10)" stroke-width="0.8"/>
+  <text x="40" y="460" fill="#6b6079" font-size="8" font-family="'Geist Mono',monospace" letter-spacing="0.14em">LEGEND</text>
+  <rect x="140" y="450" width="14" height="12" rx="3" fill="rgba(138,92,174,0.10)" stroke="#8a5cae" stroke-width="1"/>
+  <text x="162" y="460" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">where the interpreter is</text>
+  <rect x="356" y="450" width="14" height="12" rx="3" fill="#ffffff" stroke="#2e2a38" stroke-width="1"/>
+  <text x="378" y="460" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">extension does this</text>
+  <rect x="552" y="450" width="14" height="12" rx="3" fill="rgba(46,42,56,0.03)" stroke="rgba(46,42,56,0.30)" stroke-width="1"/>
+  <text x="574" y="460" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">what you end up looking at</text>
+  <rect x="796" y="450" width="14" height="12" rx="3" fill="rgba(107,96,121,0.10)" stroke="#938aa0" stroke-width="1"/>
+  <text x="818" y="460" fill="#6b6079" font-size="9" font-family="'Geist',sans-serif">what you typed</text>
+</svg>
