@@ -255,7 +255,8 @@ so the page provably runs the same language as the binary.
 Drawings arrive as vectors, about ten times smaller than the PNG and sharp at
 any zoom. `n88 --svg` writes the same from the command line.
 
-The console is four static files; `make web` builds them for any static host.
+The console is four static files; `make web` puts them in `web-console/` for
+any static host to serve.
 
 ## The VS Code extension
 
