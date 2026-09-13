@@ -50,11 +50,7 @@ n88 rings.bas            # a program that draws leaves rings.png beside it
 Add `--extension` for the VS Code extension. Flags and variables:
 [Reference](#reference).
 
-Or run it with nothing installed:
-
-```sh
-docker run --rm -v "$PWD:/work" ghcr.io/sajonaro/n88basic rings.bas
-```
+Or run it with nothing installed: [as a container](#using-it-as-a-container).
 
 **From source**, with OCaml 5 and dune:
 
@@ -63,9 +59,9 @@ make build && make test
 scripts/install-from-source.sh
 ```
 
-`opam pin add n88basic 'git+https://github.com/sajonaro/n88basic.git#v0.2.0'`
-is the only route that gives you the library rather than the command. Pin a
-tag; it is not on the opam repository.
+`opam pin add n88basic 'git+https://github.com/sajonaro/n88basic.git#<tag>'`
+is the only route that gives you the library rather than the command. It is
+not on the opam repository.
 
 ## Using it as a container
 
@@ -230,16 +226,6 @@ Removes the binary and lists what it did not install — the extension, containe
 images, an editor setting — with the command for each. n88 writes no config,
 cache or state directory, so that list is the whole of it.
 
-## Versions
-
-The interpreter and the extension ship under one tag and carry the same version,
-so extension X.Y.Z expects `n88` X.Y.Z. A newer interpreter is fine; an older
-one the extension notices and tells you about.
-
-Every release bumps the **minor** component — `v0.1.4` is followed by `v0.2.0`,
-never `v0.1.5` — enforced by `tools/check_version_bump.py` before anything is
-built.
-
 ## In a browser
 
 ```sh
@@ -265,6 +251,10 @@ or a single statement in a live session.
 ```sh
 code --install-extension n88basic.n88basic
 ```
+
+The extension and the interpreter ship under one tag and carry the same
+version. A newer interpreter is fine; an older one the extension tells you
+about.
 
 In a remote window — WSL, SSH, a dev container — install it and `n88` **on the
 remote**. [Full guide](editor/vscode/README.md).
