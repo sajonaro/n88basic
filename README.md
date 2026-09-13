@@ -174,7 +174,7 @@ The same command installs and upgrades; run it again whenever.
 | `build` | the interpreter |
 | `test` | every gate: unit suites, conformance, spec, invariants |
 | `web` | build the browser console and check it runs the corpus |
-| `webconsole`, `wc` | build it and serve it on `localhost:8088` (`PORT=…` to change). Falls back to building inside Docker when `js_of_ocaml` is missing |
+| `webconsole`, `wc` | build it and serve it on `localhost:8088` (`PORT=…` to change). Docker serves it, and builds it too when `js_of_ocaml` is missing |
 | `install` | put `n88` on your PATH from this checkout |
 | `extension` | package the VS Code extension |
 | `clean` | remove build output |
@@ -248,9 +248,10 @@ make wc          # http://localhost:8088 — stays running until Ctrl-C
 
 ![n88basic compiled to JavaScript: the interpreter, the renderer and the page all inside one browser tab](docs/diagrams/browser.svg)
 
-Docker is enough — without `js_of_ocaml`, `make wc` builds the console in a
-container. It runs the conformance corpus through the JavaScript build first,
-so the page provably runs the same language as the binary.
+Docker is the only thing you need: it serves the console, and builds it too
+when `js_of_ocaml` is missing. The build runs the conformance corpus through
+the JavaScript build first, so the page provably runs the same language as the
+binary.
 
 Drawings arrive as vectors, about ten times smaller than the PNG and sharp at
 any zoom. `n88 --svg` writes the same from the command line.
