@@ -10,7 +10,7 @@
 # takes any n88 on disk and asks whether the thing we ship behaves like the
 # thing we tested.
 #
-# Usage:  scripts/conform.sh /path/to/n88
+# Usage:  scripts/check-conformance.sh /path/to/n88
 #
 # To check a container, hand it a wrapper that presents the image as a plain
 # executable. PULL THE IMAGE FIRST: docker prints pull progress on the

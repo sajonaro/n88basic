@@ -1,6 +1,6 @@
 #!/bin/sh
 # Project invariants: cheap checks for the mistakes this codebase is prone to.
-# Each is a tripwire, not a proof. Run by scripts/test.sh.
+# Each is a tripwire, not a proof. Run by scripts/check-everything.sh.
 set -eu
 cd "$(dirname "$0")/.."
 

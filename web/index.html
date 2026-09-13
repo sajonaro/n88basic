@@ -1,0 +1,96 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>N88-BASIC(86) — web console</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="console.css">
+<header>
+  <h1>N88-BASIC<span>(86)</span></h1>
+  <p>The ROM BASIC of NEC's PC-9801, running in this page.
+     <span id="version"></span></p>
+</header>
+
+<main>
+  <section class="pane">
+    <div class="bar">
+      <label for="examples">example</label>
+      <select id="examples"></select>
+      <button id="run" type="button">Run &#9654;</button>
+    </div>
+    <textarea id="source" spellcheck="false" aria-label="BASIC program"></textarea>
+    <details id="stdin-box">
+      <summary>Input for <code>INPUT</code> — one answer per line</summary>
+      <textarea id="stdin" spellcheck="false" rows="3"
+                aria-label="input supplied to the program"></textarea>
+    </details>
+  </section>
+
+  <section class="pane">
+    <div class="bar"><span class="label">output</span></div>
+    <pre id="output" aria-live="polite"></pre>
+    <div class="bar"><span class="label">screen</span> <span id="drew"></span></div>
+    <div id="screen"><div id="art" role="img" aria-label="what the program drew"></div><p id="noscreen">Programs that draw show their picture here.</p></div>
+  </section>
+</main>
+
+<footer>
+  <p>Same interpreter as the command line and the VS&nbsp;Code extension —
+     one OCaml library, three hosts.
+     <a href="https://github.com/sajonaro/n88basic">Source and releases</a>.</p>
+</footer>
+
+<script src="examples.js"></script>
+<script src="main.bc.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  $('version').textContent = 'v' + n88.version;
+
+  var names = Object.keys(window.N88_EXAMPLES || {});
+  names.forEach(function (n) {
+    var o = document.createElement('option');
+    o.value = n; o.textContent = n;
+    $('examples').appendChild(o);
+  });
+
+  function load(name) { $('source').value = window.N88_EXAMPLES[name] || ''; }
+  $('examples').addEventListener('change', function () { load(this.value); run(); });
+
+  function run() {
+    var r = n88.run($('source').value, $('stdin').value);
+    var out = $('output');
+    out.textContent = r.output || '';
+    if (r.error) {
+      var e = document.createElement('span');
+      e.className = 'err';
+      e.textContent = (r.output ? '\n' : '') + r.error;
+      out.appendChild(e);
+    }
+    if (!r.output && !r.error) out.textContent = '(no output)';
+
+    // Prefer the vectors. The SVG is the same drawing as geometry rather
+    // than pixels, so it stays sharp at any zoom and is usually an order of
+    // magnitude smaller. When the program used PAINT or a tile there is no
+    // vector form and the SVG carries the rendered frame instead -- either
+    // way one element, inlined so it scales with the pane.
+    if (r.svg) {
+      $('art').innerHTML = r.svg;
+      $('screen').classList.add('has-image');
+      $('drew').textContent =
+        r.svgKind === 'vector'
+          ? 'vector \u00b7 ' + r.svg.length + ' B (PNG would be ' + r.png.length + ' B)'
+          : 'raster \u00b7 PAINT or a tile has no vector form';
+    } else {
+      $('art').innerHTML = '';
+      $('screen').classList.remove('has-image');
+      $('drew').textContent = '';
+    }
+  }
+
+  $('run').addEventListener('click', run);
+  $('source').addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); }
+  });
+
+  if (names.length) { load(names[0]); run(); }
+})();
+</script>

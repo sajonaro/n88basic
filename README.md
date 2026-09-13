@@ -30,100 +30,54 @@ produce, on a modern desktop, with no ROM image and no emulator.
 "Faithfully" is the hard part, and it is why this repository contains a
 specification as well as an interpreter.
 
+## How it works
+
+![The n88basic interpreter: a core that performs no I/O, a display list, and a separate renderer](docs/diagrams/interpreter.svg)
+
+The core opens no file and touches no pixel. It calls back to whoever is hosting
+it for text and input, and *records* drawing as a display list that a separate
+renderer turns into a PNG or an SVG. That is why the same interpreter runs
+unchanged in a terminal, in VS Code, and in a browser tab.
+
 ## Quick start
 
-Requires OCaml 5 and dune.
-
 ```sh
-scripts/build.sh                 # interpreter + the editor's checker bundle
-scripts/test.sh                  # 622 tests, the spec gates, the example programs
-./_build/default/bin/main.exe test/programs/12-bar-chart.bas
+curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh -o install.sh
+sh install.sh            # again later to upgrade; prints what it replaced
+n88 rings.bas            # a program that draws leaves rings.png beside it
 ```
 
-To put it on your PATH as `n88`:
+Add `--extension` for the VS Code extension. Flags and variables:
+[Reference](#reference).
 
-```sh
-scripts/install.sh               # to ~/.local, or pass a prefix
-n88 rings.bas
-n88 --version                    # prints just the version, for pinning
-```
-
-`test/programs/` holds twelve worked example programs — graphics, strings,
-number formatting, `DATA`/`READ`, `INPUT`, `PRINT USING`, and one complete
-bar-chart program. They double as the end-to-end test:
-
-```sh
-python3 tools/run_programs.py
-```
-
-## Installing
-
-Three ways, in rough order of convenience.
-
-**One command, first time and every time.** It installs to `~/.local/bin`,
-and running it again upgrades — printing what it replaced, so a version that
-moved does not move silently:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh
-#  n88 0.1.4 -> 0.2.0 (/home/you/.local/bin/n88)
-```
-
-Add `--extension` to install the VS Code extension in the same step:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh -s -- --extension
-```
-
-`PREFIX=/usr/local` to install elsewhere, `VERSION=v0.1.3` to pin one. Or take
-the asset directly — every release attaches `n88-linux-x86_64`, a native glibc
-build:
-
-```sh
-curl -LO https://github.com/sajonaro/n88basic/releases/latest/download/n88-linux-x86_64
-chmod +x n88-linux-x86_64 && ./n88-linux-x86_64 --version
-```
-
-**The container**, if you would rather install nothing — see below.
-
-**From source**, with OCaml and dune: `scripts/install.sh` puts `n88` on your
-PATH. The project is also a valid opam package, so it can be pinned directly —
-**pin a release tag, not the branch**, or you get whatever `main` happens to be
-that day:
-
-```sh
-opam pin add n88basic 'git+https://github.com/sajonaro/n88basic.git#v0.1.1'
-```
-
-This is the only route that gives you the *library* as well as the `n88`
-command: `N88basic.Interp` and `Raster` become linkable modules. If all you
-want is to run programs, the binary or the container is less work. The package
-is pinnable from git and is not published to the opam repository, so
-`opam install n88basic` on its own will not find it.
-
-## Using it as a container
-
-The interpreter is published as an image, so it can be run with nothing
-installed but Docker. A program that draws writes its PNG beside the source,
-so mount the directory holding your programs:
+Or run it with nothing installed:
 
 ```sh
 docker run --rm -v "$PWD:/work" ghcr.io/sajonaro/n88basic rings.bas
 ```
 
-```
-wrote rings.png
-```
-
-Programs that read input work the same way:
+**From source**, with OCaml 5 and dune:
 
 ```sh
+make build && make test
+scripts/install-from-source.sh
+```
+
+`opam pin add n88basic 'git+https://github.com/sajonaro/n88basic.git#v0.2.0'`
+is the only route that gives you the library rather than the command. Pin a
+tag; it is not on the opam repository.
+
+## Using it as a container
+
+Mount the directory holding your programs; a drawing lands beside its source.
+
+```sh
+docker run --rm -v "$PWD:/work" ghcr.io/sajonaro/n88basic rings.bas
 echo "Ada,36" | docker run --rm -i -v "$PWD:/work" ghcr.io/sajonaro/n88basic ask.bas
 ```
 
-Tags follow the releases: `:0.1.0` and `:0.1` pin a version, `:latest`
-follows the newest. The image carries the interpreter alone — the
-specification tooling and the tests are not in it.
+`:0.2.0` and `:0.2` pin a version, `:latest` follows the newest. The image
+carries the interpreter alone.
 
 ## What works
 
@@ -136,60 +90,31 @@ forms, `CIRCLE`, `PAINT` with tile patterns, and the colour palette,
 rendered to a 640×400 framebuffer and written out as PNG with no image
 library.
 
-## Faithful behaviour that looks like a bug
-
-`PRINT 1000000` gives `1E+06`, while the *larger* `PRINT 10000000` gives
-`10000000` in full. This has been reported as an inconsistency twice, and it
-is the manual's rule rather than a defect.
-
-A written constant takes its type from its notation. Printed p.13 §5.5 makes
-a real of **seven digits or fewer** single precision; printed p.14 §5.6 makes
-a real of **eight digits or more** double precision. Single precision has a
-six-digit display budget and so overflows to exponent form; double precision
-has sixteen and does not. The display rule is applied identically to both —
-what differs is the type the constant was written into.
-
-Spelling the type settles it either way:
+## One thing that looks like a bug
 
 ```basic
-10 PRINT 1000000#     : REM prints 1000000 -- forced double, full form
-20 PRINT 10000000!    : REM prints 1E+07   -- forced single, overflows
+PRINT 1000000      '  1E+06     seven digits -> single precision
+PRINT 10000000     '  10000000  eight digits -> double precision
+A = 10000000
+PRINT A            '  1E+07     but a plain VARIABLE is single
 ```
 
-**The half that will actually bite you.** Those rules type a *constant* by
-its notation. A **variable** with no suffix and no `DEFxxx` in effect is
-single precision (printed p.14 §6.2), so the same value prints differently
-depending on how it got there:
+A constant takes its type from how many digits you wrote (printed pp.13–14);
+a variable with no suffix is single precision whatever you assign to it
+(printed p.14). Single has a six-digit display budget, double has sixteen.
 
-```basic
-10 PRINT 10000000     : REM prints 10000000 -- an 8-digit constant is double
-20 A = 10000000
-30 PRINT A            : REM prints 1E+07    -- but A is single
-```
-
-So a program totalling a column into a plain variable gets exponent form
-once the total passes six digits, whatever the constants looked like. That
-is the machine's behaviour, not a limitation of this interpreter. Declare
-the type when you want the full form — `T#`, or `DEFDBL T` at the top.
-
-`test/conformance/num_literal_typing.bas` pins the constant path and
-`num_variable_default_type.bas` the variable one; `NUM.TYPES`,
-`NUM.DISPLAY` and `PROG.DEFDBL` in `spec/clauses.json` carry the pages.
+So a total accumulated into a plain variable goes exponential once it passes
+six digits. Write `T#`, or `DEFDBL T`, when you want the full form. This is the
+machine's behaviour, not ours — `NUM.TYPES` in `spec/clauses.json` carries the
+pages.
 
 ## Scripting around it
 
 Program output goes to **stdout**; diagnostics and the `wrote <file>.png`
-notice go to **stderr**. Keep them separate. Merging them with `2>&1` is
-order-unstable as soon as a program draws: natively the notice appears before
-the program's own output, and through the container it appears after, because
-the daemon multiplexes the two streams and does not preserve terminal order.
-A harness that merges them will capture different byte orders from the same
-program depending on how it was invoked — this cost one earlier effort seven
-fabricated test failures before the cause was found.
+notice go to **stderr**. Keep them separate — merging them with `2>&1` is
+order-unstable as soon as a program draws, and differently so under Docker.
 
 ## What it deliberately does not do
-
-Being explicit about this is part of the design, not an apology for it.
 
 - **No text screen.** `LOCATE`, `CONSOLE` and `CLS 1` parse and record their
   arguments but have no character grid to act on. Output is a stream, not a
@@ -203,41 +128,97 @@ Being explicit about this is part of the design, not an apology for it.
 Every one of these is recorded in `spec/spec.md` §3 with its reason, so the
 boundary is a decision on the record rather than a gap someone forgot.
 
+## Reference
+
+Everything that takes an option, in one place.
+
+### `n88` — running a program
+
+```
+n88 FILE.bas            run a file
+n88 -                   run a program read from stdin
+n88 --immediate         a live session: type statements, keep the variables
+```
+
+| Option | |
+| --- | --- |
+| `--svg` | draw into `FILE.svg` instead of `FILE.png` — vector, usually ~10× smaller. `PAINT` and tile fills have no vector form and embed a raster instead, which it tells you |
+| `--immediate`, `-i` | the manual's direct mode: statements run as you type them and their variables persist. Numbered lines are stored instead; `RUN`, `LIST` and `NEW` work at the prompt |
+| `--uninstall` | remove this binary and list what else came with n88. Add `--yes` to skip the confirmation |
+| `--version` | print the version and exit |
+| `--help` | print the usage and exit |
+
+A program that draws leaves a picture beside its source — `hello.bas` → `hello.png`.
+A program read from stdin has no source to sit beside, so it draws into `n88.png`
+in the working directory, and `INPUT` then has nothing to read.
+
+### `install.sh` — installing and upgrading
+
+The same command installs and upgrades; run it again whenever.
+
+| Option | |
+| --- | --- |
+| `--extension` | also install the VS Code extension from the release |
+| `--uninstall` | remove the binary, and list what else is on the machine |
+| `--yes`, `-y` | skip the confirmation on `--uninstall` |
+
+| Variable | Default | |
+| --- | --- | --- |
+| `PREFIX` | `~/.local` | where `n88` goes — the binary lands in `$PREFIX/bin` |
+| `VERSION` | `latest` | pin a release, e.g. `VERSION=v0.2.0` |
+
+### `make` — working on it
+
+| Target | |
+| --- | --- |
+| `build` | the interpreter |
+| `test` | every gate: unit suites, conformance, spec, invariants |
+| `web` | build the browser console and check it runs the corpus |
+| `webconsole`, `wc` | build it and serve it on `localhost:8088` (`PORT=…` to change). Falls back to building inside Docker when `js_of_ocaml` is missing |
+| `install` | put `n88` on your PATH from this checkout |
+| `extension` | package the VS Code extension |
+| `clean` | remove build output |
+
+### The container
+
+```sh
+docker run --rm -v "$PWD:/work" ghcr.io/sajonaro/n88basic prog.bas
+```
+
+`scripts/n88-docker` wraps this as a plain executable, so anything that can run
+`n88` can drive the image instead — including the editor's `interpreterPath`.
+Set `N88_IMAGE` to pin a tag.
+
+### The extension
+
+Two settings, `n88basic.interpreterPath` and `n88basic.languageServer`, both
+described in [the extension's own guide](editor/vscode/README.md) along with its
+commands and keybinding.
+
 ## The specification
 
-`spec/` is the interesting part. It is a machine-checked description of the
-dialect, and its central rule is:
+`spec/` is the interesting part: a machine-checked description of the dialect
+whose central rule is
 
-> **No clause without a citation.** Every rule names the page of NEC's manual
-> it came from, and `tools/check_spec.py` fails if one does not.
+> **No clause without a citation.** Every rule names the page of NEC's manual it
+> came from, and `tools/check_spec.py` fails if one does not.
 
-That rule exists because the alternative — writing down what the interpreter
-happens to do — produces a document that cannot disagree with the code, and
-so cannot find a bug in it. Several real defects here were found by reading a
-page and discovering the interpreter contradicted it.
+Writing down what the interpreter *happens to do* produces a document that
+cannot disagree with the code, and so cannot find a bug in it. Several real
+defects here were found by reading a page and seeing the interpreter contradict
+it. Where the manual is silent the interpreter still has to do something, and
+those choices are marked as ours rather than presented as the dialect's.
 
 | | |
 | --- | --- |
-| `spec/spec.md` | scope, sources, and what is deliberately excluded |
-| `spec/clauses.json` | 113 clauses, each cited, each with a status |
+| `spec/spec.md` | scope, and what is deliberately excluded |
+| `spec/clauses.json` | every clause, cited, with a status |
 | `spec/keywords.json` | the keyword inventory and its syntax |
-| `spec/errors.json` | the error catalogue with numbers and messages |
-| `spec/sources.md` | the four sources, and how far each is trusted |
+| `spec/errors.json` | the error catalogue |
+| `spec/sources.md` | the sources, and how far each is trusted |
 
-Where the manual is silent, the interpreter still has to do *something*, and
-those choices are marked as the project's own rather than presented as the
-dialect's. `PAINT`'s behaviour on an unclosed region and the error raised for
-an out-of-range `SCREEN` mode are ours; the operator precedence table is the
-manual's.
-
-Four tools keep it honest:
-
-```sh
-python3 tools/coverage.py            # clause completeness
-python3 tools/check_spec.py          # structural gate, and a scan for stale reasoning
-python3 tools/citation_coverage.py   # pages of the manual no clause cites
-python3 tools/run_programs.py        # the example programs
-```
+`tools/` holds the checkers — coverage, the structural gate, uncited manual
+pages, and the example programs. `make test` runs them.
 
 ## Removing it
 
@@ -245,56 +226,52 @@ python3 tools/run_programs.py        # the example programs
 sh install.sh --uninstall          # or: n88 --uninstall
 ```
 
-Either removes the binary and then **lists what it did not install** — the VS
-Code extension, any container images, an editor setting — with the exact
-command for each. Neither touches those itself: a tool that removed one of
-several artifacts and reported "uninstalled" would leave an extension driving a
-missing interpreter.
-
-The script detects them; the binary can only list them, since it did not place
-them and cannot know. Both refuse to remove an `n88` inside an opam switch,
-where `opam remove n88basic` is the right command.
-
-**n88 writes no config file, no cache and no state directory.** Removing the
-binary removes the program; there is nothing hidden to clean up afterwards.
+Removes the binary and lists what it did not install — the extension, container
+images, an editor setting — with the command for each. n88 writes no config,
+cache or state directory, so that list is the whole of it.
 
 ## Versions
 
-**Every release bumps the minor component.** `v0.1.4` is followed by `v0.2.0`,
-never `v0.1.5`. The rule is enforced by `tools/check_version_bump.py` in the
-release workflow, before anything is built or published, because five releases
-were tagged as patch bumps by hand and nothing objected. There is no hotfix
-exception: changing the scheme means editing that file, in the same commit that
-tags the exception, so the decision shows up in the diff.
+The interpreter and the extension ship under one tag and carry the same version,
+so extension X.Y.Z expects `n88` X.Y.Z. A newer interpreter is fine; an older
+one the extension notices and tells you about.
 
+Every release bumps the **minor** component — `v0.1.4` is followed by `v0.2.0`,
+never `v0.1.5` — enforced by `tools/check_version_bump.py` before anything is
+built.
 
-**The interpreter and the extension are released under one tag and carry the
-same version**, so extension X.Y.Z expects `n88` X.Y.Z. An interpreter *newer*
-than the extension is fine; an older one is what causes trouble, and the
-extension checks at startup and tells you rather than failing obscurely later.
-`n88 --version` answers the question directly.
+## In a browser
+
+```sh
+make wc          # http://localhost:8088 — stays running until Ctrl-C
+```
+
+![n88basic compiled to JavaScript: the interpreter, the renderer and the page all inside one browser tab](docs/diagrams/browser.svg)
+
+Docker is enough — without `js_of_ocaml`, `make wc` builds the console in a
+container. It runs the conformance corpus through the JavaScript build first,
+so the page provably runs the same language as the binary.
+
+Drawings arrive as vectors, about ten times smaller than the PNG and sharp at
+any zoom. `n88 --svg` writes the same from the command line.
+
+The console is four static files; `make web` puts them in `web-console/` for
+any static host to serve.
 
 ## The VS Code extension
 
-`editor/vscode/` provides syntax highlighting, live diagnostics, hover
-documentation drawn from the spec data, completion, quick fixes, automatic
-line numbering and renumbering, and a Run command. Diagnostics come from the
-interpreter's own parser compiled to JavaScript, so the editor and the
-interpreter cannot disagree about what parses.
+![The extension's two paths: an in-editor checker that never runs your program, and commands that spawn n88](docs/diagrams/extension.svg)
+
+Syntax highlighting, live diagnostics, hover documentation from the spec data,
+completion, quick fixes, renumbering, and commands to run a buffer, a selection,
+or a single statement in a live session.
 
 ```sh
 code --install-extension n88basic.n88basic
 ```
 
-Every tagged release also attaches a packaged `n88basic.vsix`, which is the
-route until the extension reaches the Marketplace, and `scripts/package
--extension.sh` builds one from a checkout.
-
-**The one place people get it wrong:** the extension runs where your files are
-(`extensionKind: ["workspace"]`), so in a remote window — WSL, SSH, a dev
-container, Codespaces — install both it and `n88` **on the remote**, not on the
-machine showing the UI. [The extension's own
-guide](editor/vscode/README.md) covers the rest.
+In a remote window — WSL, SSH, a dev container — install it and `n88` **on the
+remote**. [Full guide](editor/vscode/README.md).
 
 ## Licence
 
@@ -323,11 +300,17 @@ with or endorsed by NEC.
 ## Layout
 
 ```
-basic/    the interpreter: lexer, parser, evaluator
-raster/   display list to framebuffer to PNG, no dependencies
+basic/    the interpreter: lexer, parser, evaluator — no I/O of its own
+raster/   display list to a picture: framebuffer, PNG, SVG, no dependencies
 bin/      the n88 command-line runner
+web/      the browser console — the same libraries, compiled to JavaScript
 editor/   the VS Code extension and its checker
 spec/     the cited specification and its data
 test/     unit tests, conformance cases, example programs
-tools/    the spec and example-program checkers
+tools/    the checkers: spec, coverage, browser build, SVG, deflate
+docs/     design notes, the diagrams above, and the manual scans (untracked)
 ```
+
+`basic/` performing no I/O is load-bearing rather than tidy: it is what lets the same code be
+the command-line interpreter, the editor's checker, and the browser console. An invariant in
+`scripts/check-invariants.sh` enforces it.

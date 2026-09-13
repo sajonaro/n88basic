@@ -1,16 +1,20 @@
 #!/bin/sh
 # Install or upgrade n88, the N88-BASIC(86) interpreter.
 #
-#   curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh
+#   curl -fsSL .../install.sh -o install.sh && sh install.sh
+#
+# Fetched and then run, rather than piped straight into a shell: it costs one
+# more word and lets you read what you are about to execute, which is a
+# reasonable thing to want from a script that writes to your PATH.
 #
 # Run it again to upgrade. THAT IS THE POINT: the same command every time, so
 # there is nothing separate to remember and nothing to document as "upgrading".
-# It prints what it replaced -- "0.1.3 -> 0.1.4" -- because a version that
+# It prints what it replaced -- "0.1.4 -> 0.2.0" -- because a version that
 # changed silently is the problem this exists to solve. Upgrading was never
 # hard; noticing you needed to was.
 #
 #   PREFIX=/usr/local sh install.sh     install somewhere else
-#   VERSION=v0.1.3    sh install.sh     pin a specific release
+#   VERSION=v0.2.0    sh install.sh     pin a specific release
 #   sh install.sh --extension           also install the VSCode extension
 #   sh install.sh --uninstall           remove it again
 #

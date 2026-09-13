@@ -20,5 +20,8 @@ usage: n88 FILE.bas
 
   --uninstall remove this binary, and list what else came with n88
               (add --yes to skip the confirmation)
+  --svg       draw into a .svg beside the source instead of a .png:
+              vector where the program's drawing is vector, and far
+              smaller; PAINT and tile fills embed a raster instead
   --version   print the version and exit
   --help      print this message and exit

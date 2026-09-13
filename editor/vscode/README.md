@@ -18,8 +18,9 @@ with live error checking, and a real interpreter behind the Run button.
 > interpreter is behind or missing. It never installs or upgrades anything —
 > if your fixtures depend on exact output, nothing here will move it under you.
 >
-> To install or upgrade both halves at once:
-> `curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh -s -- --extension`
+> To install or upgrade both halves at once, fetch
+> [install.sh](https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh)
+> and run `sh install.sh --extension`.
 
 ---
 
