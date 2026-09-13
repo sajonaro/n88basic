@@ -55,7 +55,7 @@ scripts/test.sh                  # 622 tests, the spec gates, the example progra
 To put it on your PATH as `n88`:
 
 ```sh
-scripts/install.sh               # to ~/.local, or pass a prefix
+scripts/install-from-source.sh               # to ~/.local, or pass a prefix
 n88 rings.bas
 n88 --version                    # prints just the version, for pinning
 ```
@@ -87,9 +87,8 @@ Add `--extension` to install the VS Code extension in the same step:
 curl -fsSL https://raw.githubusercontent.com/sajonaro/n88basic/main/install.sh | sh -s -- --extension
 ```
 
-`PREFIX=/usr/local` to install elsewhere, `VERSION=v0.1.3` to pin one. Or take
-the asset directly — every release attaches `n88-linux-x86_64`, a native glibc
-build:
+Options for both are in [Reference](#reference). Or take the asset directly —
+every release attaches `n88-linux-x86_64`, a native glibc build:
 
 ```sh
 curl -LO https://github.com/sajonaro/n88basic/releases/latest/download/n88-linux-x86_64
@@ -98,7 +97,7 @@ chmod +x n88-linux-x86_64 && ./n88-linux-x86_64 --version
 
 **The container**, if you would rather install nothing — see below.
 
-**From source**, with OCaml and dune: `scripts/install.sh` puts `n88` on your
+**From source**, with OCaml and dune: `scripts/install-from-source.sh` puts `n88` on your
 PATH. The project is also a valid opam package, so it can be pinned directly —
 **pin a release tag, not the branch**, or you get whatever `main` happens to be
 that day:
@@ -215,6 +214,73 @@ Being explicit about this is part of the design, not an apology for it.
 Every one of these is recorded in `spec/spec.md` §3 with its reason, so the
 boundary is a decision on the record rather than a gap someone forgot.
 
+## Reference
+
+Everything that takes an option, in one place.
+
+### `n88` — running a program
+
+```
+n88 FILE.bas            run a file
+n88 -                   run a program read from stdin
+n88 --immediate         a live session: type statements, keep the variables
+```
+
+| Option | |
+| --- | --- |
+| `--svg` | draw into `FILE.svg` instead of `FILE.png` — vector, usually ~10× smaller. `PAINT` and tile fills have no vector form and embed a raster instead, which it tells you |
+| `--immediate`, `-i` | the manual's direct mode: statements run as you type them and their variables persist. Numbered lines are stored instead; `RUN`, `LIST` and `NEW` work at the prompt |
+| `--uninstall` | remove this binary and list what else came with n88. Add `--yes` to skip the confirmation |
+| `--version` | print the version and exit |
+| `--help` | print the usage and exit |
+
+A program that draws leaves a picture beside its source — `hello.bas` → `hello.png`.
+A program read from stdin has no source to sit beside, so it draws into `n88.png`
+in the working directory, and `INPUT` then has nothing to read.
+
+### `install.sh` — installing and upgrading
+
+The same command installs and upgrades; run it again whenever.
+
+| Option | |
+| --- | --- |
+| `--extension` | also install the VS Code extension from the release |
+| `--uninstall` | remove the binary, and list what else is on the machine |
+| `--yes`, `-y` | skip the confirmation on `--uninstall` |
+
+| Variable | Default | |
+| --- | --- | --- |
+| `PREFIX` | `~/.local` | where `n88` goes — the binary lands in `$PREFIX/bin` |
+| `VERSION` | `latest` | pin a release, e.g. `VERSION=v0.2.0` |
+
+### `make` — working on it
+
+| Target | |
+| --- | --- |
+| `build` | the interpreter |
+| `test` | every gate: unit suites, conformance, spec, invariants |
+| `web` | build the browser console and check it runs the corpus |
+| `webconsole`, `wc` | build it and serve it on `localhost:8088` (`PORT=…` to change). Falls back to building inside Docker when `js_of_ocaml` is missing |
+| `install` | put `n88` on your PATH from this checkout |
+| `extension` | package the VS Code extension |
+| `clean` | remove build output |
+
+### The container
+
+```sh
+docker run --rm -v "$PWD:/work" ghcr.io/sajonaro/n88basic prog.bas
+```
+
+`scripts/n88-docker` wraps this as a plain executable, so anything that can run
+`n88` can drive the image instead — including the editor's `interpreterPath`.
+Set `N88_IMAGE` to pin a tag.
+
+### The extension
+
+Two settings, `n88basic.interpreterPath` and `n88basic.languageServer`, both
+described in [the extension's own guide](editor/vscode/README.md) along with its
+commands and keybinding.
+
 ## The specification
 
 `spec/` is the interesting part. It is a machine-checked description of the
@@ -258,17 +324,13 @@ sh install.sh --uninstall          # or: n88 --uninstall
 ```
 
 Either removes the binary and then **lists what it did not install** — the VS
-Code extension, any container images, an editor setting — with the exact
-command for each. Neither touches those itself: a tool that removed one of
-several artifacts and reported "uninstalled" would leave an extension driving a
-missing interpreter.
-
-The script detects them; the binary can only list them, since it did not place
-them and cannot know. Both refuse to remove an `n88` inside an opam switch,
-where `opam remove n88basic` is the right command.
+Code extension, any container images, an editor setting — with the command for
+each. Neither touches those itself: a tool that removed one of several artifacts
+and reported "uninstalled" would leave an extension driving a missing
+interpreter.
 
 **n88 writes no config file, no cache and no state directory.** Removing the
-binary removes the program; there is nothing hidden to clean up afterwards.
+binary removes the program; there is nothing hidden to clean up.
 
 ## Versions
 
@@ -291,12 +353,14 @@ extension checks at startup and tells you rather than failing obscurely later.
 No install, nothing sent anywhere — the interpreter is compiled into the page.
 
 ```sh
-opam install js_of_ocaml js_of_ocaml-compiler   # once
-make wc                                          # http://localhost:8088
+make wc          # http://localhost:8088
 ```
 
-`make wc` builds the console and serves it. It also runs the corpus through the
-JavaScript build first, so a broken bundle fails before a browser ever opens it.
+**You do not need an OCaml toolchain for this.** If `js_of_ocaml` is not
+installed, `make wc` builds the console inside Docker instead and copies the
+files out — so Docker alone is enough. It runs the whole conformance corpus
+through the JavaScript build first, so a broken bundle fails before a browser
+ever opens it.
 
 **To host it anywhere,** the console is four static files and no server code:
 

@@ -1,8 +1,8 @@
 #!/bin/sh
 # Install the interpreter as `n88` on the PATH.
 #
-#   scripts/install.sh              installs to ~/.local/bin
-#   scripts/install.sh /usr/local   installs to /usr/local/bin
+#   scripts/install-from-source.sh              installs to ~/.local/bin
+#   scripts/install-from-source.sh /usr/local   installs to /usr/local/bin
 set -eu
 cd "$(dirname "$0")/.."
 

@@ -81,6 +81,13 @@ jobs:
           opam exec -- dune build @web/web
           node tools/check_web.js
 
+      # The Dockerfile's web stage is what someone without a toolchain gets, so
+      # it has to keep building. It also guards a bug the native path cannot
+      # see: WORKDIR creates /src as root, which buildx tolerates and the
+      # classic builder does not.
+      - name: The console also builds with nothing but Docker
+        run: docker build --target web-assets -t n88basic-web-assets:ci .
+
       - name: Project invariants
         run: sh scripts/check-invariants.sh
 

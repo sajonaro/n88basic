@@ -10,16 +10,21 @@
 
 PORT ?= 8088
 
+# The project keeps its own opam switch. A caller who has not run
+# `eval $(opam env)` still has a usable dune right here, so find it rather
+# than failing with "command not found".
+DUNE := $(shell command -v dune 2>/dev/null || echo $(CURDIR)/_opam/bin/dune)
+
 .PHONY: build test web webconsole wc install extension clean help
 
 help:
 	@grep -E '^#   make' Makefile | sed 's/^#   /  /'
 
 build:
-	@dune build
+	@$(DUNE) build
 
 test:
-	@dune test
+	@$(DUNE) test
 	@./scripts/conform.sh "$(CURDIR)/_build/default/bin/main.exe"
 	@python3 tools/check_spec.py >/dev/null && echo "spec gates ok"
 	@sh scripts/check-invariants.sh
@@ -27,12 +32,7 @@ test:
 # The browser console. `(modes js)` in web/dune makes this optional, so say
 # what is missing rather than failing with a dune error about a rule.
 web:
-	@dune build @web/web 2>/dev/null || { \
-	  echo "The web console needs js_of_ocaml:"; \
-	  echo "    opam install js_of_ocaml js_of_ocaml-compiler"; \
-	  exit 1; }
-	@node tools/check_web.js
-	@python3 tools/check_svg.py
+	@./scripts/build-web.sh
 
 webconsole: web
 	@echo ""
@@ -43,10 +43,10 @@ webconsole: web
 wc: webconsole
 
 install:
-	@./scripts/install.sh
+	@./scripts/install-from-source.sh
 
 extension:
 	@./scripts/package-extension.sh
 
 clean:
-	@dune clean
+	@$(DUNE) clean
