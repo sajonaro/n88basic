@@ -7,7 +7,7 @@
 # Requires @vscode/vsce:  npm install -g @vscode/vsce
 set -eu
 cd "$(dirname "$0")/.."
-. "$(dirname "$0")/lib/switch.sh"
+. "$(dirname "$0")/lib/activate-opam-switch.sh"
 
 if ! command -v vsce >/dev/null 2>&1; then
   echo "vsce not found. Install it with:  npm install -g @vscode/vsce" >&2

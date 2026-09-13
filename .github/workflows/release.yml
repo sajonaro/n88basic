@@ -101,7 +101,7 @@ jobs:
           # conform.sh reads, so a lazy fetch inside the first `docker run`
           # corrupts the first case's captured output.
           docker pull -q "${IMAGE}:${GITHUB_REF_NAME#v}"
-          ./scripts/conform.sh /tmp/n88-container
+          ./scripts/check-conformance.sh /tmp/n88-container
 
   binary:
     runs-on: ubuntu-latest
@@ -155,7 +155,7 @@ jobs:
       # links the library in process. Run the corpus through the artifact
       # itself, before it is uploaded.
       - name: The binary must pass the conformance corpus
-        run: ./scripts/conform.sh "$PWD/n88-linux-x86_64"
+        run: ./scripts/check-conformance.sh "$PWD/n88-linux-x86_64"
 
       # Only THIS job writes the release body. Both jobs used to pass
       # generate_release_notes, and they append to the same release, which is

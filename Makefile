@@ -25,14 +25,14 @@ build:
 
 test:
 	@$(DUNE) test
-	@./scripts/conform.sh "$(CURDIR)/_build/default/bin/main.exe"
+	@./scripts/check-conformance.sh "$(CURDIR)/_build/default/bin/main.exe"
 	@python3 tools/check_spec.py >/dev/null && echo "spec gates ok"
 	@sh scripts/check-invariants.sh
 
 # The browser console. `(modes js)` in web/dune makes this optional, so say
 # what is missing rather than failing with a dune error about a rule.
 web:
-	@./scripts/build-web.sh
+	@./scripts/build-web-console.sh
 
 webconsole: web
 	@echo ""

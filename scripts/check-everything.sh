@@ -3,7 +3,7 @@
 # and the example programs.
 set -eu
 cd "$(dirname "$0")/.."
-. "$(dirname "$0")/lib/switch.sh"
+. "$(dirname "$0")/lib/activate-opam-switch.sh"
 
 dune test
 sh scripts/check-invariants.sh

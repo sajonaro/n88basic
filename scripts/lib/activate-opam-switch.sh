@@ -1,6 +1,6 @@
 # switch.sh -- put dune and the OCaml toolchain on PATH. Source it, don't run it.
 #
-#   . "$(dirname "$0")/lib/switch.sh"
+#   . "$(dirname "$0")/lib/activate-opam-switch.sh"
 #
 # WHY THIS IS SHARED. Every script here that builds anything needs an activated
 # opam switch, and until now they each handled that differently or not at all:

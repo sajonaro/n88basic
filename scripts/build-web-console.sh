@@ -12,7 +12,7 @@
 # otherwise show the build's own error rather than a guess about it.
 set -eu
 cd "$(dirname "$0")/.."
-. "$(dirname "$0")/lib/switch.sh"
+. "$(dirname "$0")/lib/activate-opam-switch.sh"
 
 # js_of_ocaml is the one genuinely optional dependency: web/dune marks the
 # executable (optional), so a tree without it still builds and tests the
@@ -23,7 +23,7 @@ cd "$(dirname "$0")/.."
 if ! ocamlfind list 2>/dev/null | grep -q '^js_of_ocaml '; then
   if command -v docker >/dev/null 2>&1; then
     echo "js_of_ocaml is not installed -- building the console in Docker instead."
-    exec ./scripts/build-web-docker.sh
+    exec ./scripts/build-web-console-in-docker.sh
   fi
   echo "The browser console needs js_of_ocaml:" >&2
   echo "    opam install js_of_ocaml js_of_ocaml-compiler" >&2

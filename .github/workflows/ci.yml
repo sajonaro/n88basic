@@ -42,7 +42,7 @@ jobs:
       # the CLI's own layer -- argument handling, the stdout/stderr split,
       # buffering -- is ever vetted against the spec.
       - name: Conformance through the built binary
-        run: opam exec -- ./scripts/conform.sh "$PWD/_build/default/bin/main.exe"
+        run: opam exec -- ./scripts/check-conformance.sh "$PWD/_build/default/bin/main.exe"
 
       # raster/Zlib writes zlib streams and has no decompressor, so its
       # correctness is checked against Python's inflater rather than against
