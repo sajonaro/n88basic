@@ -168,7 +168,8 @@ The same command installs and upgrades; run it again whenever.
 | Target | |
 | --- | --- |
 | `build` | the interpreter |
-| `test` | every gate: unit suites, conformance, spec, invariants |
+| `test` | the suites — the fast loop while you work |
+| `ci` | **every** gate, in Docker: the one pipeline, the same one CI runs. Needs no OCaml, python or node on your machine |
 | `web` | build the browser console and check it runs the corpus |
 | `webconsole`, `wc` | build it and serve it on `localhost:8088` (`PORT=…` to change). Docker serves it, and builds it too when `js_of_ocaml` is missing |
 | `install` | put `n88` on your PATH from this checkout |

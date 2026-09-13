@@ -16,15 +16,33 @@ open Raster
    rather than failing for a missing optional tool. *)
 let python = try Sys.getenv "N88BASIC_PYTHON" with Not_found -> "python3"
 
-(* Whether [python] exists AND can import PyMuPDF. Testing the binary alone
-   is not enough: python3 is present almost everywhere and PyMuPDF usually
-   is not, and an earlier version of this test checked only for a file at a
-   hardcoded path, so it skipped silently on every machine but one. *)
-let decoder_available =
+(* Either of two readers will do. The property this test needs is only that
+   the decoder is not our code, and PyMuPDF and Pillow are both somebody
+   else's -- so take whichever is installed instead of insisting on one.
+
+   That is not a convenience. PyMuPDF is not packaged for Alpine and Pillow
+   is, so with only the first of them this test SKIPPED inside the very
+   pipeline meant to leave nothing unchecked. A skipped check is not a
+   passing one.
+
+   Testing for the python binary alone is not enough: python3 is present
+   almost everywhere and neither reader usually is, and an earlier version of
+   this test checked only for a file at a hardcoded path, so it skipped
+   silently on every machine but one. *)
+let can_import m =
+  Sys.command
+    (Printf.sprintf "%s -c \"import %s\" >/dev/null 2>&1" (Filename.quote python) m)
+  = 0
+
+let decoder =
   lazy
-    (Sys.command
-       (Printf.sprintf "%s -c \"import pymupdf\" >/dev/null 2>&1" (Filename.quote python))
-     = 0)
+    (if can_import "pymupdf" then Some ("PyMuPDF",
+       "import pymupdf; d = pymupdf.open('%s'); p = d[0]; \
+        print(int(p.rect.width), int(p.rect.height))")
+     else if can_import "PIL" then Some ("Pillow",
+       "from PIL import Image; im = Image.open('%s'); \
+        print(im.size[0], im.size[1])")
+     else None)
 
 let sample_framebuffer () =
   Rasterize.to_framebuffer
@@ -98,10 +116,10 @@ let test_checksum_known_vectors () =
   Alcotest.(check int32) "adler32(\"123456789\")" 0x091e01del
     (Checksums.adler32 data)
 
-(* Write [png] to a fresh temp file and ask an external process — the
-   PyMuPDF-backed Python from the scratchpad venv, not any code in this
-   repository — to open it and print its pixel dimensions. *)
-let external_decode_dimensions (png : string) : (int * int) option =
+(* Write [png] to a fresh temp file and ask an external process — a Python
+   with somebody else's PNG reader, not any code in this repository — to open
+   it and print its pixel dimensions. *)
+let external_decode_dimensions ~(snippet : string) (png : string) : (int * int) option =
   let path = Filename.temp_file "raster_test" ".png" in
   Fun.protect
     ~finally:(fun () -> try Sys.remove path with Sys_error _ -> ())
@@ -115,10 +133,10 @@ let external_decode_dimensions (png : string) : (int * int) option =
         ~finally:(fun () -> try Sys.remove out_path with Sys_error _ -> ())
         (fun () ->
           let cmd =
-            Printf.sprintf
-              "%s -c \"import pymupdf; d = pymupdf.open('%s'); p = d[0]; \
-               print(int(p.rect.width), int(p.rect.height))\" > %s 2>&1"
-              (Filename.quote python) path (Filename.quote out_path)
+            Printf.sprintf "%s -c \"%s\" > %s 2>&1"
+              (Filename.quote python)
+              (Printf.sprintf (Scanf.format_from_string snippet "%s") path)
+              (Filename.quote out_path)
           in
           let status = Sys.command cmd in
           if status <> 0 then None
@@ -131,16 +149,17 @@ let external_decode_dimensions (png : string) : (int * int) option =
             | _ -> None))
 
 let test_external_decoder_round_trip () =
-  if not (Lazy.force decoder_available) then Alcotest.skip ()
-  else
+  match Lazy.force decoder with
+  | None -> Alcotest.skip ()
+  | Some (name, snippet) -> (
     let png = Png.encode (sample_framebuffer ()) in
-    match external_decode_dimensions png with
+    match external_decode_dimensions ~snippet png with
     | None ->
         Alcotest.fail
-          "external decoder (PyMuPDF) failed to open the encoded PNG"
+          (Printf.sprintf "external decoder (%s) failed to open the encoded PNG" name)
     | Some (w, h) ->
         Alcotest.(check int) "decoded width" Framebuffer.width w;
-        Alcotest.(check int) "decoded height" Framebuffer.height h
+        Alcotest.(check int) "decoded height" Framebuffer.height h)
 
 let () =
   Alcotest.run "raster png"
@@ -155,7 +174,7 @@ let () =
         ] );
       ( "external decoder",
         [
-          Alcotest.test_case "round-trips through PyMuPDF" `Quick
+          Alcotest.test_case "round-trips through an external decoder" `Quick
             test_external_decoder_round_trip;
         ] );
     ]

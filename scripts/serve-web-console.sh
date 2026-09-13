@@ -32,7 +32,9 @@ cd "$(dirname "$0")/.."
 
 PORT="${PORT:-8088}"
 DIR=web-console
-IMAGE="${N88_HTTPD_IMAGE:-nginx:alpine}"
+# Pinned rather than :alpine, which moves under you. The Dockerfile's VERSIONS
+# block pins the build images the same way and for the same reason.
+IMAGE="${N88_HTTPD_IMAGE:-nginx:1.27-alpine}"
 
 [ -d "$DIR" ] || { echo "No console built yet. Run: make web" >&2; exit 1; }
 

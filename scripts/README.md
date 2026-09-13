@@ -11,7 +11,7 @@ something, `install-`/`package-` delivers something.
 | `build-web-console.sh` | the browser console, falling back to Docker when `js_of_ocaml` is missing |
 | `build-web-console-in-docker.sh` | the browser console using only Docker — no OCaml on this machine |
 | `serve-web-console.sh` | serve the built console on localhost, from a container, until you stop it |
-| `check-everything.sh` | every gate: unit tests, conformance, spec, invariants, example programs |
+| `check-everything.sh` | every gate, in Docker — the one pipeline, and the same one CI runs |
 | `check-conformance.sh` | run the corpus through **any** `n88` — a release binary, the container, a local build. This is how published artifacts are proven to run the same language |
 | `check-invariants.sh` | the tripwires for mistakes this codebase is prone to — `basic/` doing I/O, a manual scan getting committed, a local path in the spec |
 | `install-from-source.sh` | build this checkout and put `n88` on your PATH |
