@@ -19,9 +19,9 @@
 # The cost is that the files are a snapshot: rebuild, and restart this to see
 # it. `make wc` builds first, so that is the normal path anyway.
 #
-# nginx also gets the media types right without being told -- .js, .svg, .css
-# and .wasm all arrive with the header a browser will act on, which is the part
-# a hand-rolled static server gets wrong quietly.
+# nginx also gets the media types right without being told -- .js, .svg and
+# .css all arrive with the header a browser will act on, which is the part a
+# hand-rolled static server gets wrong quietly.
 #
 # It runs until you stop it, which is what a server does -- but it used to run
 # with its log discarded, and a silent server is indistinguishable from a hung
