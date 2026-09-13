@@ -248,21 +248,11 @@ make wc          # http://localhost:8088 — stays running until Ctrl-C
 
 ![n88basic compiled to JavaScript: the interpreter, the renderer and the page all inside one browser tab](docs/diagrams/browser.svg)
 
-Docker is the only thing you need: it serves the console, and builds it too
-when `js_of_ocaml` is missing. The build runs the conformance corpus through
-the JavaScript build first, so the page provably runs the same language as the
-binary.
+Docker is the only thing you need. The editor colours itself and reports
+problems from the interpreter's own lexer and checker, and drawings arrive as
+vectors. `make web` writes the console to `web-console/` for any static host.
 
-The editor colours itself and lists problems as you type, from the
-interpreter's own lexer and checker rather than a separate description of the
-syntax — the same bundle the VS Code extension ships, so the two cannot
-disagree.
-
-Drawings arrive as vectors, about ten times smaller than the PNG and sharp at
-any zoom. `n88 --svg` writes the same from the command line.
-
-The console is four static files; `make web` puts them in `web-console/` for
-any static host to serve.
+[The console's own guide](web/README.md).
 
 ## The VS Code extension
 
