@@ -48,29 +48,72 @@ fi
 
 # Bound to the loopback address rather than every interface: this is a dev
 # console, not something to put on the network by accident.
-set +e
-cid=$(docker run -d -p "127.0.0.1:$PORT:80" "$IMAGE" 2>&1)
-started=$?
-set -e
-if [ "$started" != 0 ]; then
-  echo "$cid" >&2
+
+say() { printf '  %s\n' "$*"; }
+
+# Pull EXPLICITLY rather than letting `docker run` do it implicitly. Two
+# reasons, and the second is a bug this had:
+#
+#   1. A first run fetches ~20 MB with nothing on screen to say so. That wait
+#      is the single longest silent stretch in `make wc`.
+#   2. `cid=$(docker run -d ... 2>&1)` captures the PULL PROGRESS into $cid
+#      along with the container id, and the `docker cp` that follows is then
+#      handed several lines of download output instead of an id.
+if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+  say "fetching $IMAGE (first run only, about 20 MB)..."
+  docker pull "$IMAGE" || exit 1
+fi
+
+say "starting the server..."
+err="$(mktemp)"
+trap 'rm -f "$err"' EXIT
+# stdout is the container id and ONLY the container id; anything docker has to
+# say goes to $err, where it can be shown without contaminating the id.
+if ! cid=$(docker run -d --init -p "127.0.0.1:$PORT:80" "$IMAGE" 2>"$err"); then
+  cat "$err" >&2
   echo >&2
   echo "If that port is already taken, choose another:  make wc PORT=8099" >&2
   exit 1
 fi
 
-# Before anything can go wrong below. Ctrl-C reaches this shell, not the
-# detached container, so without the trap the server outlives the command that
-# started it -- which is worse than a hang, because nothing says it is there.
-trap 'docker rm -f "$cid" >/dev/null 2>&1 || true' EXIT INT TERM
+trap 'docker rm -f "$cid" >/dev/null 2>&1 || true; rm -f "$err"' EXIT INT TERM
 
-docker cp "$DIR/." "$cid:/usr/share/nginx/html/"
+say "copying $(ls "$DIR" | wc -l) files into it..."
+docker cp "$DIR/." "$cid:/usr/share/nginx/html/" >/dev/null
+
+# Do not claim it is ready -- ask it. wget is busybox's, already in the image,
+# so this needs nothing on your machine. Without this the banner printed while
+# nginx was still starting, and the first thing you saw after the URL was
+# twenty lines of its boot log pushing that URL off the screen.
+say "waiting for it to answer..."
+ready=no
+i=0
+while [ "$i" -lt 50 ]; do
+  if docker exec "$cid" wget -q -O /dev/null http://localhost/ 2>/dev/null; then
+    ready=yes
+    break
+  fi
+  if [ -z "$(docker ps -q --filter id="$cid")" ]; then
+    echo "The server exited while starting up:" >&2
+    docker logs "$cid" 2>&1 | tail -20 >&2
+    exit 1
+  fi
+  i=$((i + 1))
+  sleep 0.2
+done
+if [ "$ready" != yes ]; then
+  echo "The server started but never answered on port 80 inside the container." >&2
+  docker logs "$cid" 2>&1 | tail -20 >&2
+  exit 1
+fi
 
 echo
-echo "  n88basic console:  http://localhost:$PORT/"
+echo "  n88basic console is up:  http://localhost:$PORT/"
 echo
-echo "  This stays in the foreground and logs each request below."
-echo "  Press Ctrl-C to stop it and get your prompt back."
+echo "  Serving $DIR/ (a snapshot -- rebuild and restart to pick up changes)."
+echo "  Each request is logged below. Ctrl-C stops it and frees the port."
 echo
 
-docker logs -f "$cid"
+# --tail 0: only what happens from NOW. nginx replays twenty lines of startup
+# chatter otherwise, and the URL above is the thing worth having on screen.
+docker logs -f --tail 0 "$cid"

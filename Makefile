@@ -39,9 +39,11 @@ ci:
 # The browser console. `(modes js)` in web/dune makes this optional, so say
 # what is missing rather than failing with a dune error about a rule.
 web:
+	@echo "[1/2] building the console"
 	@./scripts/build-web-console.sh
 
 webconsole: web
+	@echo "[2/2] serving it"
 	@PORT=$(PORT) ./scripts/serve-web-console.sh
 
 wc: webconsole
