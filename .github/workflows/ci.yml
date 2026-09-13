@@ -72,6 +72,15 @@ jobs:
       - name: A prompt is visible before the answer
         run: sh tools/check_interactive_flush.sh
 
+      # The browser build is a second HOST over the same libraries, and the
+      # SVG renderer is a second RENDERER over the same display list. Both
+      # claims are checkable and nothing else checks them: dune test links the
+      # library natively and conform.sh drives the CLI.
+      - name: The browser build runs the same language
+        run: |
+          opam exec -- dune build @web/web
+          node tools/check_web.js
+
       - name: Project invariants
         run: sh scripts/check-invariants.sh
 

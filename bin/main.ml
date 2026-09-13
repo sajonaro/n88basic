@@ -56,6 +56,30 @@ let read_file (path : string) : string =
    the case where full buffering is correct. The bytes were always right; only
    their arrival time was wrong, and the only observer who can see that is a
    human at a terminal. *)
+(* The same drawing as SVG. Vector where the display list is vector, which is
+   most of it: a drawing that would be 6 KB of PNG is a few hundred bytes of
+   geometry that stays sharp at any zoom. PAINT and tile fills have no vector
+   form and take an embedded raster instead, which write_svg reports so nobody
+   has to guess which they got. *)
+let svg_path_for (path : string) : string =
+  if path = "-" then "n88.svg" else Filename.remove_extension path ^ ".svg"
+
+let write_svg (path : string) (ops : N88basic.Display.op list) : unit =
+  let out = svg_path_for path in
+  let text, kind = Raster.Svg.encode ops in
+  match
+    let oc = open_out_bin out in
+    Fun.protect ~finally:(fun () -> close_out oc) (fun () -> output_string oc text)
+  with
+  | () ->
+      Printf.eprintf "wrote %s (%s)\n%!" out
+        (match kind with
+         | Raster.Svg.Vector -> "vector"
+         | Raster.Svg.Raster -> "embedded raster: the drawing used PAINT or a tile")
+  | exception Sys_error message ->
+      flush stdout;
+      prerr_endline message
+
 let stdin_line () : string option =
   flush stdout;
   match input_line stdin with line -> Some line | exception End_of_file -> None
@@ -97,7 +121,7 @@ let write_png (path : string) (ops : N88basic.Display.op list) : unit =
 (* Kept in step with the release tag. A consumer pinning byte-exact output
    needs something to pin against, and asking the binary is more reliable
    than inferring a version from the output itself. *)
-let version = "0.2.0"
+let version = N88basic.Version.string
 
 let usage =
   "usage: n88 FILE.bas\n\
@@ -118,6 +142,9 @@ let usage =
   \              ends.\n\n\
   \  --uninstall remove this binary, and list what else came with n88\n\
   \              (add --yes to skip the confirmation)\n\
+  \  --svg       draw into a .svg beside the source instead of a .png:\n\
+  \              vector where the program's drawing is vector, and far\n\
+  \              smaller; PAINT and tile fills embed a raster instead\n\
   \  --version   print the version and exit\n\
   \  --help      print this message and exit\n"
 
@@ -372,8 +399,20 @@ let uninstall ~(assume_yes : bool) : unit =
       exit 1);
   print_string the_rest
 
+(* --svg is a modifier rather than a mode: it says what a drawing program
+   should leave behind, and everything else about the run is unchanged. So it
+   is lifted out of the argument vector before dispatch rather than doubling
+   every arm that takes a path. *)
+let want_svg = ref false
+
 let () =
-  match Sys.argv with
+  let args =
+    Array.to_list Sys.argv
+    |> List.filter (fun a ->
+           if a = "--svg" then begin want_svg := true; false end else true)
+    |> Array.of_list
+  in
+  match args with
   | [| _; ("--version" | "-version" | "-v") |] ->
       print_endline version;
       exit 0
@@ -444,7 +483,8 @@ let () =
               (* A program that drew nothing must behave exactly as it did
                  before graphics existed: no stray file, no extra output. *)
               if Raster.Rasterize.produces_a_picture (List.rev !ops) then
-                write_png path (List.rev !ops);
+                if !want_svg then write_svg path (List.rev !ops)
+                else write_png path (List.rev !ops);
               (match result with
               | Ok () -> exit 0
               | Error e ->

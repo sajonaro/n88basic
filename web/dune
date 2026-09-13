@@ -1,0 +1,42 @@
+; n88basic in a browser.
+;
+; The same two libraries the command line links, with a different host in
+; front of them: `(modes js)` is the whole build difference and main.ml is the
+; whole source difference. There is no second interpreter here, and nothing in
+; this directory knows anything about the language.
+;
+; raster/ comes along because the console shows what a program DRAWS, and it
+; can only come along because basic/ performs no I/O -- the same invariant
+; that lets the editor's checker compile to JavaScript. The page gets pictures
+; without a line of canvas code.
+;
+; Optional, so a tree without js_of_ocaml still builds the interpreter and
+; passes its suites. `make webconsole` is the command that asks for this, and
+; it says what to install when it is not there.
+(executable
+ (name main)
+ (modules main)
+ (modes js)
+ (optional)
+ (libraries n88basic raster js_of_ocaml))
+
+; The example programs, packed into one file the page loads before it boots.
+; Native, because it runs at build time and not in the browser.
+(executable
+ (name bundle)
+ (modules bundle))
+
+(rule
+ (target examples.js)
+ (deps
+  (source_tree ../test/programs))
+ (action
+  (with-stdout-to
+   examples.js
+   (run ./bundle.exe ../test/programs))))
+
+; The page is four files that have to end up in one directory to be served.
+; This alias is what puts them there.
+(alias
+ (name web)
+ (deps index.html console.css examples.js main.bc.js))
