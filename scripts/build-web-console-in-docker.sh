@@ -6,13 +6,16 @@
 # owns that problem, so this borrows it: build the stage, copy the four static
 # files out, done. No OCaml on the host, no opam switch, no compiler back end.
 #
-# Files land in _build/default/web/, the same place the native build puts them,
-# so `make wc` serves them without caring which route produced them.
+# Files land in ./web-console/, NOT in _build. Writing into _build looked
+# convenient and corrupts dune: that directory is dune's, it tracks the digest
+# of everything in it, and it generates bundle.mli and main.mli there. Dropping
+# files in with `docker cp` left dune hunting for web/main.mli in the SOURCE
+# tree, where it has never existed, and the only recovery was `dune clean`.
 set -eu
 cd "$(dirname "$0")/.."
 
 TAG=n88basic-web-assets:local
-OUT=_build/default/web
+OUT=web-console
 
 echo "Building the console in Docker (no OCaml needed on this machine)..."
 docker build --target web-assets -t "$TAG" .

@@ -34,4 +34,21 @@ fi
 # Anything else: let the build speak for itself.
 dune build @web/web
 node tools/check_web.js
-python3 tools/check_svg.py
+
+# The console is assembled in ./web-console/ whichever route built it, so
+# `make wc` serves one place and nothing has to read out of _build -- which is
+# dune's, and is not ours to rummage in or write to.
+mkdir -p web-console
+for f in index.html console.css examples.js main.bc.js; do
+  cp "_build/default/web/$f" "web-console/$f"
+done
+echo "Console built into web-console/"
+
+# Optional, and says so: comparing a vector rendering against its raster needs
+# rsvg-convert and Pillow, which are the only things in this repository's
+# tooling that are not either the OCaml switch or the Python standard library.
+if python3 -c 'import PIL' 2>/dev/null && command -v rsvg-convert >/dev/null 2>&1; then
+  python3 tools/check_svg.py
+else
+  echo "Skipping the SVG geometry check: it needs rsvg-convert and Pillow."
+fi

@@ -52,3 +52,6 @@ test/conformance/*.png
 # the opam switch this morning, so the tree carries none.
 !editor/vscode/node_modules/
 editor/vscode/node_modules/.bin/
+
+# The assembled browser console, from either build route.
+web-console/
