@@ -32,7 +32,7 @@ specification as well as an interpreter.
 
 ## How it works
 
-![The n88basic interpreter: a core that performs no I/O, a display list, and a separate renderer](docs/diagrams/interpreter.png)
+![The n88basic interpreter: a core that performs no I/O, a display list, and a separate renderer](docs/diagrams/interpreter.svg)
 
 The core neither opens a file nor touches a pixel. It reads a parsed program and calls back to
 whoever is hosting it — for text, for input, and to record drawing. That recording is a **display
@@ -288,11 +288,27 @@ extension checks at startup and tells you rather than failing obscurely later.
 
 ## In a browser
 
+No install, nothing sent anywhere — the interpreter is compiled into the page.
+
 ```sh
-make wc        # http://localhost:8088
+opam install js_of_ocaml js_of_ocaml-compiler   # once
+make wc                                          # http://localhost:8088
 ```
 
-![n88basic compiled to JavaScript: the interpreter, the renderer and the page all inside one browser tab](docs/diagrams/browser.png)
+`make wc` builds the console and serves it. It also runs the corpus through the
+JavaScript build first, so a broken bundle fails before a browser ever opens it.
+
+**To host it anywhere,** the console is four static files and no server code:
+
+```sh
+make web                          # build only
+cp _build/default/web/{index.html,console.css,examples.js,main.bc.js} /your/site/
+```
+
+Any static host will do — GitHub Pages, S3, a directory on a laptop. There is no
+back end to run and nothing to configure.
+
+![n88basic compiled to JavaScript: the interpreter, the renderer and the page all inside one browser tab](docs/diagrams/browser.svg)
 
 Compiling the same libraries to JavaScript puts the language *and* its renderer in the page.
 Nothing is installed and nothing is sent anywhere. Because a drawing is a list of shapes rather
@@ -308,7 +324,7 @@ same hashes the released binary and the container are held to.
 
 ## The VS Code extension
 
-![The extension's two paths: an in-editor checker that never runs your program, and commands that spawn n88](docs/diagrams/extension.png)
+![The extension's two paths: an in-editor checker that never runs your program, and commands that spawn n88](docs/diagrams/extension.svg)
 
 **Two paths, and only one of them runs anything.** The squiggles come from the interpreter's own
 front end compiled to JavaScript and living inside the editor — it reads your program and never
