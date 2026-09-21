@@ -173,7 +173,7 @@ The same command installs and upgrades; run it again whenever.
 | `web` | build the browser console and check it runs the corpus |
 | `webconsole`, `wc` | build it and serve it on `localhost:8088` (`PORT=…` to change). Docker serves it, and builds it too when `js_of_ocaml` is missing |
 | `install` | put `n88` on your PATH from this checkout |
-| `extension` | package the VS Code extension |
+| `vsix` | package the VS Code extension as `n88basic.vsix`. Uses `vsce` if you have it, Docker if you do not |
 | `clean` | remove build output |
 
 ### The container

@@ -13,6 +13,9 @@ ARG ALCOTEST=1.9.1
 ARG MENHIR=20260209
 ARG JSOO=6.4.1
 
+# Only for packaging the VS Code extension (.vsix); nothing else uses node here.
+ARG NODE=node:22-alpine@sha256:b6f26b36c8ff49624cfdac716b8ea1138d606df02586a77d364bb5536a634f85
+
 # Pinned by DIGEST, not just tag: `alpine:3.20` moves whenever a patch is cut,
 # so a tag alone is a promise nobody keeps. The digest is the image these gates
 # were actually proven against.
@@ -249,6 +252,41 @@ COPY --from=web /src/_build/default/web/console.css       /web/
 COPY --from=web /src/_build/default/web/examples.js       /web/
 COPY --from=web /src/_build/default/web/main.bc.js        /web/
 COPY --from=web /src/_build/default/web/n88basic-check.js /web/
+
+# --- the VS Code extension, packaged --------------------------------------
+#
+# `vsce` is an npm tool, and requiring `npm install -g @vscode/vsce` to get a
+# .vsix put a second global install between someone and a build. It lives in a
+# stage instead, so `make vsix` needs Docker and nothing else.
+#
+# A plain `dune build` here is what regenerates editor/vscode/media/
+# n88basic-check.js: its rule is (mode promote), so the committed copy is only
+# refreshed by a full build. It had already gone stale once -- the extension
+# was shipping a checker without the token export the console had gained.
+FROM built AS vsix-build
+RUN opam exec -- dune build
+# The extension reads keywords and clauses at RUN time for hover and
+# completion, so they travel inside the package rather than being read from a
+# checkout that will not exist on the installing machine.
+RUN mkdir -p editor/vscode/spec \
+ && cp -f spec/keywords.json spec/clauses.json editor/vscode/spec/
+
+FROM $NODE AS vsix
+ARG NODE
+RUN npm install -g @vscode/vsce
+COPY --from=vsix-build /src/editor/vscode /ext
+WORKDIR /ext
+# NOT --no-dependencies, which sounds right and is wrong: the vendored tree is
+# committed, so nothing needs resolving -- but that flag makes vsce drop
+# node_modules from the PACKAGE as well. It produced a 34-file .vsix against
+# the native route's 410, with vscode-languageclient absent, which is the
+# feature .vscodeignore exists to protect. Caught by diffing the two packages.
+#
+# --allow-missing-repository matches what .github/workflows/release.yml runs;
+# the two must produce the same package or this route is not a rehearsal of
+# the one that ships.
+RUN vsce package --allow-missing-repository --out /n88basic.vsix \
+ && ls -l /n88basic.vsix
 
 # --- runtime ----------------------------------------------------------------
 #

@@ -16,7 +16,8 @@ something, `install-`/`package-` delivers something.
 | `check-invariants.sh` | the tripwires for mistakes this codebase is prone to — `basic/` doing I/O, a manual scan getting committed, a local path in the spec |
 | `install-from-source.sh` | build this checkout and put `n88` on your PATH |
 | `install-extension.sh` | install the extension by copying the directory, for machines without `vsce` |
-| `package-extension.sh` | package the extension as a `.vsix` |
+| `package-extension.sh` | package the extension as a `.vsix`, falling back to Docker when `vsce` is missing |
+| `package-extension-in-docker.sh` | package the extension using only Docker — no npm on this machine |
 | `n88-docker` | present the container as a plain executable, so anything that can run `n88` can drive the image instead |
 | `lib/activate-opam-switch.sh` | sourced by the others; finds dune when the caller has not activated a switch |
 

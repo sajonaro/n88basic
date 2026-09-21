@@ -5,7 +5,7 @@
 #   make ci           EVERY gate, in Docker: the same pipeline CI runs
 #   make webconsole   the console in a browser, on localhost (or: make wc)
 #   make install      n88 onto your PATH
-#   make extension    package the VS Code extension
+#   make vsix         package the VS Code extension as n88basic.vsix
 #
 # The scripts under scripts/ are the same commands and work without make.
 
@@ -16,7 +16,7 @@ PORT ?= 8088
 # than failing with "command not found".
 DUNE := $(shell command -v dune 2>/dev/null || echo $(CURDIR)/_opam/bin/dune)
 
-.PHONY: build test ci web webconsole wc install extension clean help
+.PHONY: build test ci web webconsole wc install vsix extension clean help
 
 help:
 	@grep -E '^#   make' Makefile | sed 's/^#   /  /'
@@ -51,8 +51,12 @@ wc: webconsole
 install:
 	@./scripts/install-from-source.sh
 
-extension:
+# Produces ./n88basic.vsix. Uses vsce if you have it, Docker if you do not.
+vsix:
 	@./scripts/package-extension.sh
+
+# The old name, kept because the README and the release notes use it.
+extension: vsix
 
 clean:
 	@$(DUNE) clean
