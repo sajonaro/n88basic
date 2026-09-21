@@ -7,6 +7,7 @@
 # Requires @vscode/vsce:  npm install -g @vscode/vsce
 set -eu
 cd "$(dirname "$0")/.."
+ROOT="$(pwd)"
 . "$(dirname "$0")/lib/activate-opam-switch.sh"
 
 # vsce is the one genuinely optional dependency here. If it is missing, hand
@@ -37,10 +38,17 @@ echo "  staging spec data..."
 mkdir -p editor/vscode/spec
 cp -f spec/keywords.json spec/clauses.json editor/vscode/spec/
 
-cd editor/vscode
-vsce package --out ../../n88basic.vsix
-cd ../..
+# vsce has to run from the extension directory, but it ECHOES the --out path
+# it was handed -- so a relative one made it announce "Packaged:
+# ../../n88basic.vsix", which reads as the package having been flung somewhere
+# rather than written to the repository root. Absolute path, so the tool names
+# the real location.
+#
+# --allow-missing-repository matches .github/workflows/release.yml and the
+# Dockerfile's vsix stage. All three routes now run the same command; without
+# it this one would differ from the package that actually ships.
+( cd editor/vscode && vsce package --allow-missing-repository --out "$ROOT/n88basic.vsix" )
 
 echo
-echo "  packaged n88basic.vsix ($(wc -c < n88basic.vsix) bytes)"
-echo "  install it with:  code --install-extension n88basic.vsix"
+echo "  packaged $ROOT/n88basic.vsix ($(wc -c < "$ROOT/n88basic.vsix") bytes)"
+echo "  install it with:  code --install-extension $ROOT/n88basic.vsix"

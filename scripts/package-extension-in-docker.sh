@@ -31,5 +31,5 @@ trap 'docker rm -f "$cid" >/dev/null 2>&1 || true' EXIT
 docker cp "$cid:/n88basic.vsix" "$OUT"
 
 echo
-echo "  packaged $OUT ($(wc -c < "$OUT") bytes)"
-echo "  install it with:  code --install-extension $OUT"
+echo "  packaged $(pwd)/$OUT ($(wc -c < "$OUT") bytes)"
+echo "  install it with:  code --install-extension $(pwd)/$OUT"
